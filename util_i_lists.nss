@@ -605,6 +605,9 @@ string CompressList(object oTarget, string sListName = "", int bAddUnique = FALS
 
 int GetListCount(string sList)
 {
+    if (sList == "")
+        return 0;
+
     return GetSubStringCount(sList, ",") + 1;
 }
 
