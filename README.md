@@ -1,5 +1,5 @@
 # Squatting Monk's NWN Utilities
-This package contains various utility scripts used by my other [Neverwinter Nights](neverwinternights.info).
+This package contains various utility scripts used by my other [Neverwinter Nights](neverwinternights.info) scripts.
 
 ## Installation
 Import `sm_utils.erf` into your module. This package contains the following resources:
