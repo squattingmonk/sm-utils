@@ -1101,7 +1101,7 @@ int RemoveStringListItemByIndex(object oTarget, int nIndex, string sListName = "
 
     // Delete the last item in the list and set the new count
     DeleteLocalString(oTarget, LIST_REF_STRING   + sListName + IntToString(--nCount));
-    SetLocalInt     (oTarget, LIST_COUNT_FLOAT + sListName, nCount);
+    SetLocalInt      (oTarget, LIST_COUNT_STRING + sListName, nCount);
 
     return nCount;
 }
