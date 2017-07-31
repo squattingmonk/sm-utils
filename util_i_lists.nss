@@ -56,6 +56,19 @@ const string COMMA = "#COMMA#";
 // Returns the number of occurrences of sSubString within sString.
 int GetSubStringCount(string sString, string sSubString);
 
+// ---< ProtectCommas >---
+// ---< util_i_lists >---
+// Replaces all commas in sString with a control character if bProtect is TRUE.
+// Replaces the control characters with commas if bProtect is FALSE. Use this
+// when adding or retrieving strings that may have commas from CSV lists.
+string ProtectCommas(string sString, int bProtect = TRUE);
+
+// ---< TrimString >---
+// ---< util_i_lists >---
+// Trims all leading and trailing whitspace from sString.
+string TrimString(string sString);
+
+
 // ----- CSV Lists -------------------------------------------------------------
 
 // ---< ExplodeList >---
@@ -89,10 +102,10 @@ void ExplodeList(object oTarget, string sList, string sListName = "", int bAddUn
 //   - LIST_TYPE_INT
 string CompressList(object oTarget, string sListName, int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
 
-// ---< GetListCount >---
+// ---< CountList >---
 // ---< util_i_lists >---
 // Returns the number of items in the CSV list sList.
-int GetListCount(string sList);
+int CountList(string sList);
 
 // ---< GetListItem >---
 // ---< util_i_lists >---
@@ -105,20 +118,20 @@ string GetListItem(string sList, int nNth = 0);
 // sListItem is not in the list.
 int FindListItem(string sList, string sListItem);
 
-// ---< IsItemInList >---
+// ---< HasListItem >---
 // ---< util_i_lists >---
 // Returns whether sListItem is in the CSV list sList.
-int IsItemInList(string sList, string sListItem);
+int HasListItem(string sList, string sListItem);
 
-// ---< RemoveListItemByIndex >---
+// ---< DeleteListItem >---
 // ---< util_i_lists >---
 // Returns the CSV list sList with the nNth item removed.
-string RemoveListItemByIndex(string sList, int nNth = 0);
+string DeleteListItem(string sList, int nNth = 0);
 
-// ---< RemoveListItemByIndex >---
+// ---< RemoveListItem >---
 // ---< util_i_lists >---
 // Returns the CSV list sList with the first occurrence of sListItem removed.
-string RemoveListItemByValue(string sList, string sListItem);
+string RemoveListItem(string sList, string sListItem);
 
 // ---< AddListItem >---
 // ---< util_i_lists >---
@@ -126,169 +139,160 @@ string RemoveListItemByValue(string sList, string sListItem);
 // only add items to the list if they are not already there.
 string AddListItem(string sList, string sListItem, int bAddUnique = FALSE);
 
+// ---< MergeLists >---
+// ---< util_i_lists >---
+// Returns the CSV list sList1 with every item in sList2 added. If bAddUnique is
+// TRUE, will only add items to the list if they are not already there.
+string MergeLists(string sList1, string sList2, int bAddUnique = FALSE);
+
 
 // ----- Local Variable Lists --------------------------------------------------
 
-// ---< AddFloatListItem >---
+// ---< AddListFloat >---
 // ---< util_i_lists >---
 // Adds fValue to a float list on oTarget given the list name sListName. If
 // bAddUnique is TRUE, this only adds to the list if it is not already there.
 // Returns whether the addition was successful.
-int AddFloatListItem(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE);
+int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddIntListItem >---
+// ---< AddListInt >---
 // ---< util_i_lists >---
 // Adds nValue to an int list on oTarget given the list name sListName. If
 // bAddUnique is TRUE, this only adds to the list if it is not already there.
 // Returns whether the addition was successful.
-int AddIntListItem(object oTarget, int nValue, string sListName = "", int bAddUnique = FALSE);
+int AddListInt(object oTarget, int nValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddLocationListItem >---
+// ---< AddListLocation >---
 // ---< util_i_lists >---
 // Adds lValue to a location list on oTarget given the list name sListName. If
 // bAddUnique is TRUE, this only adds to the list if it is not already there.
 // Returns whether the addition was successful.
-int AddLocationListItem(object oTarget, location lValue, string sListName = "", int bAddUnique = FALSE);
+int AddListLocation(object oTarget, location lValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddObjectListItem >---
+// ---< AddListObject >---
 // ---< util_i_lists >---
 // Adds oValue to a object list on oTarget given the list name sListName. If
 // bAddUnique is TRUE, this only adds to the list if it is not already there.
 // Returns whether the addition was successful.
-int AddObjectListItem(object oTarget, object oValue, string sListName = "", int bAddUnique = FALSE);
+int AddListObject(object oTarget, object oValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddStringListItem >---
+// ---< AddListString >---
 // ---< util_i_lists >---
 // Adds sValue to a string list on oTarget given the list name sListName. If
 // bAddUnique is TRUE, this only adds to the list if it is not already there.
 // Returns whether the addition was successful.
-int AddStringListItem(object oTarget, string sValue, string sListName = "", int bAddUnique = FALSE);
+int AddListString(object oTarget, string sValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< CopyFloatList >---
+// ---< SetListFloat >---
 // ---< util_i_lists >---
-// Copies the float list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Sets item nIndex in the float list of sListName on oTarget to fValue. If the
+// index is at the end of the list, it will be added. If it exceeds the length
+// of the list, nothing is added.
+void SetListFloat(object oTarget, int nIndex, float fValue, string sListName = "");
 
-// ---< CopyIntList >---
+// ---< SetListInt >---
 // ---< util_i_lists >---
-// Copies the int list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Sets item nIndex in the int list of sListName on oTarget to nValue. If the
+// index is at the end of the list, it will be added. If it exceeds the length
+// of the list, nothing is added.
+void SetListInt(object oTarget, int nIndex, int nValue, string sListName = "");
 
-// ---< CopyLocationList >---
+// ---< SetListLocation >---
 // ---< util_i_lists >---
-// Copies the location list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Sets item nIndex in the location list of sListName on oTarget to lValue. If
+// the index is at the end of the list, it will be added. If it exceeds the
+// length of the list, nothing is added.
+void SetListLocation(object oTarget, int nIndex, location lValue, string sListName = "");
 
-// ---< CopyObjectList >---
+// ---< SetListObject >---
 // ---< util_i_lists >---
-// Copies the object list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Sets item nIndex in the object list of sListName on oTarget to oValue. If the
+// index is at the end of the list, it will be added. If it exceeds the length
+// of the list, nothing is added.
+void SetListObject(object oTarget, int nIndex, object oValue, string sListName = "");
 
-// ---< CopyStringList >---
+// ---< SetListString >---
 // ---< util_i_lists >---
-// Copies the string list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Sets item nIndex in the string list of sListName on oTarget to sValue. If the
+// index is at the end of the list, it will be added. If it exceeds the length
+// of the list, nothing is added.
+void SetListString(object oTarget, int nIndex, string sValue, string sListName = "");
 
-// ---< GetFloatListCount >---
-// ---< util_i_lists >---
-// Returns the number of items in oTarget's float list sListName.
-int GetFloatListCount(object oTarget, string sListName = "");
-
-// ---< GetIntListCount >---
-// ---< util_i_lists >---
-// Returns the number of items in oTarget's int list sListName.
-int GetIntListCount(object oTarget, string sListName = "");
-
-// ---< GetLocationListCount >---
-// ---< util_i_lists >---
-// Returns the number of items in oTarget's location list sListName.
-int GetLocationListCount(object oTarget, string sListName = "");
-
-// ---< GetObjectListCount >---
-// ---< util_i_lists >---
-// Returns the number of items in oTarget's object list sListName.
-int GetObjectListCount(object oTarget, string sListName = "");
-
-// ---< GetStringListCount >---
-// ---< util_i_lists >---
-// Returns the number of items in oTarget's string list sListName.
-int GetStringListCount(object oTarget, string sListName = "");
-
-// ---< GetFloatListItem >---
+// ---< GetListFloat >---
 // ---< util_i_lists >---
 // Returns the float at nIndex in oTarget's float list sListName. If no float is
 // found at that index, 0.0 is returned.
-float GetFloatListItem(object oTarget, int nIndex = 0, string sListName = "");
+float GetListFloat(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetIntListItem >---
+// ---< GetListInt >---
 // ---< util_i_lists >---
 // Returns the int at nIndex in oTarget's int list sListName. If no int is found
 // at that index, 0 is returned.
-int GetIntListItem(object oTarget, int nIndex = 0, string sListName = "");
+int GetListInt(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetLocationListItem >---
+// ---< GetListLocation >---
 // ---< util_i_lists >---
 // Returns the location at nIndex in oTarget's location list sListName. If no
 // location is found at that index, an invalid location is returned.
-location GetLocationListItem(object oTarget, int nIndex = 0, string sListName = "");
+location GetListLocation(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetObjectListItem >---
+// ---< GetListObject >---
 // ---< util_i_lists >---
 // Returns the object at nIndex in oTarget's object list sListName. If no object
 // is found at that index, OBJECT_INVALID is returned.
-object GetObjectListItem(object oTarget, int nIndex = 0, string sListName = "");
+object GetListObject(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetStringListItem >---
+// ---< GetListString >---
 // ---< util_i_lists >---
 // Returns the string at nIndex in oTarget's string list sListName. If no string
 // is found at that index, "" is returned.
-string GetStringListItem(object oTarget, int nIndex = 0, string sListName = "");
+string GetListString(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< RemoveFloatListItemByIndex >---
+// ---< DeleteListFloat >---
 // ---< util_i_lists >---
 // Removes the float at nIndex on oTarget's float list sListName and returns the
 // number of items remaining in the list. If bMaintainOrder is TRUE, this will
 // shift up all entries after nIndex in the list. If FALSE, it will replace the
 // removed item with the last entry in the list. If the order of items in the
 // list doesn't matter, this will save a lot of cycles.
-int RemoveFloatListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
+int DeleteListFloat(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveIntListItemByIndex >---
+// ---< DeleteListInt >---
 // ---< util_i_lists >---
 // Removes the int at nIndex on oTarget's int list sListName and returns the
 // number of items remaining in the list. If bMaintainOrder is TRUE, this will
 // shift up all entries after nIndex in the list. If FALSE, it will replace the
 // removed item with the last entry in the list. If the order of items in the
 // list doesn't matter, this will save a lot of cycles.
-int RemoveIntListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
+int DeleteListInt(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveLocationListItemByIndex >---
+// ---< DeleteListLocation >---
 // Removes the location at nIndex on oTarget's location list sListName and
 // returns the number of items remaining in the list. If bMaintainOrder is TRUE,
 // this will shift up all entries after nIndex in the list. If FALSE, it will
 // replace the removed item with the last entry in the list. If the order of
 // items in the list doesn't matter, this will save a lot of cycles.
-int RemoveLocationListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
+int DeleteListLocation(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveObjectListItemByIndex >---
+// ---< DeleteListObject >---
 // ---< util_i_lists >---
 // Removes the object at nIndex on oTarget's object list sListName and returns
 // the number of items remaining in the list. If bMaintainOrder is TRUE, this
 // will shift up all entries after nIndex in the list. If FALSE, it will replace
 // the removed item with the last entry in the list. If the order of items in
 // the list doesn't matter, this will save a lot of cycles.
-int RemoveObjectListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
+int DeleteListObject(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveStringListItemByIndex >---
+// ---< DeleteListString >---
 // ---< util_i_lists >---
 // Removes the string at nIndex on oTarget's string list sListName and returns
 // the number of items remaining in the list. If bMaintainOrder is TRUE, this
 // will shift up all entries after nIndex in the list. If FALSE, it will replace
 // the removed item with the last entry in the list. If the order of items in
 // the list doesn't matter, this will save a lot of cycles.
-int RemoveStringListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
+int DeleteListString(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveFloatListItemByValue >---
+// ---< RemoveListFloat >---
 // ---< util_i_lists >---
 // Removes a float of fValue from the float list sListName on oTarget and
 // returns the number of items remaining in the list. If this float was added
@@ -296,9 +300,9 @@ int RemoveStringListItemByIndex(object oTarget, int nIndex, string sListName = "
 // TRUE, this will his shift up all entries after nIndex in the list. If FALSE,
 // it will replace the removed item with the last entry in the list. If the
 // order of items in the list doesn't matter, this will save a lot of cycles.
-int RemoveFloatListItemByValue(object oTarget, float fValue, string sListName = "", int bMaintainOrder = FALSE);
+int RemoveListFloat(object oTarget, float fValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveIntListItemByValue >---
+// ---< RemoveListInt >---
 // ---< util_i_lists >---
 // Removes an int of nValue from the float list sListName on oTarget and returns
 // the number of items remaining in the list. If this float was added more than
@@ -306,9 +310,9 @@ int RemoveFloatListItemByValue(object oTarget, float fValue, string sListName = 
 // will his shift up all entries after nIndex in the list. If FALSE, it will
 // replace the removed item with the last entry in the list. If the order of
 // items in the list doesn't matter, this will save a lot of cycles.
-int RemoveIntListItemByValue(object oTarget, int nValue, string sListName = "", int bMaintainOrder = FALSE);
+int RemoveListInt(object oTarget, int nValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveLocationListItemByValue >---
+// ---< RemoveListLocation >---
 // ---< util_i_lists >---
 // Removes a location of lValue from the location list sListName on oTarget and
 // returns the number of items remaining in the list. If this float was added
@@ -316,9 +320,9 @@ int RemoveIntListItemByValue(object oTarget, int nValue, string sListName = "", 
 // TRUE, this will his shift up all entries after nIndex in the list. If FALSE,
 // it will replace the removed item with the last entry in the list. If the
 // order of items in the list doesn't matter, this will save a lot of cycles.
-int RemoveLocationListItemByValue(object oTarget, location lValue, string sListName = "", int bMaintainOrder = FALSE);
+int RemoveListLocation(object oTarget, location lValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveObjectListItemByValue >---
+// ---< RemoveListObject >---
 // ---< util_i_lists >---
 // Removes an object of oValue from the object list sListName on oTarget and
 // returns the number of items remaining in the list. If this float was added
@@ -326,9 +330,9 @@ int RemoveLocationListItemByValue(object oTarget, location lValue, string sListN
 // TRUE, this will his shift up all entries after nIndex in the list. If FALSE,
 // it will replace the removed item with the last entry in the list. If the
 // order of items in the list doesn't matter, this will save a lot of cycles.
-int RemoveObjectListItemByValue(object oTarget, object oValue, string sListName = "", int bMaintainOrder = FALSE);
+int RemoveListObject(object oTarget, object oValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveStringListItemByValue >---
+// ---< RemoveListString >---
 // ---< util_i_lists >---
 // Removes a string of sValue from the object list sListName on oTarget and
 // returns the number of items remaining in the list. If this float was added
@@ -336,67 +340,67 @@ int RemoveObjectListItemByValue(object oTarget, object oValue, string sListName 
 // TRUE, this will his shift up all entries after nIndex in the list. If FALSE,
 // it will replace the removed item with the last entry in the list. If the
 // order of items in the list doesn't matter, this will save a lot of cycles.
-int RemoveStringListItemByValue(object oTarget, string sValue, string sListName = "", int bMaintainOrder = FALSE);
+int RemoveListString(object oTarget, string sValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< FindFloatInList >---
+// ---< FindListFloat >---
 // ---< util_i_lists >---
 // Returns the index of the first reference of the float fValue in the float
 // list sListName on oTarget. If it is not in the list, returns -1.
-int FindFloatInList(object oTarget, float fValue, string sListName = "");
+int FindListFloat(object oTarget, float fValue, string sListName = "");
 
-// ---< FindIntInList >---
+// ---< FindListInt >---
 // ---< util_i_lists >---
 // Returns the index of the first reference of the int nValue in the int list
 // sListName on oTarget. If it is not in the list, returns -1.
-int FindIntInList(object oTarget, int nValue, string sListName = "");
+int FindListInt(object oTarget, int nValue, string sListName = "");
 
-// ---< FindLocationInList >---
+// ---< FindListLocation >---
 // ---< util_i_lists >---
 // Returns the index of the first reference of the location lValue in the
 // location list sListName on oTarget. If it is not in the list, returns -1.
-int FindLocationInList(object oTarget, location lValue, string sListName = "");
+int FindListLocation(object oTarget, location lValue, string sListName = "");
 
-// ---< FindObjectInList >---
+// ---< FindListObject >---
 // ---< util_i_lists >---
 // Returns the index of the first reference of the obejct oValue in the object
 // list sListName on oTarget. If it is not in the list, returns -1.
-int FindObjectInList(object oTarget, object oValue, string sListName = "");
+int FindListObject(object oTarget, object oValue, string sListName = "");
 
-// ---< FindStringInList >---
+// ---< FindListString >---
 // ---< util_i_lists >---
 // Returns the index of the first reference of the string sValue in the string
 // list sListName on oTarget. If it is not in the list, returns -1.
-int FindStringInList(object oTarget, string sValue, string sListName = "");
+int FindListString(object oTarget, string sValue, string sListName = "");
 
-// ---< IsFloatInList >---
+// ---< HasListFloat >---
 // ---< util_i_lists >---
 // Returns whether oTarget has a float with the value fValue in its float list
 // sListName.
-int IsFloatInList(object oTarget, float fValue, string sListName = "");
+int HasListFloat(object oTarget, float fValue, string sListName = "");
 
-// ---< IsIntInList >---
+// ---< HasListInt >---
 // ---< util_i_lists >---
 // Returns whether oTarget has an int with the value nValue in its int list
 // sListName.
-int IsIntInList(object oTarget, int nValue, string sListName = "");
+int HasListInt(object oTarget, int nValue, string sListName = "");
 
-// ---< IsLocationInList >---
+// ---< HasListLocation >---
 // ---< util_i_lists >---
 // Returns whether oTarget has a location with the value lValue in its locaiton
 // list sListName.
-int IsLocationInList(object oTarget, location lValue, string sListName = "");
+int HasListLocation(object oTarget, location lValue, string sListName = "");
 
-// ---< IsObjectInList >---
+// ---< HasListObject >---
 // ---< util_i_lists >---
 // Returns whether oTarget has an object with the value oValue in its object
 // list sListName.
-int IsObjectInList(object oTarget, object oValue, string sListName = "");
+int HasListObject(object oTarget, object oValue, string sListName = "");
 
-// ---< IsStringInList >---
+// ---< HasListString >---
 // ---< util_i_lists >---
 // Returns whether oTarget has a string with the value sValue in its string list
 // sListName.
-int IsStringInList(object oTarget, string sValue, string sListName = "");
+int HasListString(object oTarget, string sValue, string sListName = "");
 
 // ---< DeleteFloatList >---
 // ---< util_i_lists >---
@@ -422,41 +426,6 @@ void DeleteObjectList(object oTarget, string sListName = "");
 // ---< util_i_lists >---
 // Deletes the string list sListName from oTarget.
 void DeleteStringList(object oTarget, string sListName = "");
-
-// ---< SetFloatListItem >---
-// ---< util_i_lists >---
-// Sets item nIndex in the float list of sListName on oTarget to fValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
-void SetFloatListItem(object oTarget, int nIndex, float fValue, string sListName = "");
-
-// ---< SetIntListItem >---
-// ---< util_i_lists >---
-// Sets item nIndex in the int list of sListName on oTarget to nValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
-void SetIntListItem(object oTarget, int nIndex, int nValue, string sListName = "");
-
-// ---< SetLocationListItem >---
-// ---< util_i_lists >---
-// Sets item nIndex in the location list of sListName on oTarget to lValue. If
-// the index is at the end of the list, it will be added. If it exceeds the
-// length of the list, nothing is added.
-void SetLocationListItem(object oTarget, int nIndex, location lValue, string sListName = "");
-
-// ---< SetObjectListItem >---
-// ---< util_i_lists >---
-// Sets item nIndex in the object list of sListName on oTarget to oValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
-void SetObjectListItem(object oTarget, int nIndex, object oValue, string sListName = "");
-
-// ---< SetStringListItem >---
-// ---< util_i_lists >---
-// Sets item nIndex in the string list of sListName on oTarget to sValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
-void SetStringListItem(object oTarget, int nIndex, string sValue, string sListName = "");
 
 // ---< DeclareFloatList >---
 // ---< util_i_lists >---
@@ -493,6 +462,56 @@ void DeclareObjectList(object oTarget, int nCount, string sListName = "");
 // new one is created.
 void DeclareStringList(object oTarget, int nCount, string sListName = "");
 
+// ---< CopyFloatList >---
+// ---< util_i_lists >---
+// Copies the float list sSourceName from oSource to oTarget, renamed sTargetName.
+void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName);
+
+// ---< CopyIntList >---
+// ---< util_i_lists >---
+// Copies the int list sSourceName from oSource to oTarget, renamed sTargetName.
+void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName);
+
+// ---< CopyLocationList >---
+// ---< util_i_lists >---
+// Copies the location list sSourceName from oSource to oTarget, renamed sTargetName.
+void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName);
+
+// ---< CopyObjectList >---
+// ---< util_i_lists >---
+// Copies the object list sSourceName from oSource to oTarget, renamed sTargetName.
+void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName);
+
+// ---< CopyStringList >---
+// ---< util_i_lists >---
+// Copies the string list sSourceName from oSource to oTarget, renamed sTargetName.
+void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName);
+
+// ---< CountFloatList >---
+// ---< util_i_lists >---
+// Returns the number of items in oTarget's float list sListName.
+int CountFloatList(object oTarget, string sListName = "");
+
+// ---< CountIntList >---
+// ---< util_i_lists >---
+// Returns the number of items in oTarget's int list sListName.
+int CountIntList(object oTarget, string sListName = "");
+
+// ---< CountLocationList >---
+// ---< util_i_lists >---
+// Returns the number of items in oTarget's location list sListName.
+int CountLocationList(object oTarget, string sListName = "");
+
+// ---< CountObjectList >---
+// ---< util_i_lists >---
+// Returns the number of items in oTarget's object list sListName.
+int CountObjectList(object oTarget, string sListName = "");
+
+// ---< CountStringList >---
+// ---< util_i_lists >---
+// Returns the number of items in oTarget's string list sListName.
+int CountStringList(object oTarget, string sListName = "");
+
 
 //------------------------------------------------------------------------------
 //                          Function Implementations
@@ -517,11 +536,21 @@ int GetSubStringCount(string sString, string sSubString)
     return nCount;
 }
 
-// Private method for CSV lists.
 string ProtectCommas(string sString, int bProtect = TRUE)
 {
     if (bProtect) return StringReplace(sString, ",", COMMA);
     else          return StringReplace(sString, COMMA, ",");
+}
+
+string TrimString(string sString)
+{
+    while (GetStringLeft(sString, 1) == " ")
+        sString = GetStringRight(sString, GetStringLength(sString) - 1);
+
+    while (GetStringRight(sString, 1) == " ")
+        sString = GetStringLeft(sString, GetStringLength(sString) - 1);
+
+    return sString;
 }
 
 
@@ -563,9 +592,9 @@ void ExplodeList(object oTarget, string sList, string sListName = "", int bAddUn
         // Add the item to the list.
         switch (nListType)
         {
-            case LIST_TYPE_STRING: AddStringListItem(oTarget, ProtectCommas(item, FALSE), sListName, bAddUnique); break;
-            case LIST_TYPE_INT:    AddFloatListItem (oTarget, StringToFloat(item),        sListName, bAddUnique); break;
-            case LIST_TYPE_FLOAT:  AddIntListItem   (oTarget, StringToInt  (item),        sListName, bAddUnique); break;
+            case LIST_TYPE_STRING: AddListString(oTarget,               item,  sListName, bAddUnique); break;
+            case LIST_TYPE_INT:    AddListFloat (oTarget, StringToFloat(item), sListName, bAddUnique); break;
+            case LIST_TYPE_FLOAT:  AddListInt   (oTarget, StringToInt  (item), sListName, bAddUnique); break;
         }
     }
 }
@@ -577,9 +606,9 @@ string CompressList(object oTarget, string sListName = "", int bAddUnique = FALS
     // Count the items in the list
     switch (nListType)
     {
-        case LIST_TYPE_STRING: nCount = GetStringListCount(oTarget, sListName); break;
-        case LIST_TYPE_FLOAT:  nCount = GetFloatListCount (oTarget, sListName); break;
-        case LIST_TYPE_INT:    nCount = GetIntListCount   (oTarget, sListName); break;
+        case LIST_TYPE_STRING: nCount = CountStringList(oTarget, sListName); break;
+        case LIST_TYPE_FLOAT:  nCount = CountFloatList (oTarget, sListName); break;
+        case LIST_TYPE_INT:    nCount = CountIntList   (oTarget, sListName); break;
     }
 
     if (!nCount)
@@ -592,9 +621,9 @@ string CompressList(object oTarget, string sListName = "", int bAddUnique = FALS
     {
         switch (nListType)
         {
-            case LIST_TYPE_STRING: sListItem = ProtectCommas(GetStringListItem(oTarget, i, sListName)); break;
-            case LIST_TYPE_FLOAT:  sListItem = FloatToString(GetFloatListItem (oTarget, i, sListName)); break;
-            case LIST_TYPE_INT:    sListItem = IntToString  (GetIntListItem   (oTarget, i, sListName)); break;
+            case LIST_TYPE_STRING: sListItem =               GetListString(oTarget, i, sListName);  break;
+            case LIST_TYPE_FLOAT:  sListItem = FloatToString(GetListFloat (oTarget, i, sListName)); break;
+            case LIST_TYPE_INT:    sListItem = IntToString  (GetListInt   (oTarget, i, sListName)); break;
         }
 
         sList = AddListItem(sList, sListItem, bAddUnique);
@@ -603,7 +632,7 @@ string CompressList(object oTarget, string sListName = "", int bAddUnique = FALS
     return sList;
 }
 
-int GetListCount(string sList)
+int CountList(string sList)
 {
     if (sList == "")
         return 0;
@@ -613,9 +642,7 @@ int GetListCount(string sList)
 
 string AddListItem(string sList, string sListItem, int bAddUnique = FALSE)
 {
-    sListItem = ProtectCommas(sListItem);
-
-    if (bAddUnique && IsItemInList(sList, sListItem))
+    if (bAddUnique && HasListItem(sList, sListItem))
         return sList;
 
     if (sList != "")
@@ -629,29 +656,29 @@ string GetListItem(string sList, int nNth = 0)
     // Sanity check.
     if (sList == "" || nNth < 0) return "";
 
-    // Are there enough items in the list?
-    int nItems = GetListCount(sList);
-    if (nNth > nItems) return "";
-
-    // Count the commas until they equal the item number.
-    int i;
-    string sListItem;
-    for (i=0; i <= nNth; i++)
+    // Loop through the elements until we find the one we want.
+    int nCount, nLeft, nRight = FindSubString(sList, ",");
+    while (nRight != -1 && nCount < nNth)
     {
-        // Look for the item and remove it from the list
-        sListItem = StringParse(sList, ", ");
-        sList     = StringRemoveParsed(sList, sListItem, ", ");
+        nCount++;
+        nLeft = nRight + 1;
+        nRight = FindSubString(sList, ",", nLeft);
     }
 
-    return ProtectCommas(sListItem, FALSE);
+    // If there were not enough elements, return a null string.
+    if (nCount < nNth) return "";
+
+    // Get the element
+    if (nRight >= 0)
+        sList = GetStringLeft(sList, nRight);
+    sList = GetStringRight(sList, GetStringLength(sList) - nLeft);
+    return TrimString(sList);
 }
 
 int FindListItem(string sList, string sListItem)
 {
     // Sanity check.
     if (sList == "" || sListItem == "") return -1;
-
-    sListItem = ProtectCommas(sListItem);
 
     // Is the item even in the list?
     int nOffset = FindSubString(sList, sListItem);
@@ -669,18 +696,18 @@ int FindListItem(string sList, string sListItem)
     return FindListItem(StringRemoveParsed(sList, sParsed), sListItem);
 }
 
-int IsItemInList(string sList, string sListItem)
+int HasListItem(string sList, string sListItem)
 {
     return (FindListItem(sList, sListItem) > -1);
 }
 
-string RemoveListItemByIndex(string sList, int nNth = 0)
+string DeleteListItem(string sList, int nNth = 0)
 {
     // Sanity check.
     if (sList == "" || nNth < 0) return "";
 
     // Are there enough items in the list?
-    int nItems = GetListCount(sList);
+    int nItems = CountList(sList);
     if (nNth > nItems) return "";
 
     // Count the commas until they equal the item number.
@@ -699,11 +726,20 @@ string RemoveListItemByIndex(string sList, int nNth = 0)
     return sNewList;
 }
 
-string RemoveListItemByValue(string sList, string sListItem)
+string RemoveListItem(string sList, string sListItem)
 {
-    return RemoveListItemByIndex(sList, FindListItem(sList, sListItem));
-
+    return DeleteListItem(sList, FindListItem(sList, sListItem));
 }
+
+string MergeLists(string sList1, string sList2, int bAddUnique = FALSE)
+{
+    int i, nCount = CountList(sList2);
+    for (i = 0; i < nCount; i++)
+        sList1 = AddListItem(sList1, GetListItem(sList2, i), bAddUnique);
+
+    return sList1;
+}
+
 
 // ----- Local Variable Lists --------------------------------------------------
 
@@ -714,9 +750,9 @@ string RemoveListItemByValue(string sList, string sListItem)
 // OL: Object List,   OC: Object Count
 // SL: String List,   SC: String Count
 
-int AddFloatListItem(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE)
+int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE)
 {
-    int nCount = GetFloatListCount(oTarget, sListName);
+    int nCount = CountFloatList(oTarget, sListName);
 
     // If we're adding unique we should check to see if this entry already exists
     if (bAddUnique)
@@ -734,9 +770,9 @@ int AddFloatListItem(object oTarget, float fValue, string sListName = "", int bA
     return TRUE;
 }
 
-int AddIntListItem(object oTarget, int nValue, string sListName = "", int bAddUnique = FALSE)
+int AddListInt(object oTarget, int nValue, string sListName = "", int bAddUnique = FALSE)
 {
-    int nCount = GetIntListCount(oTarget, sListName);
+    int nCount = CountIntList(oTarget, sListName);
 
     // If we're adding unique we should check to see if this entry already exists
     if (bAddUnique)
@@ -754,9 +790,9 @@ int AddIntListItem(object oTarget, int nValue, string sListName = "", int bAddUn
     return TRUE;
 }
 
-int AddLocationListItem(object oTarget, location lValue, string sListName = "", int bAddUnique = FALSE)
+int AddListLocation(object oTarget, location lValue, string sListName = "", int bAddUnique = FALSE)
 {
-    int nCount = GetLocationListCount(oTarget, sListName);
+    int nCount = CountLocationList(oTarget, sListName);
 
     // If we're adding unique we should check to see if this entry already exists
     if (bAddUnique)
@@ -774,9 +810,9 @@ int AddLocationListItem(object oTarget, location lValue, string sListName = "", 
     return TRUE;
 }
 
-int AddObjectListItem(object oTarget, object oObject, string sListName = "", int bAddUnique = FALSE)
+int AddListObject(object oTarget, object oObject, string sListName = "", int bAddUnique = FALSE)
 {
-    int nCount = GetObjectListCount(oTarget, sListName);
+    int nCount = CountObjectList(oTarget, sListName);
 
     // If we're adding unique we should check to see if this entry already exists
     if (bAddUnique)
@@ -794,9 +830,9 @@ int AddObjectListItem(object oTarget, object oObject, string sListName = "", int
     return TRUE;
 }
 
-int AddStringListItem(object oTarget, string sString, string sListName = "", int bAddUnique = FALSE)
+int AddListString(object oTarget, string sString, string sListName = "", int bAddUnique = FALSE)
 {
-    int nCount = GetStringListCount(oTarget, sListName);
+    int nCount = CountStringList(oTarget, sListName);
 
     // If we're adding unique we should check to see if this entry already exists
     if (bAddUnique)
@@ -814,146 +850,44 @@ int AddStringListItem(object oTarget, string sString, string sListName = "", int
     return TRUE;
 }
 
-// WARNING!! Extremely long list management can cause TMI; this list code
-// is expensive. It is NOT recommended that you create long lists.
-void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName)
+float GetListFloat(object oTarget, int nIndex = 0, string sListName = "")
 {
-    string sSourceItem, sTargetItem;
-    int    nCount = GetFloatListCount(oSource, sSourceName);
-
-    DeclareFloatList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
-    {
-        sSourceItem = LIST_REF_FLOAT+sSourceName+IntToString(nCount);
-        sTargetItem = LIST_REF_FLOAT+sTargetName+IntToString(nCount);
-        SetLocalFloat(oTarget, sTargetItem, GetLocalFloat(oSource, sSourceItem));
-    }
-}
-
-void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName)
-{
-    string sSourceItem, sTargetItem;
-    int    nCount = GetIntListCount(oSource, sSourceName);
-
-    DeclareIntList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
-    {
-        sSourceItem = LIST_REF_INT+sSourceName+IntToString(nCount);
-        sTargetItem = LIST_REF_INT+sTargetName+IntToString(nCount);
-        SetLocalInt(oTarget, sTargetItem, GetLocalInt(oSource, sSourceItem));
-    }
-}
-
-void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName)
-{
-    string sSourceItem, sTargetItem;
-    int    nCount = GetLocationListCount(oSource, sSourceName);
-
-    DeclareLocationList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
-    {
-        sSourceItem = LIST_REF_LOCATION+sSourceName+IntToString(nCount);
-        sTargetItem = LIST_REF_LOCATION+sTargetName+IntToString(nCount);
-        SetLocalLocation(oTarget, sTargetItem, GetLocalLocation(oSource, sSourceItem));
-    }
-}
-
-void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName)
-{
-    string sSourceItem, sTargetItem;
-    int    nCount = GetObjectListCount(oSource, sSourceName);
-
-    DeclareObjectList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
-    {
-        sSourceItem = LIST_REF_OBJECT+sSourceName+IntToString(nCount);
-        sTargetItem = LIST_REF_OBJECT+sTargetName+IntToString(nCount);
-        SetLocalObject(oTarget, sTargetItem, GetLocalObject(oSource, sSourceItem));
-    }
-}
-
-void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName)
-{
-    string sSourceItem, sTargetItem;
-    int    nCount = GetStringListCount(oSource, sSourceName);
-
-    DeclareStringList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
-    {
-        sSourceItem = LIST_REF_STRING+sSourceName+IntToString(nCount);
-        sTargetItem = LIST_REF_STRING+sTargetName+IntToString(nCount);
-        SetLocalString(oTarget, sTargetItem, GetLocalString(oSource, sSourceItem));
-    }
-}
-
-int GetFloatListCount(object oTarget, string sListName = "")
-{
-    return GetLocalInt(oTarget, LIST_COUNT_FLOAT+sListName);
-}
-
-int GetIntListCount(object oTarget, string sListName = "")
-{
-    return GetLocalInt(oTarget, LIST_COUNT_INT+sListName);
-}
-
-int GetLocationListCount(object oTarget, string sListName = "")
-{
-    return GetLocalInt(oTarget, LIST_COUNT_LOCATION+sListName);
-}
-
-int GetObjectListCount(object oTarget, string sListName = "")
-{
-    return GetLocalInt(oTarget, LIST_COUNT_OBJECT+sListName);
-}
-
-int GetStringListCount(object oTarget, string sListName = "")
-{
-    return GetLocalInt(oTarget, LIST_COUNT_STRING+sListName);
-}
-
-float GetFloatListItem(object oTarget, int nIndex = 0, string sListName = "")
-{
-    int nCount = GetFloatListCount(oTarget, sListName);
+    int nCount = CountFloatList(oTarget, sListName);
     if (nIndex >= nCount) return 0.0;
     return GetLocalFloat(oTarget, LIST_REF_FLOAT+sListName+IntToString(nIndex));
 }
 
-int GetIntListItem(object oTarget, int nIndex = 0, string sListName = "")
+int GetListInt(object oTarget, int nIndex = 0, string sListName = "")
 {
-    int nCount = GetIntListCount(oTarget, sListName);
+    int nCount = CountIntList(oTarget, sListName);
     if (nIndex >= nCount) return 0;
     return GetLocalInt(oTarget, LIST_REF_INT+sListName+IntToString(nIndex));
 }
 
-location GetLocationListItem(object oTarget, int nIndex = 0, string sListName = "")
+location GetListLocation(object oTarget, int nIndex = 0, string sListName = "")
 {
-    int nCount = GetLocationListCount(oTarget, sListName);
+    int nCount = CountLocationList(oTarget, sListName);
     if (nIndex >= nCount) return Location(OBJECT_INVALID, Vector(), 0.0);
     return GetLocalLocation(oTarget, LIST_REF_LOCATION+sListName+IntToString(nIndex));
 }
 
-object GetObjectListItem(object oTarget, int nIndex = 0, string sListName = "")
+object GetListObject(object oTarget, int nIndex = 0, string sListName = "")
 {
-    int nCount = GetObjectListCount(oTarget, sListName);
+    int nCount = CountObjectList(oTarget, sListName);
     if (nIndex >= nCount) return OBJECT_INVALID;
     return GetLocalObject(oTarget, LIST_REF_OBJECT+sListName+IntToString(nIndex));
 }
 
-string GetStringListItem(object oTarget, int nIndex = 0, string sListName = "")
+string GetListString(object oTarget, int nIndex = 0, string sListName = "")
 {
-    int nCount = GetStringListCount(oTarget, sListName);
+    int nCount = CountStringList(oTarget, sListName);
     if (nIndex >= nCount) return "";
     return GetLocalString(oTarget, LIST_REF_STRING+sListName+IntToString(nIndex));
 }
 
-int RemoveFloatListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
+int DeleteListFloat(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nCount = GetFloatListCount(oTarget, sListName);
+    int nCount = CountFloatList(oTarget, sListName);
 
     // Sanity check
     if (nCount == 0 || nIndex >= nCount || nIndex < 0) return nCount;
@@ -982,9 +916,9 @@ int RemoveFloatListItemByIndex(object oTarget, int nIndex, string sListName = ""
     return nCount;
 }
 
-int RemoveIntListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
+int DeleteListInt(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nCount = GetIntListCount(oTarget, sListName);
+    int nCount = CountIntList(oTarget, sListName);
 
     // Sanity check
     if (nCount == 0 || nIndex >= nCount || nIndex < 0) return nCount;
@@ -1013,9 +947,9 @@ int RemoveIntListItemByIndex(object oTarget, int nIndex, string sListName = "", 
     return nCount;
 }
 
-int RemoveLocationListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
+int DeleteListLocation(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nCount = GetLocationListCount(oTarget, sListName);
+    int nCount = CountLocationList(oTarget, sListName);
 
     // Sanity check
     if (nCount == 0 || nIndex >= nCount || nIndex < 0) return nCount;
@@ -1044,9 +978,9 @@ int RemoveLocationListItemByIndex(object oTarget, int nIndex, string sListName =
     return nCount;
 }
 
-int RemoveObjectListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
+int DeleteListObject(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nCount = GetObjectListCount(oTarget, sListName);
+    int nCount = CountObjectList(oTarget, sListName);
 
     // Sanity check
     if (nCount == 0 || nIndex >= nCount || nIndex < 0) return nCount;
@@ -1075,9 +1009,9 @@ int RemoveObjectListItemByIndex(object oTarget, int nIndex, string sListName = "
     return nCount;
 }
 
-int RemoveStringListItemByIndex(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
+int DeleteListString(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nCount = GetStringListCount(oTarget, sListName);
+    int nCount = CountStringList(oTarget, sListName);
 
     // Sanity check
     if (nCount == 0 || nIndex >= nCount || nIndex < 0) return nCount;
@@ -1106,39 +1040,39 @@ int RemoveStringListItemByIndex(object oTarget, int nIndex, string sListName = "
     return nCount;
 }
 
-int RemoveFloatListItemByValue(object oTarget, float fValue, string sListName = "", int bMaintainOrder = FALSE)
+int RemoveListFloat(object oTarget, float fValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nIndex = FindFloatInList(oTarget, fValue, sListName);
-    return RemoveFloatListItemByIndex(oTarget, nIndex, sListName, bMaintainOrder);
+    int nIndex = FindListFloat(oTarget, fValue, sListName);
+    return DeleteListFloat(oTarget, nIndex, sListName, bMaintainOrder);
 }
 
-int RemoveIntListItemByValue(object oTarget, int nValue, string sListName = "", int bMaintainOrder = FALSE)
+int RemoveListInt(object oTarget, int nValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nIndex = FindIntInList(oTarget, nValue, sListName);
-    return RemoveIntListItemByIndex(oTarget, nIndex, sListName, bMaintainOrder);
+    int nIndex = FindListInt(oTarget, nValue, sListName);
+    return DeleteListInt(oTarget, nIndex, sListName, bMaintainOrder);
 }
 
-int RemoveLocationListItemByValue(object oTarget, location lValue, string sListName = "", int bMaintainOrder = FALSE)
+int RemoveListLocation(object oTarget, location lValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nIndex = FindLocationInList(oTarget, lValue, sListName);
-    return RemoveLocationListItemByIndex(oTarget, nIndex, sListName, bMaintainOrder);
+    int nIndex = FindListLocation(oTarget, lValue, sListName);
+    return DeleteListLocation(oTarget, nIndex, sListName, bMaintainOrder);
 }
 
-int RemoveObjectListItemByValue(object oTarget, object oValue, string sListName = "", int bMaintainOrder = FALSE)
+int RemoveListObject(object oTarget, object oValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nIndex = FindObjectInList(oTarget, oValue, sListName);
-    return RemoveObjectListItemByIndex(oTarget, nIndex, sListName, bMaintainOrder);
+    int nIndex = FindListObject(oTarget, oValue, sListName);
+    return DeleteListObject(oTarget, nIndex, sListName, bMaintainOrder);
 }
 
-int RemoveStringListItemByValue(object oTarget, string sValue, string sListName = "", int bMaintainOrder = FALSE)
+int RemoveListString(object oTarget, string sValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    int nIndex = FindStringInList(oTarget, sValue, sListName);
-    return RemoveStringListItemByIndex(oTarget, nIndex, sListName, bMaintainOrder);
+    int nIndex = FindListString(oTarget, sValue, sListName);
+    return DeleteListString(oTarget, nIndex, sListName, bMaintainOrder);
 }
 
-int FindFloatInList(object oTarget, float fValue, string sListName = "")
+int FindListFloat(object oTarget, float fValue, string sListName = "")
 {
-    int i, nCount = GetFloatListCount(oTarget, sListName);
+    int i, nCount = CountFloatList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
         if (GetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(i)) == fValue)
@@ -1147,9 +1081,9 @@ int FindFloatInList(object oTarget, float fValue, string sListName = "")
     return -1;
 }
 
-int FindIntInList(object oTarget, int nValue, string sListName = "")
+int FindListInt(object oTarget, int nValue, string sListName = "")
 {
-    int i, nCount = GetIntListCount(oTarget, sListName);
+    int i, nCount = CountIntList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
         if (GetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(i)) == nValue)
@@ -1158,9 +1092,9 @@ int FindIntInList(object oTarget, int nValue, string sListName = "")
     return -1;
 }
 
-int FindLocationInList(object oTarget, location lValue, string sListName = "")
+int FindListLocation(object oTarget, location lValue, string sListName = "")
 {
-    int i, nCount = GetFloatListCount(oTarget, sListName);
+    int i, nCount = CountLocationList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
         if (GetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(i)) == lValue)
@@ -1169,9 +1103,9 @@ int FindLocationInList(object oTarget, location lValue, string sListName = "")
     return -1;
 }
 
-int FindObjectInList(object oTarget, object oValue, string sListName = "")
+int FindListObject(object oTarget, object oValue, string sListName = "")
 {
-    int i, nCount = GetObjectListCount(oTarget, sListName);
+    int i, nCount = CountObjectList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
         if (GetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(i)) == oValue)
@@ -1180,9 +1114,9 @@ int FindObjectInList(object oTarget, object oValue, string sListName = "")
     return -1;
 }
 
-int FindStringInList(object oTarget, string sValue, string sListName = "")
+int FindListString(object oTarget, string sValue, string sListName = "")
 {
-    int i, nCount = GetStringListCount(oTarget, sListName);
+    int i, nCount = CountStringList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
         if (GetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(i)) == sValue)
@@ -1191,39 +1125,99 @@ int FindStringInList(object oTarget, string sValue, string sListName = "")
     return -1;
 }
 
-int IsFloatInList(object oTarget, float fValue, string sListName = "")
+int HasListFloat(object oTarget, float fValue, string sListName = "")
 {
-    if (FindFloatInList(oTarget, fValue, sListName) != -1) return TRUE;
-    else                                                   return FALSE;
-}
-
-int IsIntInList(object oTarget, int nValue, string sListName = "")
-{
-    if (FindIntInList(oTarget, nValue, sListName) != -1) return TRUE;
+    if (FindListFloat(oTarget, fValue, sListName) != -1) return TRUE;
     else                                                 return FALSE;
 }
 
-int IsLocationInList(object oTarget, location lValue, string sListName = "")
+int HasListInt(object oTarget, int nValue, string sListName = "")
 {
-    if (FindLocationInList(oTarget, lValue, sListName) != -1) return TRUE;
-    else                                                      return FALSE;
+    if (FindListInt(oTarget, nValue, sListName) != -1) return TRUE;
+    else                                               return FALSE;
 }
 
-int IsObjectInList(object oTarget, object oValue, string sListName = "")
+int HasListLocation(object oTarget, location lValue, string sListName = "")
 {
-    if (FindObjectInList(oTarget, oValue, sListName) != -1) return TRUE;
+    if (FindListLocation(oTarget, lValue, sListName) != -1) return TRUE;
     else                                                    return FALSE;
 }
 
-int IsStringInList(object oTarget, string sValue, string sListName = "")
+int HasListObject(object oTarget, object oValue, string sListName = "")
 {
-    if (FindStringInList(oTarget, sValue, sListName) != -1) return TRUE;
-    else                                                    return FALSE;
+    if (FindListObject(oTarget, oValue, sListName) != -1) return TRUE;
+    else                                                  return FALSE;
+}
+
+int HasListString(object oTarget, string sValue, string sListName = "")
+{
+    if (FindListString(oTarget, sValue, sListName) != -1) return TRUE;
+    else                                                  return FALSE;
+}
+
+void SetListFloat(object oTarget, int nIndex, float fValue, string sListName = "")
+{
+    int nCount = CountFloatList(oTarget, sListName);
+
+    if (nIndex > nCount) return;
+
+    if (nIndex == nCount)
+        AddListFloat(oTarget, fValue, sListName);
+    else
+        SetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex), fValue);
+}
+
+void SetListInt(object oTarget, int nIndex, int nValue, string sListName = "")
+{
+    int nCount = CountIntList(oTarget, sListName);
+
+    if (nIndex > nCount) return;
+
+    if (nIndex == nCount)
+        AddListInt(oTarget, nValue, sListName);
+    else
+        SetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex), nValue);
+}
+
+void SetListLocation(object oTarget, int nIndex, location lValue, string sListName = "")
+{
+    int nCount = CountLocationList(oTarget, sListName);
+
+    if (nIndex > nCount) return;
+
+    if (nIndex == nCount)
+        AddListLocation(oTarget, lValue, sListName);
+    else
+        SetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex), lValue);
+}
+
+void SetListObject(object oTarget, int nIndex, object oValue, string sListName = "")
+{
+    int nCount = CountObjectList(oTarget, sListName);
+
+    if (nIndex > nCount) return;
+
+    if (nIndex == nCount)
+        AddListObject(oTarget, oValue, sListName);
+    else
+        SetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex), oValue);
+}
+
+void SetListString(object oTarget, int nIndex, string sValue, string sListName = "")
+{
+    int nCount = CountStringList(oTarget, sListName);
+
+    if (nIndex > nCount) return;
+
+    if (nIndex == nCount)
+        AddListString(oTarget, sValue, sListName);
+    else
+        SetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex), sValue);
 }
 
 void DeleteFloatList(object oTarget, string sListName = "")
 {
-    int i, nCount = GetFloatListCount(oTarget, sListName);
+    int i, nCount = CountFloatList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
         DeleteLocalFloat(oTarget, LIST_REF_FLOAT+sListName+IntToString(i));
 
@@ -1232,7 +1226,7 @@ void DeleteFloatList(object oTarget, string sListName = "")
 
 void DeleteIntList(object oTarget, string sListName = "")
 {
-    int i, nCount = GetIntListCount(oTarget, sListName);
+    int i, nCount = CountIntList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
         DeleteLocalInt(oTarget, LIST_REF_INT+sListName+IntToString(i));
 
@@ -1241,7 +1235,7 @@ void DeleteIntList(object oTarget, string sListName = "")
 
 void DeleteLocationList(object oTarget, string sListName = "")
 {
-    int i, nCount = GetLocationListCount(oTarget, sListName);
+    int i, nCount = CountLocationList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
         DeleteLocalLocation(oTarget, LIST_REF_LOCATION+sListName+IntToString(i));
 
@@ -1250,7 +1244,7 @@ void DeleteLocationList(object oTarget, string sListName = "")
 
 void DeleteObjectList(object oTarget, string sListName = "")
 {
-    int i, nCount = GetObjectListCount(oTarget, sListName);
+    int i, nCount = CountObjectList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
         DeleteLocalObject(oTarget, LIST_REF_OBJECT+sListName+IntToString(i));
 
@@ -1259,71 +1253,11 @@ void DeleteObjectList(object oTarget, string sListName = "")
 
 void DeleteStringList(object oTarget, string sListName = "")
 {
-    int i, nCount = GetStringListCount(oTarget, sListName);
+    int i, nCount = CountStringList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
         DeleteLocalString(oTarget, LIST_REF_STRING+sListName+IntToString(i));
 
     DeleteLocalInt(oTarget, LIST_COUNT_STRING+sListName);
-}
-
-void SetFloatListItem(object oTarget, int nIndex, float fValue, string sListName = "")
-{
-    int nCount = GetFloatListCount(oTarget, sListName);
-
-    if (nIndex > nCount) return;
-
-    if (nIndex == nCount)
-        AddFloatListItem(oTarget, fValue, sListName);
-    else
-        SetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex), fValue);
-}
-
-void SetIntListItem(object oTarget, int nIndex, int nValue, string sListName = "")
-{
-    int nCount = GetIntListCount(oTarget, sListName);
-
-    if (nIndex > nCount) return;
-
-    if (nIndex == nCount)
-        AddIntListItem(oTarget, nValue, sListName);
-    else
-        SetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex), nValue);
-}
-
-void SetLocationListItem(object oTarget, int nIndex, location lValue, string sListName = "")
-{
-    int nCount = GetLocationListCount(oTarget, sListName);
-
-    if (nIndex > nCount) return;
-
-    if (nIndex == nCount)
-        AddLocationListItem(oTarget, lValue, sListName);
-    else
-        SetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex), lValue);
-}
-
-void SetObjectListItem(object oTarget, int nIndex, object oValue, string sListName = "")
-{
-    int nCount = GetObjectListCount(oTarget, sListName);
-
-    if (nIndex > nCount) return;
-
-    if (nIndex == nCount)
-        AddObjectListItem(oTarget, oValue, sListName);
-    else
-        SetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex), oValue);
-}
-
-void SetStringListItem(object oTarget, int nIndex, string sValue, string sListName = "")
-{
-    int nCount = GetStringListCount(oTarget, sListName);
-
-    if (nIndex > nCount) return;
-
-    if (nIndex == nCount)
-        AddStringListItem(oTarget, sValue, sListName);
-    else
-        SetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex), sValue);
 }
 
 void DeclareFloatList(object oTarget, int nCount, string sListName = "")
@@ -1354,4 +1288,106 @@ void DeclareStringList(object oTarget, int nCount, string sListName = "")
 {
     DeleteStringList(oTarget, sListName);
     SetLocalInt(oTarget, LIST_COUNT_STRING + sListName, nCount);
+}
+
+// WARNING!! Extremely long list management can cause TMI; this list code
+// is expensive. It is NOT recommended that you create long lists.
+void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName)
+{
+    string sSourceItem, sTargetItem;
+    int    nCount = CountFloatList(oSource, sSourceName);
+
+    DeclareFloatList(oTarget, nCount, sTargetName);
+
+    for (nCount--; nCount >= 0; nCount--)
+    {
+        sSourceItem = LIST_REF_FLOAT+sSourceName+IntToString(nCount);
+        sTargetItem = LIST_REF_FLOAT+sTargetName+IntToString(nCount);
+        SetLocalFloat(oTarget, sTargetItem, GetLocalFloat(oSource, sSourceItem));
+    }
+}
+
+void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName)
+{
+    string sSourceItem, sTargetItem;
+    int    nCount = CountIntList(oSource, sSourceName);
+
+    DeclareIntList(oTarget, nCount, sTargetName);
+
+    for (nCount--; nCount >= 0; nCount--)
+    {
+        sSourceItem = LIST_REF_INT+sSourceName+IntToString(nCount);
+        sTargetItem = LIST_REF_INT+sTargetName+IntToString(nCount);
+        SetLocalInt(oTarget, sTargetItem, GetLocalInt(oSource, sSourceItem));
+    }
+}
+
+void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName)
+{
+    string sSourceItem, sTargetItem;
+    int    nCount = CountLocationList(oSource, sSourceName);
+
+    DeclareLocationList(oTarget, nCount, sTargetName);
+
+    for (nCount--; nCount >= 0; nCount--)
+    {
+        sSourceItem = LIST_REF_LOCATION+sSourceName+IntToString(nCount);
+        sTargetItem = LIST_REF_LOCATION+sTargetName+IntToString(nCount);
+        SetLocalLocation(oTarget, sTargetItem, GetLocalLocation(oSource, sSourceItem));
+    }
+}
+
+void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName)
+{
+    string sSourceItem, sTargetItem;
+    int    nCount = CountObjectList(oSource, sSourceName);
+
+    DeclareObjectList(oTarget, nCount, sTargetName);
+
+    for (nCount--; nCount >= 0; nCount--)
+    {
+        sSourceItem = LIST_REF_OBJECT+sSourceName+IntToString(nCount);
+        sTargetItem = LIST_REF_OBJECT+sTargetName+IntToString(nCount);
+        SetLocalObject(oTarget, sTargetItem, GetLocalObject(oSource, sSourceItem));
+    }
+}
+
+void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName)
+{
+    string sSourceItem, sTargetItem;
+    int    nCount = CountStringList(oSource, sSourceName);
+
+    DeclareStringList(oTarget, nCount, sTargetName);
+
+    for (nCount--; nCount >= 0; nCount--)
+    {
+        sSourceItem = LIST_REF_STRING+sSourceName+IntToString(nCount);
+        sTargetItem = LIST_REF_STRING+sTargetName+IntToString(nCount);
+        SetLocalString(oTarget, sTargetItem, GetLocalString(oSource, sSourceItem));
+    }
+}
+
+int CountFloatList(object oTarget, string sListName = "")
+{
+    return GetLocalInt(oTarget, LIST_COUNT_FLOAT+sListName);
+}
+
+int CountIntList(object oTarget, string sListName = "")
+{
+    return GetLocalInt(oTarget, LIST_COUNT_INT+sListName);
+}
+
+int CountLocationList(object oTarget, string sListName = "")
+{
+    return GetLocalInt(oTarget, LIST_COUNT_LOCATION+sListName);
+}
+
+int CountObjectList(object oTarget, string sListName = "")
+{
+    return GetLocalInt(oTarget, LIST_COUNT_OBJECT+sListName);
+}
+
+int CountStringList(object oTarget, string sListName = "")
+{
+    return GetLocalInt(oTarget, LIST_COUNT_STRING+sListName);
 }
