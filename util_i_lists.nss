@@ -145,6 +145,21 @@ string AddListItem(string sList, string sListItem, int bAddUnique = FALSE);
 // TRUE, will only add items to the list if they are not already there.
 string MergeLists(string sList1, string sList2, int bAddUnique = FALSE);
 
+// ---< AddLocalListItem >---
+// ---< util_i_lists >---
+// Adds sListItem to the CSV list saved as a local string with varname sListName
+// on oObject and returns the updated list. If bAddUnique is TRUE, will only add
+// items to the list if they are not already there.
+string AddLocalListItem(object oObject, string sListName, string sListItem, int bAddUnique = FALSE);
+
+// ---< MergeLocalList >---
+// ---< util_i_lists >---
+// Merges all items from the CSV list sListToMerge into the CSV list saved as a
+// local string with varname sListName on oObject and returns the updated list.
+// If bAddUnique is TRUE, will only add items to the list if they are not
+// already there.
+string MergeLocalList(object oObject, string sListName, string sListToMerge, int bAddUnique = FALSE);
+
 
 // ----- Local Variable Lists --------------------------------------------------
 
@@ -738,6 +753,22 @@ string MergeLists(string sList1, string sList2, int bAddUnique = FALSE)
         sList1 = AddListItem(sList1, GetListItem(sList2, i), bAddUnique);
 
     return sList1;
+}
+
+string AddLocalListItem(object oObject, string sListName, string sListItem, int bAddUnique = FALSE)
+{
+    string sList = GetLocalString(oObject, sListName);
+    sList = AddListItem(sList, sListItem, bAddUnique);
+    SetLocalString(oObject, sListName, sList);
+    return sList;
+}
+
+string MergeLocalList(object oObject, string sListName, string sListToMerge, int bAddUnique = FALSE)
+{
+    string sList = GetLocalString(oObject, sListName);
+    sList = MergeLists(sList, sListToMerge, bAddUnique);
+    SetLocalString(oObject, sListName, sList);
+    return sList;
 }
 
 
