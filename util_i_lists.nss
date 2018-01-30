@@ -1,11 +1,11 @@
 /*
 Filename:        util_i_lists.nss
-System:          Foundation Utilities (include script)
+System:          Utilities (include script)
 Author:          Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 Date Created:    Dec. 15, 2008
 Summary:
-Foundation Utilities include script. This file holds list utility functions
-commonly used throughout Foundation and its associated systems.
+Utilities include script. This file holds utility functions for manipulating
+CSV and localvar lists.
 
 Revision Info should only be included for post-release revisions.
 -----------------
