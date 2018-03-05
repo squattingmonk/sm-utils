@@ -58,10 +58,10 @@ int Debugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
 
 // ---< Debug >---
 // ---< util_i_debug >---
-// Sends sMessage to oPC, all online DMs, and the log if oTarget or the module
-// has a debug level of nLevel or higher for sSystem.
+// If oTarget has a debug level of nLevel or higher for sSystem, sends sMessage
+// to all online DMs, the log, and the first PC (if playing in single-player
+// mode).
 // Parameters:
-// - oPC: a PC object to show the message to.
 // - sMessage: The string to print.
 // - nLevel: The error level of the message.
 //   Possible values:
@@ -72,7 +72,7 @@ int Debugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
 // - sSystem: checks the given system to see whether debug calls of this level
 //   should fire. Allows you to keep some systems silent while debugging others.
 // - oTarget: The object to debug. If invalid, defaults to GetModule().
-void Debug(object oPC, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF);
+void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF);
 
 
 // -----------------------------------------------------------------------------
@@ -109,7 +109,7 @@ int Debugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF)
     return (nLevel <= GetDebugLevel(sSystem, oTarget));
 }
 
-void Debug(object oPC, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF)
+void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF)
 {
     if (Debugging(nLevel, sSystem, oTarget))
     {
@@ -129,7 +129,10 @@ void Debug(object oPC, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string 
         WriteTimestampedLogEntry(sMessage);
 
         sMessage = StringToRGBString(sMessage, sColor);
-        SendMessageToPC(oPC, sMessage);
         SendMessageToAllDMs(sMessage);
+
+        object oPC = GetFirstPC();
+        if (GetPCPublicCDKey(oPC, TRUE) != "")
+            SendMessageToPC(oPC, sMessage);
     }
 }
