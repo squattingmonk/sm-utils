@@ -6,8 +6,11 @@ Import `sm_utils.erf` into your module. This package contains the following reso
 
 | Resource		        | Function              				|
 | ---------------------	| ------------------------------------- |
-| `util_i_lists.nss`	| Local variable and CSV list utilities |
+| `util_i_lists.nss`	| CSV and local variable master include |
+| `util_i_csvlists.nss` | CSV list utilities                    |
+| `util_i_varlists.nss` | Local variable list utilities         |
 | `util_i_debug.nss`    | Debugging utilities                   |
 
 ## Acknowledgements
-- `util_i_lists.nss` local variable lists adapted from [MemeticAI](https://sourceforge.net/projects/memeticai/).
+- `util_i_varlists.nss` local variable lists adapted from 
+  [MemeticAI](https://sourceforge.net/projects/memeticai/).
