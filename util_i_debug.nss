@@ -39,7 +39,7 @@ int GetDebugLevel(string sSystem = "", object oTarget = OBJECT_SELF);
 // Sets the minimum level of debug messages that will be logged for oTarget.
 void SetDebugLevel(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
 
-// ---< Debugging >---
+// ---< IsDebugging >---
 // ---< util_i_debug >---
 // Returns whether oTarget or the module is set to display debug messages of
 // nLevel or higher for sSystem. Useful for avoiding spending cycles compiling
@@ -54,7 +54,7 @@ void SetDebugLevel(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF
 // - sSystem: checks the given system to see whether debug calls of this level
 //   should fire. Allows you to keep some systems silent while debugging others.
 // - oTarget: The object to debug. If invalid, defaults to GetModule().
-int Debugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
+int IsDebugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
 
 // ---< Debug >---
 // ---< util_i_debug >---
@@ -104,14 +104,14 @@ void SetDebugLevel(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF
     SetLocalInt(oTarget, DEBUG_LEVEL + sSystem, nLevel);
 }
 
-int Debugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF)
+int IsDebugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF)
 {
     return (nLevel <= GetDebugLevel(sSystem, oTarget));
 }
 
 void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF)
 {
-    if (Debugging(nLevel, sSystem, oTarget))
+    if (IsDebugging(nLevel, sSystem, oTarget))
     {
         string sPrefix, sColor;
         if (sSystem != "")
