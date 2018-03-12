@@ -14,7 +14,10 @@ resources:
 | `util_i_debug.nss`     | Debugging utilities                          |
 | `util_i_libraries.nss` | Library script utilities                     |
 | `util_i_library.nss`   | Library dispatcher boilerplate               |
+| `util_i_datapoint.nss` | System-specific data object creation utility |
+| `util_i_timers.nss`    | Timer utilities                              |
 
 ## Acknowledgements
 - `util_i_varlists.nss` and `util_i_libraries.nss` adapted from 
   [MemeticAI](https://sourceforge.net/projects/memeticai/).
+- `util_i_timers.nss` adapted from HCR2.
