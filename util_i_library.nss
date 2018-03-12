@@ -11,11 +11,23 @@
 #include "util_i_libraries"
 
 // -----------------------------------------------------------------------------
+//                               Global Variables
+// -----------------------------------------------------------------------------
+
+// We instantiate these here so they are automatically set when a library is
+// executed. If the library itself calls another library script, these variables
+// will remain valid in the scope of the parent library.
+int    LIB_LOADING         = (LIBRARIES == OBJECT_SELF);
+int    LIB_CURRENT_ENTRY   = GetLocalInt   (LIBRARIES, LIB_LAST_ENTRY);
+string LIB_CURRENT_LIBRARY = GetLocalString(LIBRARIES, LIB_LAST_LIBRARY);
+string LIB_CURRENT_SCRIPT  = GetLocalString(LIBRARIES, LIB_LAST_SCRIPT);
+
+
+// -----------------------------------------------------------------------------
 //                              Function Protoypes
 // -----------------------------------------------------------------------------
 
 // ---< OnLibraryLoad >---
-// ---< util_i_library >---
 // This is a user-defined function that registers function names to a unique (to
 // this library) number. When the function name is run using RunLibraryScript(),
 // this number will be passed to the user-defined function OnLibraryScript(),
@@ -37,7 +49,6 @@
 void OnLibraryLoad();
 
 // ---< OnLibraryScript >---
-// ---< util_i_library >---
 // This is a user-defined function that routes a unique (to the module) script
 // name (sScript) or a unique (to this library) number (nEntry) to a function.
 //
@@ -67,8 +78,8 @@ void OnLibraryScript(string sScript, int nEntry);
 
 void main()
 {
-    if (GetLibraries() == OBJECT_SELF)
+    if (LIB_LOADING)
         OnLibraryLoad();
     else
-        OnLibraryScript(GetLastLibraryScript(), GetLastLibraryEntry());
+        OnLibraryScript(LIB_CURRENT_SCRIPT, LIB_CURRENT_ENTRY);
 }

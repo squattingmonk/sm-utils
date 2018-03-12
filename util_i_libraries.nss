@@ -17,40 +17,29 @@
 // CSV List utility functions
 #include "util_i_csvlists"
 
+// Datapoint utilities
+#include "util_i_datapoint"
+
 // -----------------------------------------------------------------------------
 //                                   Constants
 // -----------------------------------------------------------------------------
 
-const string DEBUG_LIBRARIES = "Libraries";
+const string LIB_ENTRY        = "LIB_ENTRY";
+const string LIB_LOADED       = "LIB_LOADED";
+const string LIB_SCRIPT       = "LIB_SCRIPT";
+const string LIB_LAST_ENTRY   = "LIB_LAST_ENTRY";
+const string LIB_LAST_LIBRARY = "LIB_LAST_LIBRARY";
+const string LIB_LAST_SCRIPT  = "LIBRARY_LAST_SCRIPT";
 
-const string LIBRARIES            = "LIBRARIES";
-const string LIBRARY_ENTRY        = "LIBRARY_ENTRY";
-const string LIBRARY_LOADED       = "LIBRARY_LOADED";
-const string LIBRARY_SCRIPT       = "LIBRARY_SCRIPT";
-const string LIBRARY_LAST_ENTRY   = "LIBRARY_LAST_ENTRY";
-const string LIBRARY_LAST_LIBRARY = "LIBRARY_LAST_LIBRARY";
-const string LIBRARY_LAST_SCRIPT  = "LIBRARY_LAST_SCRIPT";
+// -----------------------------------------------------------------------------
+//                               Global Variables
+// -----------------------------------------------------------------------------
+
+object LIBRARIES = GetDatapoint("LIBRARIES");
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
-
-// ----- Debugging Aliases -----------------------------------------------------
-
-// ---< LibraryDebug >---
-// ---< util_i_libraries >---
-// Alias for Debug(). Sends sMessage if oTarget's debug level for the libraries
-// system is nLevel or higher.
-void LibraryDebug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF);
-
-// ----- Library Functions -----------------------------------------------------
-
-// ---< GetLibraries >---
-// ---< util_i_libraries >---
-// Returns the waypoint that holds all library data. If the waypoint does not
-// exist, it will be created. If the waypoint is destroyed, all libraries will
-// be unloaded.
-object GetLibraries();
 
 // ---< LoadLibrary >---
 // ---< util_i_libraries >---
@@ -101,77 +90,29 @@ void RunLibraryScript(string sScript, object oSelf = OBJECT_SELF);
 //   treated as OBJECT_SELF when the library script is called.
 void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF);
 
-// ---< GetLastLibrary >---
-// ---< util_i_libraries >---
-// Returns the name of the last executed library.
-string GetLastLibrary();
-
-// ---< GetLastLibraryScript >---
-// ---< util_i_libraries >---
-// Returns the name of the last called library script.
-string GetLastLibraryScript();
-
-// ---< GetLastLibraryEntry>---
-// ---< util_i_libraries >---
-// Returns the entry point of the last executed library. Primarily used in
-// library dispatchers to determine which script from the library should be
-// executed.
-int GetLastLibraryEntry();
-
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
 
-// ----- Debugging Aliases -----------------------------------------------------
-
-void LibraryDebug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF)
-{
-    Debug(sMessage, nLevel, DEBUG_LIBRARIES, oTarget);
-}
-
-// ----- Library Functions -----------------------------------------------------
-
-object GetLibraries()
-{
-    object oModule = GetModule();
-    object oLibraries = GetLocalObject(oModule, LIBRARIES);
-    if (!GetIsObjectValid(oLibraries))
-    {
-        oLibraries = GetWaypointByTag(LIBRARIES);
-        if (!GetIsObjectValid(oLibraries))
-        {
-            LibraryDebug("Initializing libraries object...");
-            oLibraries = CreateObject(OBJECT_TYPE_WAYPOINT, "nw_waypoint001",
-                GetStartingLocation(), FALSE, LIBRARIES);
-        }
-
-        SetLocalObject(oModule, LIBRARIES, oLibraries);
-    }
-
-    return oLibraries;
-}
-
 void LoadLibrary(string sLibrary, int bForce = FALSE)
 {
-    object oLibraries = GetLibraries();
+    Debug("Attempting to " + (bForce ? "force " : "") + "load library " + sLibrary);
 
-    LibraryDebug("Attempting to " + (bForce ? "force " : "") + "load library " + sLibrary);
-
-    if (bForce || !GetLocalInt(oLibraries, LIBRARY_LOADED + sLibrary))
+    if (bForce || !GetLocalInt(LIBRARIES, LIB_LOADED + sLibrary))
     {
-        SetLocalString(oLibraries, LIBRARY_LAST_LIBRARY, sLibrary);
-        SetLocalString(oLibraries, LIBRARY_LAST_SCRIPT,  sLibrary);
-        SetLocalInt   (oLibraries, LIBRARY_LAST_ENTRY,   0);
-        SetLocalInt   (oLibraries, LIBRARY_LOADED + sLibrary, TRUE);
-        ExecuteScript (sLibrary, oLibraries);
+        SetLocalString(LIBRARIES, LIB_LAST_LIBRARY, sLibrary);
+        SetLocalString(LIBRARIES, LIB_LAST_SCRIPT,  sLibrary);
+        SetLocalInt   (LIBRARIES, LIB_LAST_ENTRY,   0);
+        SetLocalInt   (LIBRARIES, LIB_LOADED + sLibrary, TRUE);
+        ExecuteScript (sLibrary, LIBRARIES);
     }
     else
-        LibraryDebug("Library " + sLibrary + " already loaded!", DEBUG_LEVEL_ERROR);
+        Debug("Library " + sLibrary + " already loaded!", DEBUG_LEVEL_ERROR);
 }
 
 void LoadLibraries(string sLibraries, int bForce = FALSE)
 {
-    LibraryDebug("Attempting to " + (bForce ? "force " : "") + "load libraries " + sLibraries);
+    Debug("Attempting to " + (bForce ? "force " : "") + "load libraries " + sLibraries);
 
     int i, nCount = CountList(sLibraries);
     for (i = 0; i < nCount; i++)
@@ -180,50 +121,48 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
 
 void RegisterLibraryScript(string sScript, int nEntry = 0)
 {
-    object oLibraries = GetLibraries();
-    string sLibrary   = GetLocalString(oLibraries, LIBRARY_LAST_LIBRARY);
-    string sExist     = GetLocalString(oLibraries, LIBRARY_SCRIPT + sScript);
+    string sLibrary   = GetLocalString(LIBRARIES, LIB_LAST_LIBRARY);
+    string sExist     = GetLocalString(LIBRARIES, LIB_SCRIPT + sScript);
 
     if (sLibrary != sExist)
     {
         if (sExist != "")
-            LibraryDebug(sLibrary + " is overriding " + sLibrary + "'s implementation of " +
+            Debug(sLibrary + " is overriding " + sLibrary + "'s implementation of " +
                 sScript, DEBUG_LEVEL_WARNING);
 
-        SetLocalString(oLibraries, LIBRARY_SCRIPT + sScript, sLibrary);
+        SetLocalString(LIBRARIES, LIB_SCRIPT + sScript, sLibrary);
     }
 
-    int nOldEntry = GetLocalInt(oLibraries, LIBRARY_ENTRY + sLibrary + sScript);
+    int nOldEntry = GetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript);
     if (nOldEntry)
-        LibraryDebug(sLibrary + " already declared " + sScript + ". " +
+        Debug(sLibrary + " already declared " + sScript + ". " +
             " Old Entry: " + IntToString(nOldEntry) +
             " New Entry: " + IntToString(nEntry), DEBUG_LEVEL_WARNING);
 
-    SetLocalInt(oLibraries, LIBRARY_ENTRY + sLibrary + sScript, nEntry);
+    SetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript, nEntry);
 }
 
 void RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
 {
     if (sScript == "") return;
 
-    LibraryDebug("Running library script " + sScript + " on " + GetName(oSelf));
+    Debug("Running library script " + sScript + " on " + GetName(oSelf));
 
-    object oLibraries = GetLibraries();
-    string sLibrary = GetLocalString(oLibraries, LIBRARY_SCRIPT + sScript);
+    string sLibrary = GetLocalString(LIBRARIES, LIB_SCRIPT + sScript);
 
     if (sLibrary != "")
     {
-        int nEntry = GetLocalInt(oLibraries, LIBRARY_ENTRY + sLibrary + sScript);
-        LibraryDebug("Library script found at " + sLibrary + ":" + IntToString(nEntry));
+        int nEntry = GetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript);
+        Debug("Library script found at " + sLibrary + ":" + IntToString(nEntry));
 
-        SetLocalString(oLibraries, LIBRARY_LAST_LIBRARY, sLibrary);
-        SetLocalString(oLibraries, LIBRARY_LAST_SCRIPT,  sScript);
-        SetLocalInt   (oLibraries, LIBRARY_LAST_ENTRY,   nEntry);
+        SetLocalString(LIBRARIES, LIB_LAST_LIBRARY, sLibrary);
+        SetLocalString(LIBRARIES, LIB_LAST_SCRIPT,  sScript);
+        SetLocalInt   (LIBRARIES, LIB_LAST_ENTRY,   nEntry);
         ExecuteScript (sLibrary, oSelf);
     }
     else
     {
-        LibraryDebug(sScript + " is not a library script. Executing..", DEBUG_LEVEL_WARNING);
+        Debug(sScript + " is not a library script. Executing..", DEBUG_LEVEL_WARNING);
         ExecuteScript(sScript, oSelf);
     }
 }
@@ -233,19 +172,4 @@ void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF)
     int i, nCount = CountList(sScripts);
     for (i = 0; i < nCount; i++)
         RunLibraryScript(GetListItem(sScripts, i), oSelf);
-}
-
-string GetLastLibrary()
-{
-    return GetLocalString(GetLibraries(), LIBRARY_LAST_LIBRARY);
-}
-
-string GetLastLibraryScript()
-{
-    return GetLocalString(GetLibraries(), LIBRARY_LAST_SCRIPT);
-}
-
-int GetLastLibraryEntry()
-{
-    return GetLocalInt(GetLibraries(), LIBRARY_LAST_ENTRY);
 }
