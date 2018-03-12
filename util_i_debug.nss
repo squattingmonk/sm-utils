@@ -74,6 +74,24 @@ int IsDebugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
 // - oTarget: The object to debug. If invalid, defaults to GetModule().
 void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF);
 
+// ---< DebugSystem >---
+// ---< util_i_debug >---
+// Wrapper for Debug() for systems with frequent debug calls. If oTarget has a
+// debug level of nLevel or higher for sSystem, sends sMessagex to all online
+// DMs, the log, and the first PC (if playing in single-player
+// mode).
+// Parameters:
+// - sSystem: checks the given system to see whether debug calls of this level
+//   should fire. Allows you to keep some systems silent while debugging others.
+// - sMessage: The string to print.
+// - nLevel: The error level of the message.
+//   Possible values:
+//   - DEBUG_LEVEL_CRITICAL: errors severe enough to stop the script
+//   - DEBUG_LEVEL_ERROR: indicates the script malfunctioned in some way
+//   - DEBUG_LEVEL_WARNING: indicates that unexpected behavior may occur
+//   - DEBUG_LEVEL_NOTICE: information to track the flow of the function
+// - oTarget: The object to debug. If invalid, defaults to GetModule().
+void DebugSystem(string sSystem, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
@@ -135,4 +153,9 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = ""
         if (GetPCPublicCDKey(oPC, TRUE) != "")
             SendMessageToPC(oPC, sMessage);
     }
+}
+
+void DebugSystem(string sSystem, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF)
+{
+    Debug(sMessage, nLevel, sSystem, oTarget);
 }
