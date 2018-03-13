@@ -41,6 +41,11 @@ object LIBRARIES = GetDatapoint("LIBRARIES");
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
+// ---< GetIsLibraryLoaded >---
+// ---< util_i_libraries >---
+// Returns whether sLibrary has been loaded.
+int GetIsLibraryLoaded(string sLibrary);
+
 // ---< LoadLibrary >---
 // ---< util_i_libraries >---
 // Loads library sLibrary. The scripts inside the library are registered and are
@@ -93,6 +98,11 @@ void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF);
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
+
+int GetIsLibraryLoaded(string sLibrary)
+{
+    return GetLocalInt(LIBRARIES, LIB_LOADED + sLibrary);
+}
 
 void LoadLibrary(string sLibrary, int bForce = FALSE)
 {
