@@ -27,6 +27,21 @@ string LIB_CURRENT_SCRIPT  = GetLocalString(LIBRARIES, LIB_LAST_SCRIPT);
 //                              Function Protoypes
 // -----------------------------------------------------------------------------
 
+// ---< RegisterLibraryScript >---
+// ---< util_i_library >---
+// Registers sScript as being located inside the current library at nEntry. This
+// The script can later be called using RunLibraryScript(sScript) and routed to
+// the proper function using OnLibraryScript(sScript, nEntry).
+// Parameters:
+// - sScript: the name of the script to register. This name must be unique in
+//   the module. If a second script with the same name is registered, it will
+//   overwrite the first one.
+// - nEntry: a number unique to this library to identify this script. Is can be
+//   obtained at runtime in OnLibraryScript() and used to access the correct
+//   function. If this parameter is left as the default, you will have to filter
+//   your script using the sScript parameter, which is less efficient.
+void RegisterLibraryScript(string sScript, int nEntry = 0);
+
 // ---< OnLibraryLoad >---
 // This is a user-defined function that registers function names to a unique (to
 // this library) number. When the function name is run using RunLibraryScript(),
@@ -71,6 +86,33 @@ void OnLibraryLoad();
 //
 // For advanced usage, see the libraries included in the Core Framework.
 void OnLibraryScript(string sScript, int nEntry);
+
+// -----------------------------------------------------------------------------
+//                           Function Implementations
+// -----------------------------------------------------------------------------
+
+void RegisterLibraryScript(string sScript, int nEntry = 0)
+{
+    string sLibrary = LIB_CURRENT_LIBRARY;
+    string sExist   = GetLocalString(LIBRARIES, LIB_SCRIPT + sScript);
+
+    if (sLibrary != sExist)
+    {
+        if (sExist != "")
+            Debug(sLibrary + " is overriding " + sLibrary + "'s implementation of " +
+                sScript, DEBUG_LEVEL_WARNING);
+
+        SetLocalString(LIBRARIES, LIB_SCRIPT + sScript, sLibrary);
+    }
+
+    int nOldEntry = GetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript);
+    if (nOldEntry)
+        Debug(sLibrary + " already declared " + sScript + ". " +
+            " Old Entry: " + IntToString(nOldEntry) +
+            " New Entry: " + IntToString(nEntry), DEBUG_LEVEL_WARNING);
+
+    SetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript, nEntry);
+}
 
 // -----------------------------------------------------------------------------
 //                                 Main Routine

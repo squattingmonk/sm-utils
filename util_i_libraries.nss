@@ -61,21 +61,6 @@ void LoadLibrary(string sLibrary, int bForce = FALSE);
 // unless bForce is TRUE.
 void LoadLibraries(string sLibraries, int bForce = FALSE);
 
-// ---< RegisterLibraryScript >---
-// ---< util_i_library >---
-// Registers sScript as being located inside the current library at nEntry. This
-// The script can later be called using RunLibraryScript(sScript) and routed to
-// the proper function using OnLibraryScript(sScript, nEntry).
-// Parameters:
-// - sScript: the name of the script to register. This name must be unique in
-//   the module. If a second script with the same name is registered, it will
-//   overwrite the first one.
-// - nEntry: a number unique to this library to identify this script. Is can be
-//   obtained at runtime in OnLibraryScript() and used to access the correct
-//   function. If this parameter is left as the default, you will have to filter
-//   your script using the sScript parameter, which is less efficient.
-void RegisterLibraryScript(string sScript, int nEntry = 0);
-
 // ---< RunLibraryScript >---
 // ---< util_i_libraries >---
 // Runs sScript, dispatching into a library if the script is registered as a
@@ -127,29 +112,6 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
     int i, nCount = CountList(sLibraries);
     for (i = 0; i < nCount; i++)
         LoadLibrary(GetListItem(sLibraries, i), bForce);
-}
-
-void RegisterLibraryScript(string sScript, int nEntry = 0)
-{
-    string sLibrary   = GetLocalString(LIBRARIES, LIB_LAST_LIBRARY);
-    string sExist     = GetLocalString(LIBRARIES, LIB_SCRIPT + sScript);
-
-    if (sLibrary != sExist)
-    {
-        if (sExist != "")
-            Debug(sLibrary + " is overriding " + sLibrary + "'s implementation of " +
-                sScript, DEBUG_LEVEL_WARNING);
-
-        SetLocalString(LIBRARIES, LIB_SCRIPT + sScript, sLibrary);
-    }
-
-    int nOldEntry = GetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript);
-    if (nOldEntry)
-        Debug(sLibrary + " already declared " + sScript + ". " +
-            " Old Entry: " + IntToString(nOldEntry) +
-            " New Entry: " + IntToString(nEntry), DEBUG_LEVEL_WARNING);
-
-    SetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript, nEntry);
 }
 
 void RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
