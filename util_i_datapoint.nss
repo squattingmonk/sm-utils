@@ -13,7 +13,7 @@
 // -----------------------------------------------------------------------------
 
 const string DATA_RESREF = "nw_waypoint001";
-const string DATA_PREFIX = "data_";
+const string DATA_PREFIX = "Datapoint: ";
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -22,30 +22,36 @@ const string DATA_PREFIX = "data_";
 // ---< GetDatapoint >---
 // ---< util_i_datapoint >---
 // Returns the object that sSystem uses to store system-related variables. If
-// the datapoint has not been created, the system will create one.
-object GetDatapoint(string sSystem);
+// the datapoint has not been created and bCreate, the system will create one.
+// The system-generated datapoint is a stock NWN waypoint created at the module
+// starting location.
+object GetDatapoint(string sSystem, int bCreate = TRUE);
+
+// ---< SetDatapoint >---
+// ---< util_i_datapoint >---
+// Sets oTarget as the datapoint for sSystem. Useful if you want more control
+// over the resref, object type, or location of your datapoint.
+void SetDatapoint(string sSystem, object oTarget);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
 
-
-object GetDatapoint(string sSystem)
+object GetDatapoint(string sSystem, int bCreate = TRUE)
 {
-    string sData = DATA_PREFIX + sSystem;
-    object oData = GetLocalObject(GetModule(), sSystem);
+    object oData = GetLocalObject(GetModule(), DATA_PREFIX + sSystem);
 
-    if (!GetIsObjectValid(oData))
+    if (!GetIsObjectValid(oData) && bCreate)
     {
-        oData = GetWaypointByTag(sData);
-        if (!GetIsObjectValid(oData))
-        {
-            oData = CreateObject(OBJECT_TYPE_WAYPOINT, DATA_RESREF,
-                    GetStartingLocation(), FALSE, sData);
-        }
-
-        SetLocalObject(GetModule(), sData, oData);
+        oData = CreateOject(OBJECT_TYPE_WAYPOINT, DATA_RESREF,
+                GetStartingLocation(), FALSE, sSystem);
+        SetLocalObject(GetModule(), DATA_PREFIX + sSystem, oData);
     }
 
     return oData;
+}
+
+void SetDatapoint(string sSystem, object oTarget)
+{
+    SetLocalObject(GetModule(), DATA_PREFIX + sSystem, oTarget);
 }
