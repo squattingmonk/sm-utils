@@ -355,28 +355,38 @@ void DeclareStringList(object oTarget, int nCount, string sListName = "");
 
 // ---< CopyFloatList >---
 // ---< util_i_varlists >---
-// Copies the float list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Copies the float list sSourceName from oSource to oTarget, renamed
+// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
+// that are not already present in the target list.
+void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
 // ---< CopyIntList >---
 // ---< util_i_varlists >---
 // Copies the int list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// If bAddUnique is TRUE, will only copy items from the source list that are not
+// already present in the target list.
+void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
 // ---< CopyLocationList >---
 // ---< util_i_varlists >---
-// Copies the location list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Copies the location list sSourceName from oSource to oTarget, renamed
+// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
+// that are not already present in the target list.
+void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
 // ---< CopyObjectList >---
 // ---< util_i_varlists >---
-// Copies the object list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Copies the object list sSourceName from oSource to oTarget, renamed
+// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
+// that are not already present in the target list.
+void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
 // ---< CopyStringList >---
 // ---< util_i_varlists >---
-// Copies the string list sSourceName from oSource to oTarget, renamed sTargetName.
-void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName);
+// Copies the string list sSourceName from oSource to oTarget, renamed
+// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
+// that are not already present in the target list.
+void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
 // ---< CountFloatList >---
 // ---< util_i_varlists >---
@@ -949,78 +959,63 @@ void DeclareStringList(object oTarget, int nCount, string sListName = "")
 
 // WARNING!! Extremely long list management can cause TMI; this list code
 // is expensive. It is NOT recommended that you create long lists.
-void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName)
+void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
 {
-    string sSourceItem, sTargetItem;
-    int    nCount = CountFloatList(oSource, sSourceName);
+    float fValue;
+    int  i, nCount = CountFloatList(oSource, sSourceName);
 
-    DeclareFloatList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
+    for (i = 0; i < nCount; i++)
     {
-        sSourceItem = LIST_REF_FLOAT + sSourceName + IntToString(nCount);
-        sTargetItem = LIST_REF_FLOAT + sTargetName + IntToString(nCount);
-        SetLocalFloat(oTarget, sTargetItem, GetLocalFloat(oSource, sSourceItem));
+        fValue = GetListFloat(oSource, i, sSourceName);
+        AddListFloat(oTarget, fValue, sTargetName, bAddUnique);
     }
 }
 
-void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName)
+void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
 {
-    string sSourceItem, sTargetItem;
-    int    nCount = CountIntList(oSource, sSourceName);
+    int nValue;
+    int  i, nCount = CountIntList(oSource, sSourceName);
 
-    DeclareIntList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
+    for (i = 0; i < nCount; i++)
     {
-        sSourceItem = LIST_REF_INT + sSourceName + IntToString(nCount);
-        sTargetItem = LIST_REF_INT + sTargetName + IntToString(nCount);
-        SetLocalInt(oTarget, sTargetItem, GetLocalInt(oSource, sSourceItem));
+        nValue = GetListInt(oSource, i, sSourceName);
+        AddListInt(oTarget, nValue, sTargetName, bAddUnique);
     }
 }
 
-void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName)
+void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
 {
-    string sSourceItem, sTargetItem;
-    int    nCount = CountLocationList(oSource, sSourceName);
+    location lValue;
+    int  i, nCount = CountLocationList(oSource, sSourceName);
 
-    DeclareLocationList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
+    for (i = 0; i < nCount; i++)
     {
-        sSourceItem = LIST_REF_LOCATION + sSourceName + IntToString(nCount);
-        sTargetItem = LIST_REF_LOCATION + sTargetName + IntToString(nCount);
-        SetLocalLocation(oTarget, sTargetItem, GetLocalLocation(oSource, sSourceItem));
+        lValue = GetListLocation(oSource, i, sSourceName);
+        AddListLocation(oTarget, lValue, sTargetName, bAddUnique);
     }
 }
 
-void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName)
+void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
 {
-    string sSourceItem, sTargetItem;
-    int    nCount = CountObjectList(oSource, sSourceName);
+    object oValue;
+    int  i, nCount = CountObjectList(oSource, sSourceName);
 
-    DeclareObjectList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
+    for (i = 0; i < nCount; i++)
     {
-        sSourceItem = LIST_REF_OBJECT + sSourceName + IntToString(nCount);
-        sTargetItem = LIST_REF_OBJECT + sTargetName + IntToString(nCount);
-        SetLocalObject(oTarget, sTargetItem, GetLocalObject(oSource, sSourceItem));
+        oValue = GetListObject(oSource, i, sSourceName);
+        AddListObject(oTarget, oValue, sTargetName, bAddUnique);
     }
 }
 
-void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName)
+void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
 {
-    string sSourceItem, sTargetItem;
-    int    nCount = CountStringList(oSource, sSourceName);
+    string sValue;
+    int  i, nCount = CountStringList(oSource, sSourceName);
 
-    DeclareStringList(oTarget, nCount, sTargetName);
-
-    for (nCount--; nCount >= 0; nCount--)
+    for (i = 0; i < nCount; i++)
     {
-        sSourceItem = LIST_REF_STRING + sSourceName + IntToString(nCount);
-        sTargetItem = LIST_REF_STRING + sTargetName + IntToString(nCount);
-        SetLocalString(oTarget, sTargetItem, GetLocalString(oSource, sSourceItem));
+        sValue = GetListString(oSource, i, sSourceName);
+        AddListString(oTarget, sValue, sTargetName, bAddUnique);
     }
 }
 
