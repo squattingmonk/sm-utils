@@ -28,12 +28,7 @@
 // -----------------------------------------------------------------------------
 
 // Prefixes used to keep list variables from colliding with other locals.
-const string LIST_REF_FLOAT      = "FL:";
-const string LIST_REF_INT        = "IL:";
-const string LIST_REF_LOCATION   = "LL:";
-const string LIST_REF_OBJECT     = "OL:";
-const string LIST_REF_STRING     = "SL:";
-
+const string LIST_REF            = "Ref:";
 const string LIST_COUNT_FLOAT    = "FC:";
 const string LIST_COUNT_INT      = "IC:";
 const string LIST_COUNT_LOCATION = "LC:";
@@ -422,12 +417,12 @@ int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUn
         int i;
         for (i = nCount-1; i >= 0; i--)
         {
-            if (GetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(i)) == fValue)
+            if (GetLocalFloat(oTarget, LIST_REF + sListName + IntToString(i)) == fValue)
                 return FALSE;
         }
     }
 
-    SetLocalFloat(oTarget, LIST_REF_FLOAT   + sListName + IntToString(nCount), fValue);
+    SetLocalFloat(oTarget, LIST_REF         + sListName + IntToString(nCount), fValue);
     SetLocalInt  (oTarget, LIST_COUNT_FLOAT + sListName, nCount + 1);
     return TRUE;
 }
@@ -442,12 +437,12 @@ int AddListInt(object oTarget, int nValue, string sListName = "", int bAddUnique
         int i;
         for (i = nCount-1; i >= 0; i--)
         {
-            if (GetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(i)) == nValue)
+            if (GetLocalInt(oTarget, LIST_REF + sListName + IntToString(i)) == nValue)
                 return FALSE;
         }
     }
 
-    SetLocalInt(oTarget, LIST_REF_INT   + sListName + IntToString(nCount), nValue);
+    SetLocalInt(oTarget, LIST_REF       + sListName + IntToString(nCount), nValue);
     SetLocalInt(oTarget, LIST_COUNT_INT + sListName, nCount + 1);
     return TRUE;
 }
@@ -462,12 +457,12 @@ int AddListLocation(object oTarget, location lValue, string sListName = "", int 
         int i;
         for (i = nCount-1; i >= 0; i--)
         {
-            if (GetLocalLocation(oTarget, LIST_REF_INT + sListName + IntToString(i)) == lValue)
+            if (GetLocalLocation(oTarget, LIST_REF + sListName + IntToString(i)) == lValue)
                 return FALSE;
         }
     }
 
-    SetLocalLocation(oTarget, LIST_REF_LOCATION   + sListName + IntToString(nCount), lValue);
+    SetLocalLocation(oTarget, LIST_REF            + sListName + IntToString(nCount), lValue);
     SetLocalInt     (oTarget, LIST_COUNT_LOCATION + sListName, nCount + 1);
     return TRUE;
 }
@@ -482,12 +477,12 @@ int AddListObject(object oTarget, object oObject, string sListName = "", int bAd
         int i;
         for (i = nCount-1; i >= 0; i--)
         {
-            if (GetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(i)) == oObject)
+            if (GetLocalObject(oTarget, LIST_REF + sListName + IntToString(i)) == oObject)
                 return FALSE;
         }
     }
 
-    SetLocalObject(oTarget, LIST_REF_OBJECT   + sListName + IntToString(nCount), oObject);
+    SetLocalObject(oTarget, LIST_REF          + sListName + IntToString(nCount), oObject);
     SetLocalInt   (oTarget, LIST_COUNT_OBJECT + sListName, nCount + 1);
     return TRUE;
 }
@@ -502,12 +497,12 @@ int AddListString(object oTarget, string sString, string sListName = "", int bAd
         int i;
         for (i = nCount-1; i >= 0; i--)
         {
-            if (GetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(i)) == sString)
+            if (GetLocalString(oTarget, LIST_REF + sListName + IntToString(i)) == sString)
                 return FALSE;
         }
     }
 
-    SetLocalString(oTarget, LIST_REF_STRING   + sListName + IntToString(nCount), sString);
+    SetLocalString(oTarget, LIST_REF          + sListName + IntToString(nCount), sString);
     SetLocalInt   (oTarget, LIST_COUNT_STRING + sListName, nCount + 1);
     return TRUE;
 }
@@ -516,35 +511,35 @@ float GetListFloat(object oTarget, int nIndex = 0, string sListName = "")
 {
     int nCount = CountFloatList(oTarget, sListName);
     if (nIndex >= nCount) return 0.0;
-    return GetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex));
+    return GetLocalFloat(oTarget, LIST_REF + sListName + IntToString(nIndex));
 }
 
 int GetListInt(object oTarget, int nIndex = 0, string sListName = "")
 {
     int nCount = CountIntList(oTarget, sListName);
     if (nIndex >= nCount) return 0;
-    return GetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex));
+    return GetLocalInt(oTarget, LIST_REF + sListName + IntToString(nIndex));
 }
 
 location GetListLocation(object oTarget, int nIndex = 0, string sListName = "")
 {
     int nCount = CountLocationList(oTarget, sListName);
     if (nIndex >= nCount) return Location(OBJECT_INVALID, Vector(), 0.0);
-    return GetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex));
+    return GetLocalLocation(oTarget, LIST_REF + sListName + IntToString(nIndex));
 }
 
 object GetListObject(object oTarget, int nIndex = 0, string sListName = "")
 {
     int nCount = CountObjectList(oTarget, sListName);
     if (nIndex >= nCount) return OBJECT_INVALID;
-    return GetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex));
+    return GetLocalObject(oTarget, LIST_REF + sListName + IntToString(nIndex));
 }
 
 string GetListString(object oTarget, int nIndex = 0, string sListName = "")
 {
     int nCount = CountStringList(oTarget, sListName);
     if (nIndex >= nCount) return "";
-    return GetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex));
+    return GetLocalString(oTarget, LIST_REF + sListName + IntToString(nIndex));
 }
 
 int DeleteListFloat(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
@@ -560,19 +555,19 @@ int DeleteListFloat(object oTarget, int nIndex, string sListName = "", int bMain
         // Shift all entries up
         for (nIndex; nIndex < nCount; nIndex++)
         {
-            fRef = GetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex + 1));
-                   SetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex), fRef);
+            fRef = GetLocalFloat(oTarget, LIST_REF + sListName + IntToString(nIndex + 1));
+                   SetLocalFloat(oTarget, LIST_REF + sListName + IntToString(nIndex), fRef);
         }
     }
     else
     {
         // Replace this item with the last one in the list
-        fRef = GetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nCount - 1));
-               SetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex), fRef);
+        fRef = GetLocalFloat(oTarget, LIST_REF + sListName + IntToString(nCount - 1));
+               SetLocalFloat(oTarget, LIST_REF + sListName + IntToString(nIndex), fRef);
     }
 
     // Delete the last item in the list and set the new count
-    DeleteLocalFloat(oTarget, LIST_REF_FLOAT   + sListName + IntToString(--nCount));
+    DeleteLocalFloat(oTarget, LIST_REF         + sListName + IntToString(--nCount));
     SetLocalInt     (oTarget, LIST_COUNT_FLOAT + sListName, nCount);
 
     return nCount;
@@ -591,19 +586,19 @@ int DeleteListInt(object oTarget, int nIndex, string sListName = "", int bMainta
         // Shift all entries up
         for (nIndex; nIndex < nCount; nIndex++)
         {
-            nRef = GetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex + 1));
-                   SetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex), nRef);
+            nRef = GetLocalInt(oTarget, LIST_REF + sListName + IntToString(nIndex + 1));
+                   SetLocalInt(oTarget, LIST_REF + sListName + IntToString(nIndex), nRef);
         }
     }
     else
     {
         // Replace this item with the last one in the list
-        nRef = GetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nCount - 1));
-               SetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex), nRef);
+        nRef = GetLocalInt(oTarget, LIST_REF + sListName + IntToString(nCount - 1));
+               SetLocalInt(oTarget, LIST_REF + sListName + IntToString(nIndex), nRef);
     }
 
     // Delete the last item in the list and set the new count
-    DeleteLocalInt(oTarget, LIST_REF_INT   + sListName + IntToString(--nCount));
+    DeleteLocalInt(oTarget, LIST_REF       + sListName + IntToString(--nCount));
     SetLocalInt   (oTarget, LIST_COUNT_INT + sListName, nCount);
 
     return nCount;
@@ -622,19 +617,19 @@ int DeleteListLocation(object oTarget, int nIndex, string sListName = "", int bM
         // Shift all entries up
         for (nIndex; nIndex < nCount; nIndex++)
         {
-            lRef = GetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex + 1));
-                   SetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex), lRef);
+            lRef = GetLocalLocation(oTarget, LIST_REF + sListName + IntToString(nIndex + 1));
+                   SetLocalLocation(oTarget, LIST_REF + sListName + IntToString(nIndex), lRef);
         }
     }
     else
     {
         // Replace this item with the last one in the list
-        lRef = GetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nCount - 1));
-               SetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex), lRef);
+        lRef = GetLocalLocation(oTarget, LIST_REF + sListName + IntToString(nCount - 1));
+               SetLocalLocation(oTarget, LIST_REF + sListName + IntToString(nIndex), lRef);
     }
 
     // Delete the last item in the list and set the new count
-    DeleteLocalLocation(oTarget, LIST_REF_LOCATION   + sListName + IntToString(--nCount));
+    DeleteLocalLocation(oTarget, LIST_REF            + sListName + IntToString(--nCount));
     SetLocalInt        (oTarget, LIST_COUNT_LOCATION + sListName, nCount);
 
     return nCount;
@@ -653,19 +648,19 @@ int DeleteListObject(object oTarget, int nIndex, string sListName = "", int bMai
         // Shift all entries up
         for (nIndex; nIndex < nCount; nIndex++)
         {
-            oRef = GetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex + 1));
-                   SetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex), oRef);
+            oRef = GetLocalObject(oTarget, LIST_REF + sListName + IntToString(nIndex + 1));
+                   SetLocalObject(oTarget, LIST_REF + sListName + IntToString(nIndex), oRef);
         }
     }
     else
     {
         // Replace this item with the last one in the list
-        oRef = GetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nCount - 1));
-               SetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex), oRef);
+        oRef = GetLocalObject(oTarget, LIST_REF + sListName + IntToString(nCount - 1));
+               SetLocalObject(oTarget, LIST_REF + sListName + IntToString(nIndex), oRef);
     }
 
     // Delete the last item in the list and set the new count
-    DeleteLocalObject(oTarget, LIST_REF_OBJECT   + sListName + IntToString(--nCount));
+    DeleteLocalObject(oTarget, LIST_REF   + sListName + IntToString(--nCount));
     SetLocalInt      (oTarget, LIST_COUNT_OBJECT + sListName, nCount);
 
     return nCount;
@@ -684,19 +679,19 @@ int DeleteListString(object oTarget, int nIndex, string sListName = "", int bMai
         // Shift all entries up
         for (nIndex; nIndex < nCount; nIndex++)
         {
-            sRef = GetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex + 1));
-                   SetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex), sRef);
+            sRef = GetLocalString(oTarget, LIST_REF + sListName + IntToString(nIndex + 1));
+                   SetLocalString(oTarget, LIST_REF + sListName + IntToString(nIndex), sRef);
         }
     }
     else
     {
         // Replace this item with the last one in the list
-        sRef = GetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nCount - 1));
-               SetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex), sRef);
+        sRef = GetLocalString(oTarget, LIST_REF + sListName + IntToString(nCount - 1));
+               SetLocalString(oTarget, LIST_REF + sListName + IntToString(nIndex), sRef);
     }
 
     // Delete the last item in the list and set the new count
-    DeleteLocalString(oTarget, LIST_REF_STRING   + sListName + IntToString(--nCount));
+    DeleteLocalString(oTarget, LIST_REF          + sListName + IntToString(--nCount));
     SetLocalInt      (oTarget, LIST_COUNT_STRING + sListName, nCount);
 
     return nCount;
@@ -737,7 +732,7 @@ int FindListFloat(object oTarget, float fValue, string sListName = "")
     int i, nCount = CountFloatList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
-        if (GetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(i)) == fValue)
+        if (GetLocalFloat(oTarget, LIST_REF + sListName + IntToString(i)) == fValue)
             return i;
 
     return -1;
@@ -748,7 +743,7 @@ int FindListInt(object oTarget, int nValue, string sListName = "")
     int i, nCount = CountIntList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
-        if (GetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(i)) == nValue)
+        if (GetLocalInt(oTarget, LIST_REF + sListName + IntToString(i)) == nValue)
             return i;
 
     return -1;
@@ -759,7 +754,7 @@ int FindListLocation(object oTarget, location lValue, string sListName = "")
     int i, nCount = CountLocationList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
-        if (GetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(i)) == lValue)
+        if (GetLocalLocation(oTarget, LIST_REF + sListName + IntToString(i)) == lValue)
             return i;
 
     return -1;
@@ -770,7 +765,7 @@ int FindListObject(object oTarget, object oValue, string sListName = "")
     int i, nCount = CountObjectList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
-        if (GetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(i)) == oValue)
+        if (GetLocalObject(oTarget, LIST_REF + sListName + IntToString(i)) == oValue)
             return i;
 
     return -1;
@@ -781,7 +776,7 @@ int FindListString(object oTarget, string sValue, string sListName = "")
     int i, nCount = CountStringList(oTarget, sListName);
 
     for (i = 0; i < nCount; i++)
-        if (GetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(i)) == sValue)
+        if (GetLocalString(oTarget, LIST_REF + sListName + IntToString(i)) == sValue)
             return i;
 
     return -1;
@@ -826,7 +821,7 @@ void SetListFloat(object oTarget, int nIndex, float fValue, string sListName = "
     if (nIndex == nCount)
         AddListFloat(oTarget, fValue, sListName);
     else
-        SetLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(nIndex), fValue);
+        SetLocalFloat(oTarget, LIST_REF + sListName + IntToString(nIndex), fValue);
 }
 
 void SetListInt(object oTarget, int nIndex, int nValue, string sListName = "")
@@ -838,7 +833,7 @@ void SetListInt(object oTarget, int nIndex, int nValue, string sListName = "")
     if (nIndex == nCount)
         AddListInt(oTarget, nValue, sListName);
     else
-        SetLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(nIndex), nValue);
+        SetLocalInt(oTarget, LIST_REF + sListName + IntToString(nIndex), nValue);
 }
 
 void SetListLocation(object oTarget, int nIndex, location lValue, string sListName = "")
@@ -850,7 +845,7 @@ void SetListLocation(object oTarget, int nIndex, location lValue, string sListNa
     if (nIndex == nCount)
         AddListLocation(oTarget, lValue, sListName);
     else
-        SetLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(nIndex), lValue);
+        SetLocalLocation(oTarget, LIST_REF + sListName + IntToString(nIndex), lValue);
 }
 
 void SetListObject(object oTarget, int nIndex, object oValue, string sListName = "")
@@ -862,7 +857,7 @@ void SetListObject(object oTarget, int nIndex, object oValue, string sListName =
     if (nIndex == nCount)
         AddListObject(oTarget, oValue, sListName);
     else
-        SetLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(nIndex), oValue);
+        SetLocalObject(oTarget, LIST_REF + sListName + IntToString(nIndex), oValue);
 }
 
 void SetListString(object oTarget, int nIndex, string sValue, string sListName = "")
@@ -874,14 +869,14 @@ void SetListString(object oTarget, int nIndex, string sValue, string sListName =
     if (nIndex == nCount)
         AddListString(oTarget, sValue, sListName);
     else
-        SetLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(nIndex), sValue);
+        SetLocalString(oTarget, LIST_REF + sListName + IntToString(nIndex), sValue);
 }
 
 void DeleteFloatList(object oTarget, string sListName = "")
 {
     int i, nCount = CountFloatList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
-        DeleteLocalFloat(oTarget, LIST_REF_FLOAT + sListName + IntToString(i));
+        DeleteLocalFloat(oTarget, LIST_REF + sListName + IntToString(i));
 
     DeleteLocalInt(oTarget, LIST_COUNT_FLOAT + sListName);
 }
@@ -890,7 +885,7 @@ void DeleteIntList(object oTarget, string sListName = "")
 {
     int i, nCount = CountIntList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
-        DeleteLocalInt(oTarget, LIST_REF_INT + sListName + IntToString(i));
+        DeleteLocalInt(oTarget, LIST_REF + sListName + IntToString(i));
 
     DeleteLocalInt(oTarget, LIST_COUNT_INT + sListName);
 }
@@ -899,7 +894,7 @@ void DeleteLocationList(object oTarget, string sListName = "")
 {
     int i, nCount = CountLocationList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
-        DeleteLocalLocation(oTarget, LIST_REF_LOCATION + sListName + IntToString(i));
+        DeleteLocalLocation(oTarget, LIST_REF + sListName + IntToString(i));
 
     DeleteLocalInt(oTarget, LIST_COUNT_LOCATION + sListName);
 }
@@ -908,7 +903,7 @@ void DeleteObjectList(object oTarget, string sListName = "")
 {
     int i, nCount = CountObjectList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
-        DeleteLocalObject(oTarget, LIST_REF_OBJECT + sListName + IntToString(i));
+        DeleteLocalObject(oTarget, LIST_REF + sListName + IntToString(i));
 
     DeleteLocalInt(oTarget, LIST_COUNT_STRING + sListName);
 }
@@ -917,7 +912,7 @@ void DeleteStringList(object oTarget, string sListName = "")
 {
     int i, nCount = CountStringList(oTarget, sListName);
     for (i = 0; i < nCount; i++)
-        DeleteLocalString(oTarget, LIST_REF_STRING + sListName + IntToString(i));
+        DeleteLocalString(oTarget, LIST_REF + sListName + IntToString(i));
 
     DeleteLocalInt(oTarget, LIST_COUNT_STRING + sListName);
 }
