@@ -43,7 +43,7 @@ object GetDatapoint(string sSystem, int bCreate = TRUE)
 
     if (!GetIsObjectValid(oData) && bCreate)
     {
-        oData = CreateOject(OBJECT_TYPE_WAYPOINT, DATA_RESREF,
+        oData = CreateObject(OBJECT_TYPE_WAYPOINT, DATA_RESREF,
                 GetStartingLocation(), FALSE, sSystem);
         SetLocalObject(GetModule(), DATA_PREFIX + sSystem, oData);
     }

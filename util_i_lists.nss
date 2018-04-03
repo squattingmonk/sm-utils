@@ -55,7 +55,7 @@ void ExplodeList(object oTarget, string sList, string sListName = "", int bAddUn
 //   - LIST_TYPE_STRING (default)
 //   - LIST_TYPE_FLOAT
 //   - LIST_TYPE_INT
-string CompressList(object oTarget, string sListName, int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
+string CompressList(object oTarget, string sListName = "", int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
 
 // -----------------------------------------------------------------------------
 //                           Function Implementations
