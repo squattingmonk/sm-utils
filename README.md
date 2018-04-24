@@ -7,7 +7,7 @@ This package does not require any other code. However, the install script
 requires the following:
 
 - [nwn-erf from nwn-lib](https://github.com/niv/nwn-lib)
-- [ruby](htt[s://www.ruby-lang.org)
+- [ruby](https://www.ruby-lang.org)
 
 ## Installation
 Get the code:
