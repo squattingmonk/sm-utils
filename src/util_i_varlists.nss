@@ -11,12 +11,13 @@
 // Local variable lists are specific to a variable type: string lists and int
 // lists can be maintained separately even when you give them the same name.
 // This is because the variables are saved in a table with VarNames in the
-// following format: <type>:<varname>[<index>] where type is:
-//   FL: Float List,    FC: Float Count
-//   IL: Int List,      IC: Int Count
-//   LL: Location List, LC: Location Count
-//   OL: Object List,   OC: Object Count
-//   SL: String List,   SC: String Count
+// format Ref:<varname><index>. Each list maintains its own count in the format
+// <type>:<varname>, where <type> is one of the following:
+//   FC: Float Count
+//   IC: Int Count
+//   LC: Location Count
+//   OC: Object Count
+//   SC: String Count
 // You should not manipulate these variables directly. Rather, use the *List*()
 // functions contained in this library.
 // -----------------------------------------------------------------------------
