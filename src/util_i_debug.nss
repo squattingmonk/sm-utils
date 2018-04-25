@@ -14,14 +14,23 @@
 //                                   Constants
 // -----------------------------------------------------------------------------
 
-// Debug mode
+// VarNames
+const string DEBUG_COLOR = "DEBUG_COLOR";
 const string DEBUG_LEVEL = "DEBUG_LEVEL";
+const string DEBUG_LOG   = "DEBUG_LOG";
 
 // Debug levels
 const int DEBUG_LEVEL_CRITICAL = 0;
 const int DEBUG_LEVEL_ERROR    = 1;
 const int DEBUG_LEVEL_WARNING  = 2;
 const int DEBUG_LEVEL_NOTICE   = 3;
+
+// Debug logging
+const int DEBUG_LOG_NONE = 0x0;
+const int DEBUG_LOG_FILE = 0x1;
+const int DEBUG_LOG_DM   = 0x2;
+const int DEBUG_LOG_PC   = 0x4;
+const int DEBUG_LOG_ALL  = 0xf;
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -32,18 +41,59 @@ const int DEBUG_LEVEL_NOTICE   = 3;
 // Returns the minimum level of debug messages that will be logged for oTarget.
 // If the module is set to have more verbosity than oTarget, will return the
 // module's verbosity instead.
-int GetDebugLevel(string sSystem = "", object oTarget = OBJECT_SELF);
+int GetDebugLevel(object oTarget = OBJECT_SELF);
 
 // ---< SetDebugLevel >---
 // ---< util_i_debug >---
 // Sets the minimum level of debug messages that will be logged for oTarget.
-void SetDebugLevel(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
+void SetDebugLevel(int nLevel, object oTarget = OBJECT_SELF);
+
+// ---< GetDebugColor >---
+// ---< util_i_debug >---
+// Returns the string color code for debug messages of nLevel. This code takes
+// the form "nnn", where n is a number between 0 and 7 inclusive. This color
+// code is used with StringToRGBString() to color the output of debug functions.
+string GetDebugColor(int nLevel);
+
+// ---< SetDebugColor >---
+// ---< util_i_debug >---
+// Sets the string color code for debug messages of nLevel. This code takes the
+// form "nnn", where n is a number between 0 and 7 inclusive. This color code is
+// used with StringToRGBString() to color the output of debug functions. If
+// sColor is blank, will use the default color codes.
+void SetDebugColor(int nLevel, string sColor = "");
+
+// ---< GetDebugLogging >---
+// ---< util_i_debug >---
+// Returns the enabled debug logging destinations. This is a bitmasked field
+// that may contain the following:
+// - DEBUG_LOG_NONE: do not log debug messages
+// - DEBUG_LOG_FILE: log debug messages to the log file
+// - DEBUG_LOG_DM: send debug messages to online DMs
+// - DEBUG_LOG_PC: send debug messages to the first PC
+// - DEBUG_LOG_ALL: sends messages to the log file, online DMs, and the first PC
+// Note: only messages with a priority of GetDebugLevel() or higher will be
+// logged.
+int GetDebugLogging();
+
+// ---< SetDebugLogging >---
+// ---< util_i_debug >---
+// Enables debug logging to nEnabled. This is a bitmasked field that may contain
+// the following:
+// - DEBUG_LOG_NONE: do not log debug messages
+// - DEBUG_LOG_FILE: log debug messages to the log file
+// - DEBUG_LOG_DM: send debug messages to online DMs
+// - DEBUG_LOG_PC: send debug messages to the first PC
+// - DEBUG_LOG_ALL: sends messages to the log file, online DMs, and the first PC
+// Note: only messages with a priority of GetDebugLevel() or higher will be
+// logged.
+void SetDebugLogging(int nEnabled);
 
 // ---< IsDebugging >---
 // ---< util_i_debug >---
-// Returns whether oTarget or the module is set to display debug messages of
-// nLevel or higher for sSystem. Useful for avoiding spending cycles compiling
-// extra information if it will not be shown.
+// Returns whether debug messages of nLevel will be logged on oTarget. Useful
+// for avoiding spending cycles compiling extra debug information if it will not
+// be shown.
 // Parameters:
 // - nLevel: The error level of the message.
 //   Possible values:
@@ -51,111 +101,102 @@ void SetDebugLevel(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF
 //   - DEBUG_LEVEL_ERROR: indicates the script malfunctioned in some way
 //   - DEBUG_LEVEL_WARNING: indicates that unexpected behavior may occur
 //   - DEBUG_LEVEL_NOTICE: information to track the flow of the function
-// - sSystem: checks the given system to see whether debug calls of this level
-//   should fire. Allows you to keep some systems silent while debugging others.
 // - oTarget: The object to debug. If invalid, defaults to GetModule().
-int IsDebugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF);
+int IsDebugging(int nLevel, object oTarget = OBJECT_SELF);
 
 // ---< Debug >---
 // ---< util_i_debug >---
-// If oTarget has a debug level of nLevel or higher for sSystem, sends sMessage
-// to all online DMs, the log, and the first PC (if playing in single-player
-// mode).
-// Parameters:
-// - sMessage: The string to print.
-// - nLevel: The error level of the message.
-//   Possible values:
-//   - DEBUG_LEVEL_CRITICAL: errors severe enough to stop the script
-//   - DEBUG_LEVEL_ERROR: indicates the script malfunctioned in some way
-//   - DEBUG_LEVEL_WARNING: indicates that unexpected behavior may occur
-//   - DEBUG_LEVEL_NOTICE: information to track the flow of the function
-// - sSystem: checks the given system to see whether debug calls of this level
-//   should fire. Allows you to keep some systems silent while debugging others.
-// - oTarget: The object to debug. If invalid, defaults to GetModule().
-void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF);
-
-// ---< DebugSystem >---
-// ---< util_i_debug >---
-// Wrapper for Debug() for systems with frequent debug calls. If oTarget has a
-// debug level of nLevel or higher for sSystem, sends sMessagex to all online
-// DMs, the log, and the first PC (if playing in single-player
-// mode).
-// Parameters:
-// - sSystem: checks the given system to see whether debug calls of this level
-//   should fire. Allows you to keep some systems silent while debugging others.
-// - sMessage: The string to print.
-// - nLevel: The error level of the message.
-//   Possible values:
-//   - DEBUG_LEVEL_CRITICAL: errors severe enough to stop the script
-//   - DEBUG_LEVEL_ERROR: indicates the script malfunctioned in some way
-//   - DEBUG_LEVEL_WARNING: indicates that unexpected behavior may occur
-//   - DEBUG_LEVEL_NOTICE: information to track the flow of the function
-// - oTarget: The object to debug. If invalid, defaults to GetModule().
-void DebugSystem(string sSystem, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF);
+// If oTarget has a debug level of nLevel or higher, logs sMessages to all
+// destinations set with SetDebugLogging(). If the module is set to log with
+// more verbosity than oTarget, will log using the module's verbosity instead.
+void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
 
-int GetDebugLevel(string sSystem = "", object oTarget = OBJECT_SELF)
+int GetDebugLevel(object oTarget = OBJECT_SELF)
 {
     object oModule = GetModule();
-    int nModuleGlobal = GetLocalInt(oModule, DEBUG_LEVEL);
-    int nModuleSystem = GetLocalInt(oModule, DEBUG_LEVEL + sSystem);
-    int nModule = (nModuleGlobal > nModuleSystem ? nModuleGlobal : nModuleSystem);
+    int    nModule = GetLocalInt(oModule, DEBUG_LEVEL);
 
     if (oTarget == oModule || !GetIsObjectValid(oTarget))
         return nModule;
 
-    int nTargetGlobal = GetLocalInt(oTarget, DEBUG_LEVEL);
-    int nTargetSystem = GetLocalInt(oTarget, DEBUG_LEVEL + sSystem);
-    int nTarget = (nTargetGlobal > nTargetSystem ? nTargetGlobal : nTargetSystem);
-
+    int nTarget = GetLocalInt(oTarget, DEBUG_LEVEL);
     return (nModule > nTarget ? nModule : nTarget);
 }
 
-void SetDebugLevel(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF)
+void SetDebugLevel(int nLevel, object oTarget = OBJECT_SELF)
 {
-    if (!GetIsObjectValid(oTarget))
-        oTarget = GetModule();
-
-    SetLocalInt(oTarget, DEBUG_LEVEL + sSystem, nLevel);
+    SetLocalInt(oTarget, DEBUG_LEVEL, nLevel);
 }
 
-int IsDebugging(int nLevel, string sSystem = "", object oTarget = OBJECT_SELF)
+string GetDebugColor(int nLevel)
 {
-    return (nLevel <= GetDebugLevel(sSystem, oTarget));
-}
+    string sColor = GetLocalString(GetModule(), DEBUG_COLOR + IntToString(nLevel));
 
-void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, string sSystem = "", object oTarget = OBJECT_SELF)
-{
-    if (IsDebugging(nLevel, sSystem, oTarget))
+    if (sColor == "")
     {
-        string sPrefix, sColor;
-        if (sSystem != "")
-            sPrefix = "[" + sSystem + "] ";
+        switch (nLevel)
+        {
+            case DEBUG_LEVEL_CRITICAL: sColor = "700"; break;
+            case DEBUG_LEVEL_ERROR:    sColor = "720"; break;
+            case DEBUG_LEVEL_WARNING:  sColor = "740"; break;
+            default:                   sColor = "770"; break;
+        }
+    }
+
+    return sColor;
+}
+
+void SetDebugColor(int nLevel, string sColor = "")
+{
+    SetLocalString(GetModule(), DEBUG_COLOR + IntToString(nLevel), sColor);
+}
+
+int GetDebugLogging()
+{
+    return GetLocalInt(GetModule(), DEBUG_LOG);
+}
+
+void SetDebugLogging(int nEnabled)
+{
+    SetLocalInt(GetModule(), DEBUG_LOG, nEnabled);
+}
+
+int IsDebugging(int nLevel, object oTarget = OBJECT_SELF)
+{
+    return (nLevel <= GetDebugLevel(oTarget));
+}
+
+void Debug(string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF)
+{
+    if (IsDebugging(nLevel, oTarget))
+    {
+        string sColor = GetDebugColor(nLevel);
+        string sPrefix;
 
         switch (nLevel)
         {
-            case DEBUG_LEVEL_CRITICAL: sColor = "700"; sPrefix += "Critical Error: "; break;
-            case DEBUG_LEVEL_ERROR:    sColor = "720"; sPrefix += "Error: ";          break;
-            case DEBUG_LEVEL_WARNING:  sColor = "740"; sPrefix += "Warning: ";        break;
-            default:                   sColor = "770";                                break;
+            case DEBUG_LEVEL_CRITICAL: sPrefix = "[Critical Error] "; break;
+            case DEBUG_LEVEL_ERROR:    sPrefix = "[Error] ";          break;
+            case DEBUG_LEVEL_WARNING:  sPrefix = "[Warning] ";        break;
         }
 
         sMessage = sPrefix + sMessage;
-        WriteTimestampedLogEntry(sMessage);
+
+        int nLogging = GetLocalInt(GetModule(), DEBUG_LOG);
+
+        if (nLogging & DEBUG_LOG_FILE)
+            WriteTimestampedLogEntry(sMessage);
 
         sMessage = StringToRGBString(sMessage, sColor);
-        SendMessageToAllDMs(sMessage);
 
-        object oPC = GetFirstPC();
-        if (GetPCPublicCDKey(oPC, TRUE) != "")
-            SendMessageToPC(oPC, sMessage);
+        if (nLogging & DEBUG_LOG_DM)
+            SendMessageToAllDMs(sMessage);
+
+        if (nLogging & DEBUG_LOG_PC)
+            SendMessageToPC(GetFirstPC(), sMessage);
     }
-}
-
-void DebugSystem(string sSystem, string sMessage, int nLevel = DEBUG_LEVEL_NOTICE, object oTarget = OBJECT_SELF)
-{
-    Debug(sMessage, nLevel, sSystem, oTarget);
 }
