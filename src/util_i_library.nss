@@ -42,6 +42,11 @@ string LIB_CURRENT_SCRIPT  = GetLocalString(LIBRARIES, LIB_LAST_SCRIPT);
 //   your script using the sScript parameter, which is less efficient.
 void RegisterLibraryScript(string sScript, int nEntry = 0);
 
+// ---< SetLibraryReturnValue >---
+// ---< util_i_library >---
+// Sets the return value of the currently executing library to nValue.
+void SetLibraryReturnValue(int nValue);
+
 // ---< OnLibraryLoad >---
 // This is a user-defined function that registers function names to a unique (to
 // this library) number. When the function name is run using RunLibraryScript(),
@@ -112,6 +117,11 @@ void RegisterLibraryScript(string sScript, int nEntry = 0)
             " New Entry: " + IntToString(nEntry), DEBUG_LEVEL_WARNING);
 
     SetLocalInt(LIBRARIES, LIB_ENTRY + sLibrary + sScript, nEntry);
+}
+
+void SetLibraryReturnValue(int nValue)
+{
+    SetLocalInt(OBJECT_SELF, LIB_RETURN, nValue);
 }
 
 // -----------------------------------------------------------------------------

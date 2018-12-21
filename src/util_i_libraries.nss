@@ -26,6 +26,7 @@
 
 const string LIB_ENTRY        = "LIB_ENTRY";
 const string LIB_LOADED       = "LIB_LOADED";
+const string LIB_RETURN       = "LIB_RETURN";
 const string LIB_SCRIPT       = "LIB_SCRIPT";
 const string LIB_LAST_ENTRY   = "LIB_LAST_ENTRY";
 const string LIB_LAST_LIBRARY = "LIB_LAST_LIBRARY";
@@ -65,10 +66,11 @@ void LoadLibraries(string sLibraries, int bForce = FALSE);
 // ---< util_i_libraries >---
 // Runs sScript, dispatching into a library if the script is registered as a
 // library script or executing the script via ExecuteScript() if it is not.
+// Returns the value of SetLibraryReturnValue().
 // Parameters:
 // - oSelf: Who actually executes the script. This object will be treated as
 //   OBJECT_SELF when the library script is called.
-void RunLibraryScript(string sScript, object oSelf = OBJECT_SELF);
+int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF);
 
 // ---< RunLibraryScripts >---
 // ---< util_i_libraries >---
@@ -114,13 +116,14 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
         LoadLibrary(GetListItem(sLibraries, i), bForce);
 }
 
-void RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
+int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
 {
-    if (sScript == "") return;
+    if (sScript == "") return -1;
 
     Debug("Running library script " + sScript + " on " + GetName(oSelf));
 
     string sLibrary = GetLocalString(LIBRARIES, LIB_SCRIPT + sScript);
+    DeleteLocalInt(oSelf, LIB_RETURN);
 
     if (sLibrary != "")
     {
@@ -137,6 +140,8 @@ void RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
         Debug(sScript + " is not a library script. Executing..", DEBUG_LEVEL_WARNING);
         ExecuteScript(sScript, oSelf);
     }
+
+    return GetLocalInt(oSelf, LIB_RETURN);
 }
 
 void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF)
