@@ -101,6 +101,18 @@ string MergeLists(string sList1, string sList2, int bAddUnique = FALSE);
 // items to the list if they are not already there.
 string AddLocalListItem(object oObject, string sListName, string sListItem, int bAddUnique = FALSE);
 
+// ---< DeleteLocalListItem >---
+// ---< util_i_csvlists >---
+// Deletes the nNth item in the CSV list saved as a localstring with varname
+// sListName on oObject and returns the updated list.
+string DeleteLocalListItem(object oObject, string sListName, int nNth = 0);
+
+// ---< RemoveLocalListItem >---
+// ---< util_i_csvlists >---
+// Removes the first occurrence of sListItem from the CSV list saved as a local
+// string with the varname sListName on oObject and returns the updated list.
+string RemoveLocalListItem(object oObject, string sListName, string sListItem);
+
 // ---< MergeLocalList >---
 // ---< util_i_csvlists >---
 // Merges all items from the CSV list sListToMerge into the CSV list saved as a
@@ -258,6 +270,22 @@ string AddLocalListItem(object oObject, string sListName, string sListItem, int 
 {
     string sList = GetLocalString(oObject, sListName);
     sList = AddListItem(sList, sListItem, bAddUnique);
+    SetLocalString(oObject, sListName, sList);
+    return sList;
+}
+
+string DeleteLocalListItem(object oObject, string sListName, int nNth = 0)
+{
+    string sList = GetLocalString(oObject, sListName);
+    sList = DeleteListItem(sList, nNth);
+    SetLocalString(oObject, sListName, sList);
+    return sList;
+}
+
+string RemoveLocalListItem(object oObject, string sListName, string sListItem)
+{
+    string sList = GetLocalString(oObject, sListName);
+    sList = RemoveListItem(sList, sListItem);
     SetLocalString(oObject, sListName, sList);
     return sList;
 }
