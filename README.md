@@ -90,7 +90,7 @@ SetDebugLevel(DEBUG_LEVEL_ERROR, GetModule());
 
 // Generate some debug messages on OBJECT_SELF
 Debug("My critical error", DEBUG_LEVEL_CRITICAL); // Displays
-Debug("My  error",         DEBUG_LEVEL_ERROR);    // Displays
+Debug("My error",         DEBUG_LEVEL_ERROR);    // Displays
 Debug("My warning",        DEBUG_LEVEL_WARNING);  // Will not display
 Debug("My notice",         DEBUG_LEVEL_NOTICE);   // Will not display
 
@@ -99,7 +99,7 @@ SetDebugLevel(DEBUG_LEVEL_WARNING);
 
 // Generate some debug messages on OBJECT_SELF
 Debug("My critical error", DEBUG_LEVEL_CRITICAL); // Displays
-Debug("My  error",         DEBUG_LEVEL_ERROR);    // Displays
+Debug("My error",         DEBUG_LEVEL_ERROR);    // Displays
 Debug("My warning",        DEBUG_LEVEL_WARNING);  // Displays
 Debug("My notice",         DEBUG_LEVEL_NOTICE);   // Will not display
 
@@ -121,7 +121,7 @@ string lists that are altered in place. They are zero-indexed.
 
 ``` c
 // Create a list of knights, then count and loop through the list
-string string sKnight, sKnights = "Lancelot, Galahad, Robin";
+string sKnight, sKnights = "Lancelot, Galahad, Robin";
 int i, nCount = CountList(sKnights);
 for (i = 0; i < nCount; i++)
 {
