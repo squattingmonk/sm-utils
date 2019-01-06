@@ -169,7 +169,7 @@ int nItem;
 for (i = 0; i < nCount; i++)
 {
     sItem = GetListString(oModule, i, "Menu");
-    nItem = GetListInt   (oModule, i, "Menu);
+    nItem = GetListInt   (oModule, i, "Menu");
     SpeakString(sItem + " costs " + IntToString(nItem) + " GP");
 }
 
