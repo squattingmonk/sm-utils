@@ -105,8 +105,10 @@ Debug("My notice",         DEBUG_LEVEL_NOTICE);   // Will not display
 
 // Check if the message will be displayed before doing something intensive
 if (IsDebugging(DEBUG_LEVEL_NOTICE))
+{
     string sMessage = MyExpensiveFunction();
     Debug(sMessage);
+}
 ```
 
 ### Lists
