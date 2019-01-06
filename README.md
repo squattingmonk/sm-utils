@@ -53,7 +53,7 @@ will create and save the datapoint if it doesn't already exist, or return it if
 it does. Datapoints can be saved to the module (default) for system-wide access 
 or to particular objects to hold system-specific information for that object.
 
-``` nwscript
+``` c
 // Getting a global datapoint
 object oGlobal = GetDatapoint("MySystem");
 
@@ -81,7 +81,7 @@ The debug level can be set on individual objects or module-wide using
 given level; this is useful if you want to save cycles assembling a debug dump 
 that would not be shown.
 
-``` nwscript
+``` c
 // Set debug messages to be sent to the log and the first PC
 SetDebugLogging(DEBUG_LOG_FILE | DEBUG_LOG_PC);
 
@@ -119,7 +119,7 @@ done using the functions in `util_i_lists.nss`.
 `util_i_csvlists.nss` holds functions for CSV lists. These are comma-separated 
 string lists that are altered in place. They are zero-indexed.
 
-``` nwscript
+``` c
 // Create a list of knights, then count and loop through the list
 string string sKnight, sKnights = "Lancelot, Galahad, Robin";
 int i, nCount = CountList(sKnights);
@@ -149,7 +149,7 @@ saved to objects as local variables. They support float, int, location, object,
 and string datatypes. Each variable type is maintained in a separate list to 
 avoid collision. 
 
-``` nwscript
+``` c
 // Create a list of menu items on the module
 object oModule = GetModule();
 AddListString(oModule, "Spam", "Menu");
@@ -213,7 +213,7 @@ script that is not a library because it implements `main()`.
 
 Next, add the following functions to the script:
 
-``` nwscript
+``` c
 #include "util_i_library"
 
 void OnLibraryLoad()
@@ -237,7 +237,7 @@ function.
 
 For example:
 
-``` nwscript
+``` c
 #include "util_i_library"
 
 void MyFunction()
@@ -269,7 +269,7 @@ For longer libraries, string comparison in a large if/else tree may be tedious
 and slow. Using nEntry to identify the script to run can help, and it enables 
 more complicated routing:
 
-``` nwscript
+``` c
 void OnLibraryLoad()
 {
     // Event functions
@@ -411,7 +411,7 @@ void OnLibraryScript(string sScript, int nEntry)
 To use a library, you must first load it. This will activate the library's 
 `OnLibraryLoad()` function and bind each library script to a name and number.
 
-``` nwscript
+``` c
 // Loads a single library
 LoadLibrary("my_l_library");
 
@@ -428,7 +428,7 @@ This will allow the library's `OnLibraryScript()` to route it to the correct
 function. If the name supplied is a normal script and is not implemented in a 
 library, the normal script will be called instead.
 
-``` nwscript
+``` c
 // Executes a single library script on OBJECT_SELF
 RunLibraryScript("MyFunction");
 
