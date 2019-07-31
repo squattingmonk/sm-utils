@@ -1,30 +1,31 @@
 # Squatting Monk's NWN Utilities
-This package contains various utility scripts used by my other [Neverwinter 
+This package contains various utility scripts used by my other [Neverwinter
 Nights](http://neverwinternights.info) scripts.
 
 ## Prerequisites
-This package does not require any other code. However, the install script 
+This package does not require any other code. However, the install script
 requires the following:
 
-- [nwn-erf from nwn-lib](https://github.com/niv/nwn-lib)
-- [ruby](https://www.ruby-lang.org)
+- [nwnsc](https://gitlab.com/glorwinger/nwnsc)
+- [neverwinter.nim](https://github.com/niv/neverwinter.nim)
+- [nasher.nim](https://github.com/squattingmonk/nasher.nim)
 
 ## Installation
 Get the code:
 ```
-git clone https://github.com/squattingmonk/sm-utils
+git clone https://github.com/squattingmonk/sm-utils.git
 ```
 
-Run the build script:
+Build it:
 ```
 cd sm-utils
-rake erf
+nasher install
 ```
 
-The `sm_utils.erf` file will be created in the `sm-utils` directory. Import 
-this file into your module.
+The `sm_utils.erf` file will be installed into the `erf` folder in your NWN
+installation directory. Import this file into your module.
 
-Alternatively, you can simply copy all files from `sm-utils/src` into your 
+Alternatively, you can simply copy all files from `sm-utils/src` into your
 module's working directory.
 
 This package contains the following resources:
@@ -42,15 +43,15 @@ This package contains the following resources:
 ## Usage
 
 ### Datapoints
-`util_i_datapoint.nss` holds functions for creating and interacting with 
-datapoints. Datapoints are invisible objects used to hold variables specific to 
-a system. You can use datapoints to avoid collision with similar varnames and 
-to reduce variable access time in modules where large number of variables are 
+`util_i_datapoint.nss` holds functions for creating and interacting with
+datapoints. Datapoints are invisible objects used to hold variables specific to
+a system. You can use datapoints to avoid collision with similar varnames and
+to reduce variable access time in modules where large number of variables are
 saved on the module object.
 
-Creating a datapoint is as simple as calling `GetDatapoint()`. The function 
-will create and save the datapoint if it doesn't already exist, or return it if 
-it does. Datapoints can be saved to the module (default) for system-wide access 
+Creating a datapoint is as simple as calling `GetDatapoint()`. The function
+will create and save the datapoint if it doesn't already exist, or return it if
+it does. Datapoints can be saved to the module (default) for system-wide access
 or to particular objects to hold system-specific information for that object.
 
 ``` c
@@ -66,19 +67,19 @@ SetDatapoint("MyOtherSystem", oData);
 ```
 
 ### Debugging
-`util_i_debug.nss` holds functions for generating debug messages. Use `Debug()` 
-to send a debug message. Debug messages have a level of importance associated 
+`util_i_debug.nss` holds functions for generating debug messages. Use `Debug()`
+to send a debug message. Debug messages have a level of importance associated
 with them:
 1. Critical errors are severe enough to stop the script from functioning
 2. Errors indicate the script malfunctioned in some way
 3. Warnings indicate that unexpected behavior may occur
 4. Notices are general information used to track the flow of the script
 
-The debug level can be set on individual objects or module-wide using 
-`SetDebugLevel()`. You can control how debug messages are displayed using 
-`SetDebugLogging()` and the colors of the messages using `SetDebugColor()`. 
-`IsDebugging()` can check to see if the object will show a debug message of the 
-given level; this is useful if you want to save cycles assembling a debug dump 
+The debug level can be set on individual objects or module-wide using
+`SetDebugLevel()`. You can control how debug messages are displayed using
+`SetDebugLogging()` and the colors of the messages using `SetDebugColor()`.
+`IsDebugging()` can check to see if the object will show a debug message of the
+given level; this is useful if you want to save cycles assembling a debug dump
 that would not be shown.
 
 ``` c
@@ -90,7 +91,7 @@ SetDebugLevel(DEBUG_LEVEL_ERROR, GetModule());
 
 // Generate some debug messages on OBJECT_SELF
 Debug("My critical error", DEBUG_LEVEL_CRITICAL); // Displays
-Debug("My error",         DEBUG_LEVEL_ERROR);    // Displays
+Debug("My error",          DEBUG_LEVEL_ERROR);    // Displays
 Debug("My warning",        DEBUG_LEVEL_WARNING);  // Will not display
 Debug("My notice",         DEBUG_LEVEL_NOTICE);   // Will not display
 
@@ -99,7 +100,7 @@ SetDebugLevel(DEBUG_LEVEL_WARNING);
 
 // Generate some debug messages on OBJECT_SELF
 Debug("My critical error", DEBUG_LEVEL_CRITICAL); // Displays
-Debug("My error",         DEBUG_LEVEL_ERROR);    // Displays
+Debug("My error",          DEBUG_LEVEL_ERROR);    // Displays
 Debug("My warning",        DEBUG_LEVEL_WARNING);  // Displays
 Debug("My notice",         DEBUG_LEVEL_NOTICE);   // Will not display
 
@@ -112,11 +113,11 @@ if (IsDebugging(DEBUG_LEVEL_NOTICE))
 ```
 
 ### Lists
-Two types of lists are available. Conversions between the two list types can be 
+Two types of lists are available. Conversions between the two list types can be
 done using the functions in `util_i_lists.nss`.
 
 #### CSV Lists
-`util_i_csvlists.nss` holds functions for CSV lists. These are comma-separated 
+`util_i_csvlists.nss` holds functions for CSV lists. These are comma-separated
 string lists that are altered in place. They are zero-indexed.
 
 ``` c
@@ -144,10 +145,10 @@ SpeakString("Robin is knight " + IntToString(nRobin) + " in the party.");
 ```
 
 #### Var Lists
-`util_i_varlists.nss` contains functions for handling var lists. Var lists are 
-saved to objects as local variables. They support float, int, location, object, 
-and string datatypes. Each variable type is maintained in a separate list to 
-avoid collision. 
+`util_i_varlists.nss` contains functions for handling var lists. Var lists are
+saved to objects as local variables. They support float, int, location, object,
+and string datatypes. Each variable type is maintained in a separate list to
+avoid collision.
 
 ``` c
 // Create a list of menu items on the module
@@ -190,25 +191,25 @@ CopyStringList(oModule, OBJECT_SELF, "Menu", "Eats");
 ```
 
 ### Libraries
-Libraries allow the builder to encapsulate many scripts into one, dramatically 
-reducing the script count in the module. In a library, each script is a 
-function bound to a unique name and/or number. When the library is called, a 
+Libraries allow the builder to encapsulate many scripts into one, dramatically
+reducing the script count in the module. In a library, each script is a
+function bound to a unique name and/or number. When the library is called, a
 dispatcher function routes the call to the proper function.
 
-Since each script defined by a library has a unique name to identify it, the 
-builder can execute a library script without having to know the file it is 
-located in. This makes it easy to create script systems to override behavior of 
-another system; you don't have to edit the other system's code, you just 
+Since each script defined by a library has a unique name to identify it, the
+builder can execute a library script without having to know the file it is
+located in. This makes it easy to create script systems to override behavior of
+another system; you don't have to edit the other system's code, you just
 implement your own function to override it.
 
-`util_i_libraries.nss` holds functions for interacting with libraries. This 
-script requires `util_i_debug.nss`, `util_i_datapoint.nss`, and 
-`util_i_csvlists.nss`. 
+`util_i_libraries.nss` holds functions for interacting with libraries. This
+script requires `util_i_debug.nss`, `util_i_datapoint.nss`, and
+`util_i_csvlists.nss`.
 
 #### Creating a Library
-First, include `util_i_library.nss` in your script. This script contains 
-boilerplate code to make your own libraries. It should not be included in a 
-script that is not a library because it implements `main()`. 
+First, include `util_i_library.nss` in your script. This script contains
+boilerplate code to make your own libraries. It should not be included in a
+script that is not a library because it implements `main()`.
 `util_i_library.nss` does not compile on its own; this is intentional.
 
 Next, add the following functions to the script:
@@ -226,13 +227,13 @@ void OnLibraryScript(string sScript, int nEntry)
 
 ```
 
-`OnLibraryLoad()` is called once when the library is first loaded. It uses 
-`RegisterLibraryScript()` to set the name and/or number your library script 
-should be routed to. 
+`OnLibraryLoad()` is called once when the library is first loaded. It uses
+`RegisterLibraryScript()` to set the name and/or number your library script
+should be routed to.
 
-`OnLibraryScript()` is a dispatch function which will take the name and number 
-generated by the calling script and route the library to the correct function. 
-You can use the provided script name and number to route to the correct 
+`OnLibraryScript()` is a dispatch function which will take the name and number
+generated by the calling script and route the library to the correct function.
+You can use the provided script name and number to route to the correct
 function.
 
 For example:
@@ -265,8 +266,8 @@ void OnLibraryScript(string sScript, int nEntry)
 }
 ```
 
-For longer libraries, string comparison in a large if/else tree may be tedious 
-and slow. Using nEntry to identify the script to run can help, and it enables 
+For longer libraries, string comparison in a large if/else tree may be tedious
+and slow. Using nEntry to identify the script to run can help, and it enables
 more complicated routing:
 
 ``` c
@@ -408,7 +409,7 @@ void OnLibraryScript(string sScript, int nEntry)
 #### Using a Library
 `util_i_libraries.nss` is needed to load or run library scripts.
 
-To use a library, you must first load it. This will activate the library's 
+To use a library, you must first load it. This will activate the library's
 `OnLibraryLoad()` function and bind each library script to a name and number.
 
 ``` c
@@ -419,13 +420,13 @@ LoadLibrary("my_l_library");
 LoadLibraries("pw_l_plugin, dlg_l_example, prr_l_main");
 ```
 
-If a library implements a script that has already been implemented in another 
+If a library implements a script that has already been implemented in another
 library, a warning will be issued and the newer script will take precedence.
 
-Calling a library script is done using `RunLibraryScript()`. The name supplied 
-should be the name bound to the function in the library's `OnLibraryLoad()`. 
-This will allow the library's `OnLibraryScript()` to route it to the correct 
-function. If the name supplied is a normal script and is not implemented in a 
+Calling a library script is done using `RunLibraryScript()`. The name supplied
+should be the name bound to the function in the library's `OnLibraryLoad()`.
+This will allow the library's `OnLibraryScript()` to route it to the correct
+function. If the name supplied is a normal script and is not implemented in a
 library, the normal script will be called instead.
 
 ``` c
@@ -438,5 +439,5 @@ RunLibraryScripts("MyFunction, "MyOtherFunction", oPC);
 ```
 
 ## Acknowledgements
-- `util_i_varlists.nss` and `util_i_libraries.nss` adapted from 
+- `util_i_varlists.nss` and `util_i_libraries.nss` adapted from
   [MemeticAI](https://sourceforge.net/projects/memeticai/).
