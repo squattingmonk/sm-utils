@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_libraries.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/sm-utils
+//     URL: https://github.com/squattingmonk/nwn-core-framework
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds functions for packaging scripts into libraries. This allows
@@ -137,7 +137,7 @@ int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
     }
     else
     {
-        Debug(sScript + " is not a library script. Executing..", DEBUG_LEVEL_WARNING);
+        Debug(sScript + " is not a library script; executing directly.");
         ExecuteScript(sScript, oSelf);
     }
 

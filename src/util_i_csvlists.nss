@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_csvlists.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/sm-utils
+//     URL: https://github.com/squattingmonk/nwn-core-framework
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds utility functions for manipulating CSV lists. These are
@@ -201,7 +201,9 @@ string GetListItem(string sList, int nNth = 0)
     return TrimString(sList);
 }
 
-int FindListItem(string sList, string sListItem)
+// Private implementation of FindListItem. nParsed is used to preserve the index
+// on recursion.
+int _FindListItem(string sList, string sListItem, int nParsed = 0)
 {
     // Sanity check.
     if (sList == "" || sListItem == "") return -1;
@@ -215,11 +217,16 @@ int FindListItem(string sList, string sListItem)
 
     // Make sure it's not a partial match.
     if (GetListItem(sList, i) == sListItem)
-        return i;
+        return i + nParsed;
 
     // Okay, so let's slim down the list and re-execute.
     string sParsed = StringParse(sList, GetListItem(sList, ++i));
-    return FindListItem(StringRemoveParsed(sList, sParsed), sListItem);
+    return _FindListItem(StringRemoveParsed(sList, sParsed), sListItem, i + nParsed);
+}
+
+int FindListItem(string sList, string sListItem)
+{
+    return _FindListItem(sList, sListItem);
 }
 
 int HasListItem(string sList, string sListItem)

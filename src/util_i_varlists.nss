@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_varlists.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/sm-utils
+//     URL: https://github.com/squattingmonk/nwn-core-framework
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds utility functions for manipulating local variable lists.
@@ -916,7 +916,7 @@ void DeleteObjectList(object oTarget, string sListName = "")
     for (i = 0; i < nCount; i++)
         DeleteLocalObject(oTarget, LIST_REF + sListName + IntToString(i));
 
-    DeleteLocalInt(oTarget, LIST_COUNT_STRING + sListName);
+    DeleteLocalInt(oTarget, LIST_COUNT_OBJECT + sListName);
 }
 
 void DeleteStringList(object oTarget, string sListName = "")
