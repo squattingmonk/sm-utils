@@ -16,14 +16,11 @@
 //   FC: Float Count
 //   IC: Int Count
 //   LC: Location Count
+//   VC: Vector Count
 //   OC: Object Count
 //   SC: String Count
 // You should not manipulate these variables directly. Rather, use the *List*()
 // functions contained in this library.
-//
-// Vector functions are wrappers for location functions using invalid data for
-// the required area and facing components, therefore list names for vector lists
-// and location lists must be deconflicted.
 // -----------------------------------------------------------------------------
 // Acknowledgements: these functions are adapted from those in Memetic AI.
 // -----------------------------------------------------------------------------
@@ -34,9 +31,11 @@
 
 // Prefixes used to keep list variables from colliding with other locals.
 const string LIST_REF            = "Ref:";
+const string LIST_REF_VECTOR     = "RefV:";
 const string LIST_COUNT_FLOAT    = "FC:";
 const string LIST_COUNT_INT      = "IC:";
 const string LIST_COUNT_LOCATION = "LC:";
+const string LIST_COUNT_VECTOR   = "VC:";
 const string LIST_COUNT_OBJECT   = "OC:";
 const string LIST_COUNT_STRING   = "SC:";
 
@@ -49,12 +48,6 @@ const string LIST_COUNT_STRING   = "SC:";
 // Internal function to convert a vector to a pseudo-location by adding an
 // OBJECT_INVALID area and 0.0f facing.  Vectors are stored as pseudo-locations.
 location _VectorToLocation(vector vVector);
-
-// ---< _LocationToVector >---
-// ---< util_i_varlists >---
-// Internal function to convert a pseuo-location to a vector by extracting the
-// position vector.  Vectors are stored as pseudo-locations.
-vector _LocationToVector(location lLocation);
 
 // ---< AddListFloat >---
 // ---< util_i_varlists >---
@@ -512,12 +505,7 @@ int CountStringList(object oTarget, string sListName = "");
 
 location _VectorToLocation(vector vVector)
 {
-    return location(OBJECT_INVALID, vVector, 0.0f);
-}
-
-vector _LocationToVector(location lLocation)
-{
-    return(GetPositionFromLocation(lLocation));
+    return Location(OBJECT_INVALID, vVector, 0.0f);
 }
 
 int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE)
@@ -582,8 +570,23 @@ int AddListLocation(object oTarget, location lValue, string sListName = "", int 
 
 int AddListVector(object oTarget, vector vValue, string sListName = "", int bAddUnique = FALSE)
 {
-    location lLocation = _VectorToLocation(vValue);
-    return (AddListLocation(oTarget, lLocation, sListName, bAddUnique));
+    location lValue = _VectorToLocation(vValue);
+    int nCount = CountVectorList(oTarget, sListName);
+
+    // If we're adding unique we should check to see if this entry already exists
+    if (bAddUnique)
+    {
+        int i;
+        for (i = nCount-1; i >= 0; i--)
+        {
+            if (GetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(i)) == lValue)
+                return FALSE;
+        }
+    }
+
+    SetLocalLocation(oTarget, LIST_REF_VECTOR   + sListName + IntToString(nCount), lValue);
+    SetLocalInt     (oTarget, LIST_COUNT_VECTOR + sListName, nCount + 1);
+    return TRUE;
 }
 
 int AddListObject(object oTarget, object oObject, string sListName = "", int bAddUnique = FALSE)
@@ -649,8 +652,9 @@ location GetListLocation(object oTarget, int nIndex = 0, string sListName = "")
 
 vector GetListVector(object oTarget, int nIndex = 0, string sListName = "")
 {
-    location lLocation = GetListLocation(oTarget, nIndex, sListName);
-    return _LocationToVector(lLocation);
+    int nCount = CountVectorList(oTarget, sListName);
+    if (nIndex >= nCount) return Vector();
+    return GetPositionFromLocation(GetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(nIndex)));
 }
 
 object GetListObject(object oTarget, int nIndex = 0, string sListName = "")
@@ -762,7 +766,33 @@ int DeleteListLocation(object oTarget, int nIndex, string sListName = "", int bM
 
 int DeleteListVector(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
 {
-    return DeleteListLocation(oTarget, nIndex, sListName, bMaintainOrder);
+    int nCount = CountVectorList(oTarget, sListName);
+
+    // Sanity check
+    if (nCount == 0 || nIndex >= nCount || nIndex < 0) return nCount;
+
+    location lRef;
+    if (bMaintainOrder)
+    {
+        // Shift all entries up
+        for (nIndex; nIndex < nCount; nIndex++)
+        {
+            lRef = GetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(nIndex + 1));
+                   SetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(nIndex), lRef);
+        }
+    }
+    else
+    {
+        // Replace this item with the last one in the list
+        lRef = GetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(nCount - 1));
+               SetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(nIndex), lRef);
+    }
+
+    // Delete the last item in the list and set the new count
+    DeleteLocalLocation(oTarget, LIST_REF_VECTOR   + sListName + IntToString(--nCount));
+    SetLocalInt        (oTarget, LIST_COUNT_VECTOR + sListName, nCount);
+
+    return nCount;
 }
 
 int DeleteListObject(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE)
@@ -847,8 +877,8 @@ int RemoveListLocation(object oTarget, location lValue, string sListName = "", i
 
 int RemoveListVector(object oTarget, vector vValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    location lLocation = _VectorToLocation(vValue);
-    return RemoveListLocation(oTarget, lLocation, sListName, bMaintainOrder);
+    int nIndex = FindListVector(oTarget, vValue, sListName);
+    return DeleteListVector(oTarget, nIndex, sListName, bMaintainOrder);
 }
 
 int RemoveListObject(object oTarget, object oValue, string sListName = "", int bMaintainOrder = FALSE)
@@ -898,8 +928,14 @@ int FindListLocation(object oTarget, location lValue, string sListName = "")
 
 int FindListVector(object oTarget, vector vValue, string sListName = "")
 {
-    location lLocation = _VectorToLocation(vValue);
-    return FindListLocation(oTarget, lLocation, sListName);
+    location lValue = _VectorToLocation(vValue);
+    int i, nCount = CountVectorList(oTarget, sListName);
+
+    for (i = 0; i < nCount; i++)
+        if (GetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(i)) == lValue)
+            return i;
+
+    return -1;
 }
 
 int FindListObject(object oTarget, object oValue, string sListName = "")
@@ -998,8 +1034,16 @@ void SetListLocation(object oTarget, int nIndex, location lValue, string sListNa
 
 void SetListVector(object oTarget, int nIndex, vector vValue, string sListName = "")
 {
-    location lLocation = _VectorToLocation(vValue);
-    SetListLocation(oTarget, nIndex, lLocation, sListName);
+    location lValue = _VectorToLocation(vValue);
+    int nCount = CountVectorList(oTarget, sListName);
+
+    if (nIndex > nCount) return;
+
+    if (nIndex == nCount)
+        AddListVector(oTarget, vValue, sListName);
+    else
+        SetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(nIndex), lValue);
+
 }
 
 void SetListObject(object oTarget, int nIndex, object oValue, string sListName = "")
@@ -1053,9 +1097,13 @@ void DeleteLocationList(object oTarget, string sListName = "")
     DeleteLocalInt(oTarget, LIST_COUNT_LOCATION + sListName);
 }
 
-void DeleteVectorList(object oTarget, string sListName = "");
+void DeleteVectorList(object oTarget, string sListName = "")
 {
-    DeleteLocationList(oTarget, sListName);
+    int i, nCount = CountVectorList(oTarget, sListName);
+    for (i = 0; i < nCount; i++)
+        DeleteLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(i));
+
+    DeleteLocalInt(oTarget, LIST_COUNT_VECTOR + sListName);
 }
 
 void DeleteObjectList(object oTarget, string sListName = "")
@@ -1094,9 +1142,10 @@ void DeclareLocationList(object oTarget, int nCount, string sListName = "")
     SetLocalInt(oTarget, LIST_COUNT_LOCATION + sListName, nCount);
 }
 
-void DeclareVectorList(object oTarget, int nCount, string sListName = "");
+void DeclareVectorList(object oTarget, int nCount, string sListName = "")
 {
-    DeclareLocationList(oTarget, nCount, sListName);
+    DeleteVectorList(oTarget, sListName);
+    SetLocalInt(oTarget, LIST_COUNT_VECTOR + sListName, nCount);
 }
 
 void DeclareObjectList(object oTarget, int nCount, string sListName = "")
@@ -1151,7 +1200,14 @@ void CopyLocationList(object oSource, object oTarget, string sSourceName, string
 
 void CopyVectorList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
 {
-    CopyLocationList(oSource, oTarget, sSourceName, sTargetName, bAddUnique);
+    vector vValue;
+    int  i, nCount = CountVectorList(oSource, sSourceName);
+
+    for (i = 0; i < nCount; i++)
+    {
+        vValue = GetListVector(oSource, i, sSourceName);
+        AddListVector(oTarget, vValue, sTargetName, bAddUnique);
+    } 
 }
 
 void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
@@ -1195,7 +1251,7 @@ int CountLocationList(object oTarget, string sListName = "")
 
 int CountVectorList(object oTarget, string sListName = "")
 {
-    return CountLocationList(oTarget, sListName);
+    return GetLocalInt(oTarget, LIST_COUNT_VECTOR + sListName);
 }
 
 int CountObjectList(object oTarget, string sListName = "")
