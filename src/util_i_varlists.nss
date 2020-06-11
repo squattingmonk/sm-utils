@@ -512,7 +512,7 @@ int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUn
     if (bAddUnique)
     {
         int i;
-        for (i = nCount-1; i >= 0; i--)
+        for (i = 0; i < nCount; i++)
         {
             if (GetLocalFloat(oTarget, LIST_REF + sListName + IntToString(i)) == fValue)
                 return FALSE;
@@ -532,7 +532,7 @@ int AddListInt(object oTarget, int nValue, string sListName = "", int bAddUnique
     if (bAddUnique)
     {
         int i;
-        for (i = nCount-1; i >= 0; i--)
+        for (i = 0; i < nCount; i++)
         {
             if (GetLocalInt(oTarget, LIST_REF + sListName + IntToString(i)) == nValue)
                 return FALSE;
@@ -552,7 +552,7 @@ int AddListLocation(object oTarget, location lValue, string sListName = "", int 
     if (bAddUnique)
     {
         int i;
-        for (i = nCount-1; i >= 0; i--)
+        for (i = 0; i < nCount; i++)
         {
             if (GetLocalLocation(oTarget, LIST_REF + sListName + IntToString(i)) == lValue)
                 return FALSE;
@@ -573,7 +573,7 @@ int AddListVector(object oTarget, vector vValue, string sListName = "", int bAdd
     if (bAddUnique)
     {
         int i;
-        for (i = nCount-1; i >= 0; i--)
+        for (i = 0; i < nCount; i++)
         {
             if (GetLocalLocation(oTarget, LIST_REF_VECTOR + sListName + IntToString(i)) == lValue)
                 return FALSE;
@@ -593,7 +593,7 @@ int AddListObject(object oTarget, object oObject, string sListName = "", int bAd
     if (bAddUnique)
     {
         int i;
-        for (i = nCount-1; i >= 0; i--)
+        for (i = 0; i < nCount; i++)
         {
             if (GetLocalObject(oTarget, LIST_REF + sListName + IntToString(i)) == oObject)
                 return FALSE;
@@ -613,7 +613,7 @@ int AddListString(object oTarget, string sString, string sListName = "", int bAd
     if (bAddUnique)
     {
         int i;
-        for (i = nCount-1; i >= 0; i--)
+        for (i = 0; i < nCount; i++)
         {
             if (GetLocalString(oTarget, LIST_REF + sListName + IntToString(i)) == sString)
                 return FALSE;
@@ -1203,7 +1203,7 @@ void CopyVectorList(object oSource, object oTarget, string sSourceName, string s
     {
         vValue = GetListVector(oSource, i, sSourceName);
         AddListVector(oTarget, vValue, sTargetName, bAddUnique);
-    } 
+    }
 }
 
 void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)
