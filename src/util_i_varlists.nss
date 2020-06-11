@@ -43,12 +43,6 @@ const string LIST_COUNT_STRING   = "SC:";
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< _VectorToLocation >---
-// ---< util_i_varlists >---
-// Internal function to convert a vector to a pseudo-location by adding an
-// OBJECT_INVALID area and 0.0f facing.  Vectors are stored as pseudo-locations.
-location _VectorToLocation(vector vVector);
-
 // ---< AddListFloat >---
 // ---< util_i_varlists >---
 // Adds fValue to a float list on oTarget given the list name sListName. If
@@ -503,6 +497,8 @@ int CountStringList(object oTarget, string sListName = "");
 //                           Function Implementations
 // -----------------------------------------------------------------------------
 
+// Internal function to convert a vector to a pseudo-location by adding an
+// OBJECT_INVALID area and 0.0f facing. Vectors are stored as pseudo-locations.
 location _VectorToLocation(vector vVector)
 {
     return Location(OBJECT_INVALID, vVector, 0.0f);
