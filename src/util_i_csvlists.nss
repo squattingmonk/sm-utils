@@ -48,13 +48,18 @@ int GetSubStringCount(string sString, string sSubString);
 // Trims all leading and trailing whitespace from sString.
 string TrimString(string sString);
 
-
 // ----- CSV Lists -------------------------------------------------------------
 
 // ---< CountList >---
 // ---< util_i_csvlists >---
 // Returns the number of items in the CSV list sList.
 int CountList(string sList);
+
+// ---< AddListItem >---
+// ---< util_i_csvlists >---
+// Returns the CSV list sList with sListItem added. If bAddUnique is TRUE, will
+// only add items to the list if they are not already there.
+string AddListItem(string sList, string sListItem, int bAddUnique = FALSE);
 
 // ---< GetListItem >---
 // ---< util_i_csvlists >---
@@ -82,11 +87,11 @@ string DeleteListItem(string sList, int nNth = 0);
 // Returns the CSV list sList with the first occurrence of sListItem removed.
 string RemoveListItem(string sList, string sListItem);
 
-// ---< AddListItem >---
+// ---< CopyListItem >---
 // ---< util_i_csvlists >---
-// Returns the CSV list sList with sListItem added. If bAddUnique is TRUE, will
-// only add items to the list if they are not already there.
-string AddListItem(string sList, string sListItem, int bAddUnique = FALSE);
+// Starting at nIndex, copies nRange list items from sSource to sTarget.  Returns
+// number of list items copied to target list.
+int CopyListItem(string sSource, string sTarget, int nIndex, int bAddUnique = FALSE, int nRange = 1);
 
 // ---< MergeLists >---
 // ---< util_i_csvlists >---
@@ -154,7 +159,6 @@ string TrimString(string sString)
 
     return sString;
 }
-
 
 // ----- CSV Lists -------------------------------------------------------------
 
@@ -262,6 +266,27 @@ string DeleteListItem(string sList, int nNth = 0)
 string RemoveListItem(string sList, string sListItem)
 {
     return DeleteListItem(sList, FindListItem(sList, sListItem));
+}
+
+int CopyListItem(string sSource, string sTarget, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+{
+    string sValue, sCheck;
+    int i, nCopied, nCount = CountList(sSource);
+
+    if (nIndex < 0 || nIndex > nCount || !nCount)
+        return FALSE;
+
+    for (i = 0; i < nRange; i++)
+    {
+        sValue = GetListItem(sSource, nIndex + i);
+        sCheck = sTarget;
+        sTarget = AddListItem(sTarget, sValue, bAddUnique);
+
+        if (sCheck != sTarget)
+            nCopied++;
+    }
+
+    return nCopied;
 }
 
 string MergeLists(string sList1, string sList2, int bAddUnique = FALSE)
