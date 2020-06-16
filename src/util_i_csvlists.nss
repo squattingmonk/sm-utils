@@ -31,6 +31,7 @@
 
 // 1.69 string manipulation functions
 #include "x3_inc_string"
+#include "util_i_math"
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -91,7 +92,7 @@ string RemoveListItem(string sList, string sListItem);
 // ---< util_i_csvlists >---
 // Starting at nIndex, copies nRange list items from sSource to sTarget.  Returns
 // number of list items copied to target list.
-int CopyListItem(string sSource, string sTarget, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+string CopyListItem(string sSource, string sTarget, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< MergeLists >---
 // ---< util_i_csvlists >---
@@ -268,25 +269,24 @@ string RemoveListItem(string sList, string sListItem)
     return DeleteListItem(sList, FindListItem(sList, sListItem));
 }
 
-int CopyListItem(string sSource, string sTarget, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+string CopyListItem(string sSource, string sTarget, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
-    string sValue, sCheck;
-    int i, nCopied, nCount = CountList(sSource);
+    string sValue;
+    int i, nCount = CountList(sSource);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
-        return FALSE;
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
+        return "";
+
+    if (nRange > nCount - nIndex)
+        nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
         sValue = GetListItem(sSource, nIndex + i);
-        sCheck = sTarget;
         sTarget = AddListItem(sTarget, sValue, bAddUnique);
-
-        if (sCheck != sTarget)
-            nCopied++;
     }
 
-    return nCopied;
+    return sTarget;
 }
 
 string MergeLists(string sList1, string sList2, int bAddUnique = FALSE)

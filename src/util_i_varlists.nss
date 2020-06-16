@@ -25,6 +25,8 @@
 // Acknowledgements: these functions are adapted from those in Memetic AI.
 // -----------------------------------------------------------------------------
 
+#include "util_i_math"
+
 // -----------------------------------------------------------------------------
 //                                   Constants
 // -----------------------------------------------------------------------------
@@ -354,42 +356,42 @@ void SetListString(object oTarget, int nIndex, string sValue, string sListName =
 // Starting at nIndex, copies nRange items from float list sSourceName on oSource
 // and adds them to list sTargetName on oTarget.  Returns the number of list items
 // copied to the target list.
-int CopyListFloat(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+int CopyListFloat(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< CopyListInt >---
 // ---< util_i_varlists >---
 // Starting at nIndex, copies nRange items from int list sSourceName on oSource
 // and adds them to list sTargetName on oTarget.  Returns the number of list items
 // copied to the target list.
-int CopyListInt(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+int CopyListInt(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< CopyListLocation >---
 // ---< util_i_varlists >---
 // Starting at nIndex, copies nRange items from location list sSourceName on oSource
 // and adds them to list sTargetName on oTarget.  Returns the number of list items
 // copied to the target list.
-int CopyListLocation(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+int CopyListLocation(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< CopyListVector >---
 // ---< util_i_varlists >---
 // Starting at nIndex, copies nRange items from vector list sSourceName on oSource
 // and adds them to list sTargetName on oTarget.  Returns the number of list items
 // copied to the target list.
-int CopyListVector(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+int CopyListVector(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< CopyListObject >---
 // ---< util_i_varlists >---
 // Starting at nIndex, copies nRange items from object list sSourceName on oSource
 // and adds them to list sTargetName on oTarget.  Returns the number of list items
 // copied to the target list.
-int CopyListObject(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+int CopyListObject(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< CopyListString >---
 // ---< util_i_varlists >---
 // Starting at nIndex, copies nRange items from string list sSourceName on oSource
 // and adds them to list sTargetName on oTarget.  Returns the number of list items
 // copied to the target list.
-int CopyListString(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1);
+int CopyListString(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
 // ---< DeleteFloatList >---
 // ---< util_i_varlists >---
@@ -1108,13 +1110,16 @@ void SetListString(object oTarget, int nIndex, string sValue, string sListName =
         SetLocalString(oTarget, LIST_REF + sListName + IntToString(nIndex), sValue);
 }
 
-int CopyListFloat(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+int CopyListFloat(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
     float fValue;
     int  i, nCopied, nCount = CountFloatList(oSource, sSourceName);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
+
+    if (nRange > nCount - nIndex)
+        nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
@@ -1126,13 +1131,16 @@ int CopyListFloat(object oSource, object oTarget, string sSourceName, string sTa
     return nCopied;
 }
 
-int CopyListInt(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+int CopyListInt(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
     int nValue;
     int  i, nCopied, nCount = CountIntList(oSource, sSourceName);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
+
+    if (nRange > nCount - nIndex)
+        nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
@@ -1144,13 +1152,16 @@ int CopyListInt(object oSource, object oTarget, string sSourceName, string sTarg
     return nCopied;
 }
 
-int CopyListLocation(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+int CopyListLocation(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
     location lValue;
     int  i, nCopied, nCount = CountLocationList(oSource, sSourceName);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
+
+    if (nRange > nCount - nIndex)
+        nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
@@ -1162,12 +1173,12 @@ int CopyListLocation(object oSource, object oTarget, string sSourceName, string 
     return nCopied;
 }
 
-int CopyListVector(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+int CopyListVector(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
     vector vValue;
     int  i, nCopied, nCount = CountVectorList(oSource, sSourceName);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
     for (i = 0; i < nRange; i++)
@@ -1180,12 +1191,12 @@ int CopyListVector(object oSource, object oTarget, string sSourceName, string sT
     return nCopied;
 }
 
-int CopyListObject(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+int CopyListObject(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
     object oValue;
     int  i, nCopied, nCount = CountObjectList(oSource, sSourceName);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
     for (i = 0; i < nRange; i++)
@@ -1198,12 +1209,12 @@ int CopyListObject(object oSource, object oTarget, string sSourceName, string sT
     return nCopied;
 }
 
-int CopyListString(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int bAddUnique = FALSE, int nRange = 1)
+int CopyListString(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE)
 {
     string sValue;
     int  i, nCopied, nCount = CountStringList(oSource, sSourceName);
 
-    if (nIndex < 0 || nIndex > nCount || !nCount)
+    if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
     for (i = 0; i < nRange; i++)
