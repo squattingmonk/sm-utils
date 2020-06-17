@@ -275,7 +275,7 @@ string CopyListItem(string sSource, string sTarget, int nIndex, int nRange = 1, 
     int i, nCount = CountList(sSource);
 
     if (nIndex < 0 || nIndex >= nCount || !nCount)
-        return "";
+        return sSource;
 
     nRange = clamp(nRange, 1, nCount - nIndex);
 
