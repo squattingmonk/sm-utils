@@ -1139,8 +1139,7 @@ int CopyListInt(object oSource, object oTarget, string sSourceName, string sTarg
     if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
-    if (nRange > nCount - nIndex)
-        nRange = clamp(nRange, 1, nCount - nIndex);
+    nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
@@ -1160,8 +1159,7 @@ int CopyListLocation(object oSource, object oTarget, string sSourceName, string 
     if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
-    if (nRange > nCount - nIndex)
-        nRange = clamp(nRange, 1, nCount - nIndex);
+    nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
@@ -1181,6 +1179,8 @@ int CopyListVector(object oSource, object oTarget, string sSourceName, string sT
     if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
+    nRange = clamp(nRange, 1, nCount - nIndex);
+
     for (i = 0; i < nRange; i++)
     {
         vValue = GetListVector(oSource, nIndex + i, sSourceName);
@@ -1199,6 +1199,8 @@ int CopyListObject(object oSource, object oTarget, string sSourceName, string sT
     if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
 
+    nRange = clamp(nRange, 1, nCount - nIndex);
+
     for (i = 0; i < nRange; i++)
     {
         oValue = GetListObject(oSource, nIndex + i, sSourceName);
@@ -1216,6 +1218,8 @@ int CopyListString(object oSource, object oTarget, string sSourceName, string sT
 
     if (nIndex < 0 || nIndex >= nCount || !nCount)
         return FALSE;
+
+    nRange = clamp(nRange, 1, nCount - nIndex);
 
     for (i = 0; i < nRange; i++)
     {
