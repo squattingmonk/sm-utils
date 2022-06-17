@@ -10,7 +10,7 @@
 // -----------------------------------------------------------------------------
 // Example usage:
 //
-// string string sKnight, sKnights = "Lancelot, Galahad, Robin";
+// string sKnight, sKnights = "Lancelot, Galahad, Robin";
 // int i, nCount = CountList(sKnights);
 // for (i = 0; i < nCount; i++)
 // {
@@ -29,6 +29,8 @@
 // SpeakString("Robin is knight " + IntToString(nRobin) + " in the party.");
 // -----------------------------------------------------------------------------
 
+#include "util_i_strings"
+
 // 1.69 string manipulation functions
 #include "x3_inc_string"
 #include "util_i_math"
@@ -36,20 +38,6 @@
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
-
-// ----- String Utilities ------------------------------------------------------
-
-// ---< GetSubStringCount >---
-// ---< util_i_csvlists >---
-// Returns the number of occurrences of sSubString within sString.
-int GetSubStringCount(string sString, string sSubString);
-
-// ---< TrimString >---
-// ---< util_i_csvlists >---
-// Trims all leading and trailing whitespace from sString.
-string TrimString(string sString);
-
-// ----- CSV Lists -------------------------------------------------------------
 
 // ---< CountList >---
 // ---< util_i_csvlists >---
@@ -64,8 +52,8 @@ string AddListItem(string sList, string sListItem, int bAddUnique = FALSE);
 
 // ---< GetListItem >---
 // ---< util_i_csvlists >---
-// Returns the nNth item in the CSV list sList.
-string GetListItem(string sList, int nNth = 0);
+// Returns the item at nNdex in the CSV list sList.
+string GetListItem(string sList, int nIndex = 0);
 
 // ---< FindListItem >---
 // ---< util_i_csvlists >---
@@ -80,8 +68,8 @@ int HasListItem(string sList, string sListItem);
 
 // ---< DeleteListItem >---
 // ---< util_i_csvlists >---
-// Returns the CSV list sList with the nNth item removed.
-string DeleteListItem(string sList, int nNth = 0);
+// Returns the CSV list sList with the item at nIndex removed.
+string DeleteListItem(string sList, int nIndex = 0);
 
 // ---< RemoveListItem >---
 // ---< util_i_csvlists >---
@@ -131,38 +119,6 @@ string MergeLocalList(object oObject, string sListName, string sListToMerge, int
 //                           Function Implementations
 // -----------------------------------------------------------------------------
 
-// ----- String Utilities ------------------------------------------------------
-
-int GetSubStringCount(string sString, string sSubString)
-{
-    // Sanity Check
-    if (sSubString == "") return 0;
-
-    int nLength = GetStringLength(sSubString);
-    int nCount, nPos = FindSubString(sString, sSubString);
-
-    while (nPos != -1)
-    {
-        nCount++;
-        nPos = FindSubString(sString, sSubString, nPos + nLength);
-    }
-
-    return nCount;
-}
-
-string TrimString(string sString)
-{
-    while (GetStringLeft(sString, 1) == " ")
-        sString = GetStringRight(sString, GetStringLength(sString) - 1);
-
-    while (GetStringRight(sString, 1) == " ")
-        sString = GetStringLeft(sString, GetStringLength(sString) - 1);
-
-    return sString;
-}
-
-// ----- CSV Lists -------------------------------------------------------------
-
 int CountList(string sList)
 {
     if (sList == "")
@@ -182,14 +138,14 @@ string AddListItem(string sList, string sListItem, int bAddUnique = FALSE)
     return sListItem;
 }
 
-string GetListItem(string sList, int nNth = 0)
+string GetListItem(string sList, int nIndex = 0)
 {
-    // Sanity check.
-    if (sList == "" || nNth < 0) return "";
+    if (nIndex < 0 || sList == "")
+        return "";
 
     // Loop through the elements until we find the one we want.
     int nCount, nLeft, nRight = FindSubString(sList, ",");
-    while (nRight != -1 && nCount < nNth)
+    while (nRight != -1 && nCount < nIndex)
     {
         nCount++;
         nLeft = nRight + 1;
@@ -197,13 +153,11 @@ string GetListItem(string sList, int nNth = 0)
     }
 
     // If there were not enough elements, return a null string.
-    if (nCount < nNth) return "";
+    if (nCount < nIndex)
+        return "";
 
     // Get the element
-    if (nRight >= 0)
-        sList = GetStringLeft(sList, nRight);
-    sList = GetStringRight(sList, GetStringLength(sList) - nLeft);
-    return TrimString(sList);
+    return TrimString(GetStringSlice(sList, nLeft, nRight));
 }
 
 // Private implementation of FindListItem. nParsed is used to preserve the index
@@ -239,29 +193,27 @@ int HasListItem(string sList, string sListItem)
     return (FindListItem(sList, sListItem) > -1);
 }
 
-string DeleteListItem(string sList, int nNth = 0)
+string DeleteListItem(string sList, int nIndex = 0)
 {
-    // Sanity check.
-    if (sList == "" || nNth < 0) return "";
+    if (nIndex < 0 || sList == "")
+        return sList;
 
-    // Are there enough items in the list?
-    int nItems = CountList(sList);
-    if (nNth > nItems) return "";
-
-    // Count the commas until they equal the item number.
-    int i;
-    string sListItem, sNewList;
-    for (i = 0; i < nItems; i++)
+    int nPos = FindSubStringN(sList, ",", nIndex);
+    if (nPos < 0)
     {
-        // Look for the item and remove it from the list
-        sListItem = StringParse(sList, ", ");
-        sList     = StringRemoveParsed(sList, sListItem, ", ");
+        if (nIndex)
+        {
+            nPos = FindSubStringN(sList, ",", nIndex - 1);
+            return TrimStringRight(GetStringSlice(sList, 0, nPos));
+        }
 
-        if (i != nNth - 1)
-            sNewList = (sNewList == "" ? sListItem : sNewList + ", " + sListItem);
+        return "";
     }
 
-    return sNewList;
+    string sRight = GetStringSlice(sList, nPos + 1);
+    nPos = FindSubStringN(sList, ",", nIndex - 1);
+    sRight = nPos < 0 ? TrimStringLeft(sRight) : sRight;
+    return GetStringSlice(sList, 0, nPos + 1) + sRight;
 }
 
 string RemoveListItem(string sList, string sListItem)
