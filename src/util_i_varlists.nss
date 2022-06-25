@@ -2,7 +2,7 @@
 //    File: util_i_varlists.nss
 //  System: Utilities (include script)
 //     URL: https://github.com/squattingmonk/nwn-core-framework
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+// Authors: Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds utility functions for manipulating local variable lists.
 // Because these lists are zero-indexed, they can be used to approximate
@@ -24,7 +24,7 @@
 // -----------------------------------------------------------------------------
 
 // Constants used to describe float|int|string sorting order
-const int LIST_SORT_ASC = 1;
+const int LIST_SORT_ASC  = 1;
 const int LIST_SORT_DESC = 2;
 
 // Prefixes used to keep list variables from colliding with other locals. These
@@ -113,7 +113,7 @@ int AddListObject(object oTarget, object oValue, string sListName = "", int bAdd
 int AddListString(object oTarget, string sValue, string sListName = "", int bAddUnique = FALSE);
 
 // ---< AddListJson >---
-// ---< util`_i_varlists >---
+// ---< util_i_varlists >---
 // Adds jValue to a json list on oTarget given the list name sListName. If
 // bAddUnique is TRUE, this only adds to the list if it is not already there.
 // Returns whether the addition was successful.

@@ -56,5 +56,5 @@ meant to be included in other scripts that implement its functions.
   - [Libraries](docs/libraries.md)
 
 ## Acknowledgements
-- `util_i_varlists.nss` and `util_i_libraries.nss` adapted from
+- `util_i_libraries.nss` adapted from
   [MemeticAI](https://sourceforge.net/projects/memeticai/).
