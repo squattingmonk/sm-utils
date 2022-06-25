@@ -39,6 +39,9 @@ This package contains the following resources:
 | `util_i_libraries.nss` | Library script utilities                     |
 | `util_i_library.nss`   | Library dispatcher boilerplate               |
 | `util_i_datapoint.nss` | System-specific data object creation utility |
+| `util_i_math.nss`      | Common math utilities                        |
+| `util_i_strings.nss`   | String manipulation utilities                |
+| `util_i_color.nss`     | RGB, HSV, and hex color utilities            |
 
 Note: `sm-utils` relies on script extensions added by
 [nwnsc](https://github.com/nwneetools/nwnsc). This prevents error messages when
