@@ -1,14 +1,12 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_libraries.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
+//     URL: https://github.com/squattingmonk/sm-utils
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds functions for packaging scripts into libraries. This allows
 // the builder to dramatically reduce the module script count by keeping related
 // scripts in the same file.
-// -----------------------------------------------------------------------------
-// Acknowledgement: these scripts have been adapted from Memetic AI.
 // -----------------------------------------------------------------------------
 
 // Debug utility functions
@@ -21,15 +19,10 @@
 //                                   Constants
 // -----------------------------------------------------------------------------
 
-const string LIB_ENTRY        = "LIB_ENTRY";
-const string LIB_LOADED       = "LIB_LOADED";
-const string LIB_LOADING      = "LIB_LOADING";
 const string LIB_RETURN       = "LIB_RETURN";
-const string LIB_SCRIPT       = "LIB_SCRIPT";
-const string LIB_LAST_ENTRY   = "LIB_LAST_ENTRY";
-const string LIB_LAST_LIBRARY = "LIB_LAST_LIBRARY";
-const string LIB_LAST_SCRIPT  = "LIB_LAST_SCRIPT";
-const string LIB_LOADING_LIB  = "LIB_LOADING_LIB";
+const string LIB_ENTRY   = "LIB_ENTRY";
+const string LIB_LIBRARY = "LIB_LIBRARY";
+const string LIB_SCRIPT  = "LIB_SCRIPT";
 const string LIB_INIT         = "LIB_INIT";
 
 // -----------------------------------------------------------------------------
@@ -38,33 +31,33 @@ const string LIB_INIT         = "LIB_INIT";
 
 // ---< AddLibraryScript >---
 // ---< util_i_libraries >---
-// Creates the `framework_libraries` table in the module's volatile sqlite database.
+// Creates the `library_scripts` table in the module's volatile sqlite database.
 // If bReset is TRUE, the table will be dropped and recreated.
 void CreateLibraryTable(int bReset = FALSE);
 
 // ---< AddLibraryScript >---
 // ---< util_i_libraries >---
-// Adds a database record associating sScript with sLibrary at entry nEntry.  sScript
-// must be unique module-wide.
+// Adds a database record associating sScript with sLibrary at entry nEntry.
+// sScript must be unique module-wide.
 void AddLibraryScript(string sLibrary, string sScript, int nEntry);
 
 // ---< GetScriptLibrary >---
 // ---< util_i_libraries >---
-// Queries the framework's volatile database to return the script library associated
-// with sScript.
+// Queries the module's volatile database to return the script library
+// associated with sScript.
 string GetScriptLibrary(string sScript);
 
 // ---< GetScriptEntry >---
 // ---< util_i_libraries >---
-// Queries the framework's volatile database to return the entry number associated
+// Queries the module's volatile database to return the entry number associated
 // with sScript.
 int GetScriptEntry(string sScript);
 
 // ---< GetScriptData >---
 // ---< util_i_libraries >---
-// Returns a prepared query with the library and entry data associated with sScript
-// allowing users to retrieve the same data returned by GetScriptLibrary and
-// GetScriptEntry with one function.
+// Returns a prepared query with the library and entry data associated with
+// sScript, allowing users to retrieve the same data returned by
+// GetScriptLibrary() and GetScriptEntry() with one function.
 sqlquery GetScriptData(string sScript);
 
 // ---< GetIsLibraryLoaded >---
@@ -140,12 +133,12 @@ void CreateLibraryTable(int bReset = FALSE)
 
     if (bReset)
     {
-        string sDrop = "DROP TABLE framework_libraries;";
+        string sDrop = "DROP TABLE library_scripts;";
         sqlquery sqlDrop = SqlPrepareQueryObject(GetModule(), sDrop);
         SqlStep(sqlDrop);
     }
 
-    string sLibraries = "CREATE TABLE IF NOT EXISTS framework_libraries (" +
+    string sLibraries = "CREATE TABLE IF NOT EXISTS library_scripts (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "sLibrary TEXT NOT NULL, " +
                     "sScript TEXT NOT NULL UNIQUE ON CONFLICT REPLACE, " +
@@ -159,7 +152,7 @@ void AddLibraryScript(string sLibrary, string sScript, int nEntry)
 {
     CreateLibraryTable();
 
-    string sQuery = "INSERT INTO framework_libraries (sLibrary, sScript, nEntry) " +
+    string sQuery = "INSERT INTO library_scripts (sLibrary, sScript, nEntry) " +
                     "VALUES (@sLibrary, @sScript, @nEntry);";
     sqlquery sql = SqlPrepareQueryObject(GetModule(), sQuery);
     SqlBindString(sql, "@sLibrary", sLibrary);
@@ -173,7 +166,7 @@ string GetScriptFieldData(string sField, string sScript)
 {
     CreateLibraryTable();
 
-    string sQuery = "SELECT " + sField + " FROM framework_libraries " +
+    string sQuery = "SELECT " + sField + " FROM library_scripts " +
                     "WHERE sScript = @sScript;";
     sqlquery sql = SqlPrepareQueryObject(GetModule(), sQuery);
     SqlBindString(sql, "@sScript", sScript);
@@ -193,7 +186,7 @@ int GetScriptEntry(string sScript)
 
 sqlquery GetScriptData(string sScript)
 {
-    string sQuery = "SELECT sLibrary, nEntry FROM framework_libraries " +
+    string sQuery = "SELECT sLibrary, nEntry FROM library_scripts " +
                     "WHERE sScript = @sScript;";
     sqlquery sql = SqlPrepareQueryObject(GetModule(), sQuery);
     SqlBindString(sql, "@sScript", sScript);
@@ -205,7 +198,7 @@ int GetIsLibraryLoaded(string sLibrary)
 {
     CreateLibraryTable();
 
-    string sQuery = "SELECT COUNT(sLibrary) FROM framework_libraries " +
+    string sQuery = "SELECT COUNT(sLibrary) FROM library_scripts " +
                     "WHERE sLibrary = @sLibrary LIMIT 1;";
     sqlquery sql = SqlPrepareQueryObject(GetModule(), sQuery);
     SqlBindString(sql, "@sLibrary", sLibrary);
@@ -219,7 +212,7 @@ void LoadLibrary(string sLibrary, int bForce = FALSE)
 
     if (bForce || !GetIsLibraryLoaded(sLibrary))
     {
-        SetScriptParam(LIB_LAST_LIBRARY, sLibrary);
+        SetScriptParam(LIB_LIBRARY, sLibrary);
         ExecuteScript(sLibrary, GetModule());
     }
     else
@@ -256,9 +249,9 @@ int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
         Debug("Library script " + sScript + " found in " + sLibrary +
             (nEntry != 0 ? " at entry " + IntToString(nEntry) : ""));
 
-        SetScriptParam(LIB_LAST_LIBRARY, sLibrary);
-        SetScriptParam(LIB_LAST_SCRIPT, sScript);
-        SetScriptParam(LIB_LAST_ENTRY, IntToString(nEntry));
+        SetScriptParam(LIB_LIBRARY, sLibrary);
+        SetScriptParam(LIB_SCRIPT, sScript);
+        SetScriptParam(LIB_ENTRY, IntToString(nEntry));
 
         ExecuteScript(sLibrary, oSelf);
     }
@@ -280,7 +273,7 @@ void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF)
 
 void RegisterLibraryScript(string sScript, int nEntry = 0)
 {
-    string sLibrary = GetScriptParam(LIB_LAST_LIBRARY);
+    string sLibrary = GetScriptParam(LIB_LIBRARY);
     string sExist = GetScriptLibrary(sScript);
 
     if (sLibrary != sExist && sExist != "")
