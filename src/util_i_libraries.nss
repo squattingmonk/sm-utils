@@ -107,6 +107,26 @@ int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF);
 //   treated as OBJECT_SELF when the library script is called.
 void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF);
 
+// ---< RegisterLibraryScript >---
+// ---< util_i_libraries >---
+// Registers sScript as being located inside the current library at nEntry. This
+// The script can later be called using RunLibraryScript(sScript) and routed to
+// the proper function using OnLibraryScript(sScript, nEntry).
+// Parameters:
+// - sScript: the name of the script to register. This name must be unique in
+//   the module. If a second script with the same name is registered, it will
+//   overwrite the first one.
+// - nEntry: a number unique to this library to identify this script. Is can be
+//   obtained at runtime in OnLibraryScript() and used to access the correct
+//   function. If this parameter is left as the default, you will have to filter
+//   your script using the sScript parameter, which is less efficient.
+void RegisterLibraryScript(string sScript, int nEntry = 0);
+
+// ---< LibraryReturn >---
+// ---< util_i_library >---
+// Sets the return value of the currently executing library to nValue.
+void LibraryReturn(int nValue);
+
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
@@ -199,11 +219,7 @@ void LoadLibrary(string sLibrary, int bForce = FALSE)
 
     if (bForce || !GetIsLibraryLoaded(sLibrary))
     {
-        SetLocalString(GetModule(), LIB_LAST_LIBRARY, sLibrary);
-        SetLocalString(GetModule(), LIB_LAST_SCRIPT, sLibrary);
-        SetLocalInt(GetModule(), LIB_LAST_ENTRY, 0);
-
-        SetLocalInt(GetModule(), LIB_LOADING, TRUE);
+        SetScriptParam(LIB_LAST_LIBRARY, sLibrary);
         ExecuteScript(sLibrary, GetModule());
     }
     else
@@ -240,11 +256,11 @@ int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
         Debug("Library script " + sScript + " found in " + sLibrary +
             (nEntry != 0 ? " at entry " + IntToString(nEntry) : ""));
 
-        SetLocalString(GetModule(), LIB_LAST_LIBRARY, sLibrary);
-        SetLocalString(GetModule(), LIB_LAST_SCRIPT, sScript);
-        SetLocalInt(GetModule(), LIB_LAST_ENTRY, nEntry);
+        SetScriptParam(LIB_LAST_LIBRARY, sLibrary);
+        SetScriptParam(LIB_LAST_SCRIPT, sScript);
+        SetScriptParam(LIB_LAST_ENTRY, IntToString(nEntry));
 
-        ExecuteScript (sLibrary, oSelf);
+        ExecuteScript(sLibrary, oSelf);
     }
     else
     {
@@ -260,4 +276,26 @@ void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF)
     int i, nCount = CountList(sScripts);
     for (i = 0; i < nCount; i++)
         RunLibraryScript(GetListItem(sScripts, i), oSelf);
+}
+
+void RegisterLibraryScript(string sScript, int nEntry = 0)
+{
+    string sLibrary = GetScriptParam(LIB_LAST_LIBRARY);
+    string sExist = GetScriptLibrary(sScript);
+
+    if (sLibrary != sExist && sExist != "")
+        Warning(sLibrary + " is overriding " + sExist + "'s implementation of " + sScript);
+
+    int nOldEntry = GetScriptEntry(sScript);
+    if (nOldEntry)
+        Warning(sLibrary + " already declared " + sScript +
+            " Old Entry: " + IntToString(nOldEntry) +
+            " New Entry: " + IntToString(nEntry));
+
+    AddLibraryScript(sLibrary, sScript, nEntry);
+}
+
+void LibraryReturn(int nValue)
+{
+    SetLocalInt(OBJECT_SELF, LIB_RETURN, nValue);
 }
