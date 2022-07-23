@@ -186,6 +186,8 @@ int GetScriptEntry(string sScript)
 
 sqlquery GetScriptData(string sScript)
 {
+    CreateLibraryTable();
+
     string sQuery = "SELECT sLibrary, nEntry FROM library_scripts " +
                     "WHERE sScript = @sScript;";
     sqlquery sql = SqlPrepareQueryObject(GetModule(), sQuery);
