@@ -56,6 +56,16 @@ json SplitList(object oTarget, string sList, string sListName = "", int bAddUniq
 //   - LIST_TYPE_INT
 string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
 
+// ---< ListToJson >---
+// ---< util_i_lists >---
+// Converts a CSV list to a json array.
+json ListToJson(string sList);
+
+// ---< ListToJson >---
+// ---< util_i_lists >---
+// Converts a json array to a CSV list.
+string JsonToList(json jArray);
+
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -113,6 +123,32 @@ string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, i
     {
         sList = JsonDump(jList);
         sList = GetStringSlice(sList, 1, GetStringLength(sList) - 2);
+    }
+
+    return sList;
+}
+
+json ListToJson(string sList)
+{
+    json jRet = JsonArray();
+    int i, nCount = CountList(sList);
+    for (i; i < nCount; i++)
+        jRet = JsonArrayInsert(jRet, JsonString(GetListItem(sList, i)));
+    return jRet;
+}
+
+string JsonToList(json jArray)
+{
+    if (JsonGetType(jArray) != JSON_TYPE_ARRAY)
+        return "";
+
+    string sList;
+    int i, nCount = JsonGetLength(jArray);
+    for (i; i < nCount; i++)
+    {
+        if (i > 0)
+            sList += ", ";
+        sList += JsonGetString(JsonArrayGet(jArray, i));
     }
 
     return sList;
