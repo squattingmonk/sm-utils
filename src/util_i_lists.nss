@@ -131,9 +131,20 @@ string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, i
 json ListToJson(string sList)
 {
     json jRet = JsonArray();
-    int i, nCount = CountList(sList);
-    for (i; i < nCount; i++)
-        jRet = JsonArrayInsert(jRet, JsonString(GetListItem(sList, i)));
+    if (sList == "")
+        return jRet;
+
+    string sItem;
+    int nStart, nEnd;
+
+    do
+    {
+        nEnd = FindSubString(sList, ",", nStart);
+        sItem = TrimString(GetStringSlice(sList, nStart, nEnd));
+        jRet = JsonArrayInsert(jRet, JsonString(sItem));
+        nStart = nEnd + 1;
+    } while (nEnd != -1);
+
     return jRet;
 }
 
