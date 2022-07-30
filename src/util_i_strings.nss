@@ -18,9 +18,16 @@ int GetSubStringCount(string sString, string sSubString);
 
 // ---< FindSubStringN >---
 // ---< util_i_strings >---
-// Returns the position of the nNth occurrence of sSubString within sString. If 
+// Returns the position of the nNth occurrence of sSubString within sString. If
 // the substring was not found at least nNth + 1 times, returns -1.
 int FindSubStringN(string sString, string sSubString, int nNth = 0);
+
+// ---< GetStringSlice >---
+// ---< util_i_strings >---
+// Returns a substring of sString from index nStart to nEnd. If nEnd is -1, will
+// return to the end of the string. Basically a convenience wrapper around
+// GetSubString().
+string GetStringSlice(string sString, int nStart, int nEnd = -1);
 
 // ---< TrimStringLeft >---
 // ---< util_i_strings >---
@@ -34,7 +41,7 @@ string TrimStringRight(string sString, string sRemove = " ");
 
 // ---< TrimString >---
 // ---< util_i_strings >---
-// Trims any characters in sRemove from the left and right side of sString. This 
+// Trims any characters in sRemove from the left and right side of sString. This
 // can be used to remove leading and trailing whitespace.
 string TrimString(string sString, string sRemove = " ");
 
