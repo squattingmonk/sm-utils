@@ -18,6 +18,7 @@ const string DEBUG_COLOR    = "DEBUG_COLOR";
 const string DEBUG_LEVEL    = "DEBUG_LEVEL";
 const string DEBUG_LOG      = "DEBUG_LOG";
 const string DEBUG_OVERRIDE = "DEBUG_OVERRIDE";
+const string DEBUG_PREFIX   = "DEBUG_PREFIX";
 
 const int DEBUG_LEVEL_NONE     = 0; // No debug level set
 const int DEBUG_LEVEL_CRITICAL = 1;
@@ -65,6 +66,19 @@ string GetDebugColor(int nLevel);
 // Sets the string color code (in <cRGB> form) for debug messages of nLevel. If
 // sColor is blank, will use the default color codes.
 void SetDebugColor(int nLevel, string sColor = "");
+
+// ---< GetDebugPrefix >---
+// ---< util_i_debug >---
+// Returns the prefix oTarget uses before its debug messages.
+string GetDebugPrefix(object oTarget = OBJECT_SELF);
+
+// ---< SetDebugPrefix >---
+// ---< util_i_debug >---
+// Sets the prefix oTarget uses before its debug messages. You can include color
+// codes in the prefix. If a prefix is not set, the default prefix will be the
+// object's tag in brackets. The default color for the prefix can be set using
+// SetDebugColor(DEBUG_LEVEL_NONE, sColor);
+void SetDebugPrefix(string sPrefix, object oTarget = OBJECT_SELF);
 
 // ---< GetDebugLogging >---
 // ---< util_i_debug >---
@@ -178,6 +192,7 @@ string GetDebugColor(int nLevel)
             case DEBUG_LEVEL_ERROR:    nColor = COLOR_ORANGE_DARK;  break;
             case DEBUG_LEVEL_WARNING:  nColor = COLOR_ORANGE_LIGHT; break;
             case DEBUG_LEVEL_NOTICE:   nColor = COLOR_YELLOW;       break;
+            case DEBUG_LEVEL_NONE:     nColor = COLOR_GREEN_LIGHT;  break;
             default:                   nColor = COLOR_GRAY_LIGHT;   break;
         }
 
@@ -191,6 +206,24 @@ string GetDebugColor(int nLevel)
 void SetDebugColor(int nLevel, string sColor = "")
 {
     SetLocalString(GetModule(), DEBUG_COLOR + IntToString(nLevel), sColor);
+}
+
+string GetDebugPrefix(object oTarget = OBJECT_SELF)
+{
+    string sColor = GetDebugColor(DEBUG_LEVEL_NONE);
+    string sPrefix = GetLocalString(oTarget, DEBUG_PREFIX);
+    if (sPrefix == "")
+    {
+        string sTag = GetTag(oTarget);
+        sPrefix = "[" + (sTag != "" ? sTag : GetName(oTarget)) + "]";
+    }
+
+    return ColorString(sPrefix, sColor);
+}
+
+void SetDebugPrefix(string sPrefix, object oTarget = OBJECT_SELF)
+{
+    SetLocalString(oTarget, DEBUG_PREFIX, sPrefix);
 }
 
 int GetDebugLogging()
@@ -213,17 +246,16 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJ
     if (IsDebugging(nLevel, oTarget))
     {
         string sColor = GetDebugColor(nLevel);
-        string sPrefix;
+        string sPrefix = GetDebugPrefix(oTarget) + " ";
 
         switch (nLevel)
         {
-            case DEBUG_LEVEL_CRITICAL: sPrefix = "[Critical Error] "; break;
-            case DEBUG_LEVEL_ERROR:    sPrefix = "[Error] ";          break;
-            case DEBUG_LEVEL_WARNING:  sPrefix = "[Warning] ";        break;
+            case DEBUG_LEVEL_CRITICAL: sPrefix += "[Critical Error] "; break;
+            case DEBUG_LEVEL_ERROR:    sPrefix += "[Error] ";          break;
+            case DEBUG_LEVEL_WARNING:  sPrefix += "[Warning] ";        break;
         }
 
         sMessage = sPrefix + sMessage;
-
         int nLogging = GetLocalInt(GetModule(), DEBUG_LOG);
 
         if (nLogging & DEBUG_LOG_FILE)
