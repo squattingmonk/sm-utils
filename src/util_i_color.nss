@@ -10,8 +10,8 @@
 // Because color codes are arcane and can't be easily looked up, the functions
 // in this file prefer to use hex color codes. These codes are the same as you'd
 // use in web design and many other areas, so they are easy to look up and can
-// be copied and pasted into other programs. This file provides some hex codes
-// for common uses.
+// be copied and pasted into other programs. util_c_color.nss provides some hex
+// codes for common uses.
 //
 // This file also contains functions to represent colors as RGB or HSV triplets.
 // HSV (Hue, Saturation, Value) may be particularly useful if you want to play
@@ -23,6 +23,7 @@
 
 #include "x3_inc_string"
 #include "util_i_math"
+#include "util_c_color"
 
 // -----------------------------------------------------------------------------
 //                                   Constants
@@ -34,48 +35,9 @@
 // NB: First character is "nearest to 00" since we can't use \x00 itself
 const string COLOR_TOKEN = "\x01\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2A\x2B\x2C\x2D\x2E\x2F\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3A\x3B\x3C\x3D\x3E\x3F\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4A\x4B\x4C\x4D\x4E\x4F\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5A\x5B\x5C\x5D\x5E\x5F\x60\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6A\x6B\x6C\x6D\x6E\x6F\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7A\x7B\x7C\x7D\x7E\x7F\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8A\x8B\x8C\x8D\x8E\x8F\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9A\x9B\x9C\x9D\x9E\x9F\xA0\xA1\xA2\xA3\xA4\xA5\xA6\xA7\xA8\xA9\xAA\xAB\xAC\xAD\xAE\xAF\xB0\xB1\xB2\xB3\xB4\xB5\xB6\xB7\xB8\xB9\xBA\xBB\xBC\xBD\xBE\xBF\xC0\xC1\xC2\xC3\xC4\xC5\xC6\xC7\xC8\xC9\xCA\xCB\xCC\xCD\xCE\xCF\xD0\xD1\xD2\xD3\xD4\xD5\xD6\xD7\xD8\xD9\xDA\xDB\xDC\xDD\xDE\xDF\xE0\xE1\xE2\xE3\xE4\xE5\xE6\xE7\xE8\xE9\xEA\xEB\xEC\xED\xEE\xEF\xF0\xF1\xF2\xF3\xF4\xF5\xF6\xF7\xF8\xF9\xFA\xFB\xFC\xFD\xFE\xFF";
 
-// Color codes in hex format
-const int COLOR_BLACK        = 0x000000;
-const int COLOR_GRAY         = 0x7c7c7c;
-const int COLOR_GRAY_DARK    = 0x5a5a5a;
-const int COLOR_GRAY_LIGHT   = 0xb4b4b4;
-const int COLOR_WHITE        = 0xfefefe;
-const int COLOR_RED          = 0xff0000;
-const int COLOR_RED_DARK     = 0x660000;
-const int COLOR_RED_LIGHT    = 0xfa6155;
-const int COLOR_ORANGE       = 0xfea400;
-const int COLOR_ORANGE_DARK  = 0xfe7c00;
-const int COLOR_ORANGE_LIGHT = 0xf3b800;
-const int COLOR_BROWN        = 0x9c5230;
-const int COLOR_BROWN_LIGHT  = 0xd0814b;
-const int COLOR_GOLD         = 0xfdd500;
-const int COLOR_YELLOW       = 0xfefe00;
-const int COLOR_YELLOW_DARK  = 0xd0ce00;
-const int COLOR_YELLOW_LIGHT = 0xfefeab;
-const int COLOR_GREEN        = 0x3dc93d;
-const int COLOR_GREEN_DARK   = 0x006400;
-const int COLOR_GREEN_LIGHT  = 0x3dc93d;
-const int COLOR_TURQUOISE    = 0x4bd3ce;
-const int COLOR_CYAN         = 0x00ffff;
-const int COLOR_BLUE         = 0x0099ff;
-const int COLOR_BLUE_DARK    = 0x3734b0;
-const int COLOR_BLUE_LIGHT   = 0xb3f3fe;
-const int COLOR_PURPLE       = 0x9632c8;
-const int COLOR_VIOLET       = 0xe984e7;
-const int COLOR_VIOLET_DARK  = 0x452744;
-const int COLOR_VIOLET_LIGHT = 0xf397f8;
-const int COLOR_PINK         = 0xfa6bb0;
-
-// By function
-const int COLOR_DEFAULT   = COLOR_WHITE;
-const int COLOR_ATTENTION = COLOR_ORANGE;
-const int COLOR_BUG       = COLOR_RED_DARK;
-const int COLOR_FAIL      = COLOR_RED;
-const int COLOR_SUCCESS   = COLOR_GREEN;
-const int COLOR_DEBUG     = COLOR_GRAY_LIGHT;
-const int COLOR_INFO      = COLOR_BROWN_LIGHT;
-const int COLOR_MAGIC     = COLOR_VIOLET;
-const int COLOR_DIVINE    = 0xfeecda;
+// -----------------------------------------------------------------------------
+//                                     Types
+// -----------------------------------------------------------------------------
 
 struct RGB
 {
