@@ -18,52 +18,9 @@
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
-//                                Colors By Name
-// -----------------------------------------------------------------------------
-// These are color codes included with the original version of sm-utils. If you
-// wish to use the X11 Palette instead, you should comment out this section
-// since some of the comment names conflict.
-
-const int COLOR_BLACK        = 0x000000;
-const int COLOR_GRAY         = 0x7c7c7c;
-const int COLOR_GRAY_DARK    = 0x5a5a5a;
-const int COLOR_GRAY_LIGHT   = 0xb4b4b4;
-const int COLOR_WHITE        = 0xfefefe;
-const int COLOR_RED          = 0xff0000;
-const int COLOR_RED_DARK     = 0x660000;
-const int COLOR_RED_LIGHT    = 0xfa6155;
-const int COLOR_ORANGE       = 0xfea400;
-const int COLOR_ORANGE_DARK  = 0xfe7c00;
-const int COLOR_ORANGE_LIGHT = 0xf3b800;
-const int COLOR_BROWN        = 0x9c5230;
-const int COLOR_BROWN_LIGHT  = 0xd0814b;
-const int COLOR_GOLD         = 0xfdd500;
-const int COLOR_YELLOW       = 0xfefe00;
-const int COLOR_YELLOW_DARK  = 0xd0ce00;
-const int COLOR_YELLOW_LIGHT = 0xfefeab;
-const int COLOR_GREEN        = 0x3dc93d;
-const int COLOR_GREEN_DARK   = 0x006400;
-const int COLOR_GREEN_LIGHT  = 0x3dc93d;
-const int COLOR_TURQUOISE    = 0x4bd3ce;
-const int COLOR_CYAN         = 0x00ffff;
-const int COLOR_BLUE         = 0x0099ff;
-const int COLOR_BLUE_DARK    = 0x3734b0;
-const int COLOR_BLUE_LIGHT   = 0xb3f3fe;
-const int COLOR_PURPLE       = 0x9632c8;
-const int COLOR_VIOLET       = 0xe984e7;
-const int COLOR_VIOLET_DARK  = 0x452744;
-const int COLOR_VIOLET_LIGHT = 0xf397f8;
-const int COLOR_PINK         = 0xfa6bb0;
-
-// -----------------------------------------------------------------------------
 //                               X11 Color Palette
 // -----------------------------------------------------------------------------
-// The codes included below are from the X11 color palette. Since some of these
-// names conflict with those above, you should comment out that section if you
-// want to use these instead.
-// -----------------------------------------------------------------------------
 
-/*
 // ----- Whites ----------------------------------------------------------------
 const int COLOR_AZURE               = 0xf0ffff;
 const int COLOR_BEIGE               = 0xf5f5dc;
@@ -227,42 +184,40 @@ const int COLOR_PEACH_PUFF          = 0xffdab9;
 const int COLOR_YELLOW              = 0xffff00;
 const int COLOR_YELLOW_DARK         = 0xd0ce00;
 const int COLOR_YELLOW_LIGHT        = 0xffffe0;
-*/
 
 // -----------------------------------------------------------------------------
 //                              Colors By Function
 // -----------------------------------------------------------------------------
 
-const int COLOR_DEFAULT           = COLOR_WHITE;
-const int COLOR_ATTENTION         = COLOR_ORANGE;
-const int COLOR_BUG               = COLOR_RED_DARK;
-const int COLOR_FAIL              = COLOR_RED;
-const int COLOR_SUCCESS           = COLOR_GREEN;
-const int COLOR_DEBUG             = COLOR_GRAY_LIGHT;
-const int COLOR_INFO              = COLOR_BROWN_LIGHT;
+const int COLOR_DEFAULT             = 0xfefefe;
+const int COLOR_ATTENTION           = 0xfea400;
+const int COLOR_BUG                 = 0x660000;
+const int COLOR_FAIL                = 0xff0000;
+const int COLOR_SUCCESS             = 0x3dc93d;
+const int COLOR_DEBUG               = 0xb4b4b4;
+const int COLOR_INFO                = 0xd0814b;
 
 // ----- Damage Types ----------------------------------------------------------
-const int COLOR_DAMAGE_MAGICAL    = 0xcc77ff;
-const int COLOR_DAMAGE_ACID       = 0x01ff01;
-const int COLOR_DAMAGE_COLD       = 0x99ffff;
-const int COLOR_DAMAGE_DIVINE     = 0xffff01;
-const int COLOR_DAMAGE_ELECTRICAL = 0x0166ff;
-const int COLOR_DAMAGE_FIRE       = 0xff0101;
-const int COLOR_DAMAGE_NEGATIVE   = 0x999999;
-const int COLOR_DAMAGE_POSITIVE   = 0xffffff;
-const int COLOR_DAMAGE_SONIC      = 0xff9901;
+const int COLOR_DAMAGE_MAGICAL      = 0xcc77ff;
+const int COLOR_DAMAGE_ACID         = 0x01ff01;
+const int COLOR_DAMAGE_COLD         = 0x99ffff;
+const int COLOR_DAMAGE_DIVINE       = 0xffff01;
+const int COLOR_DAMAGE_ELECTRICAL   = 0x0166ff;
+const int COLOR_DAMAGE_FIRE         = 0xff0101;
+const int COLOR_DAMAGE_NEGATIVE     = 0x999999;
+const int COLOR_DAMAGE_POSITIVE     = 0xffffff;
+const int COLOR_DAMAGE_SONIC        = 0xff9901;
 
 // ----- Chat Log Messages -----------------------------------------------------
-const int COLOR_MESSAGE_FEEDBACK  = 0xffff01;
-const int COLOR_MESSAGE_COMBAT    = 0xff6601;
-const int COLOR_MESSAGE_MAGIC     = 0xcc77ff;
-const int COLOR_MESSAGE_SKILLS    = 0x0166ff;
-const int COLOR_MESSAGE_SAVING    = 0x66ccff;
-const int COLOR_SAVE_STATUS       = 0x20ff20;
-const int COLOR_PAUSE_STATE       = 0xff0101;
-const int COLOR_NAME_CLIENT       = 0x99ffff;
-const int COLOR_NAME_OTHER        = 0xcc99cc;
-
+const int COLOR_MESSAGE_FEEDBACK    = 0xffff01;
+const int COLOR_MESSAGE_COMBAT      = 0xff6601;
+const int COLOR_MESSAGE_MAGIC       = 0xcc77ff;
+const int COLOR_MESSAGE_SKILLS      = 0x0166ff;
+const int COLOR_MESSAGE_SAVING      = 0x66ccff;
+const int COLOR_SAVE_STATUS         = 0x20ff20;
+const int COLOR_PAUSE_STATE         = 0xff0101;
+const int COLOR_NAME_CLIENT         = 0x99ffff;
+const int COLOR_NAME_OTHER          = 0xcc99cc;
 
 // -----------------------------------------------------------------------------
 //                                 Custom Colors
