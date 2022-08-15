@@ -80,6 +80,14 @@ void LoadLibrary(string sLibrary, int bForce = FALSE);
 // unless bForce is TRUE.
 void LoadLibraries(string sLibraries, int bForce = FALSE);
 
+// ---< LoadPrefixLibraries >---
+// ---< util_i_libraries >---
+// Loads all libraries included script files prefixed with sPrefix.  The scripts
+// inside the library are registered and are accessible via a call to
+// RunLibraryScript().  If any of the libraries have already been loaded, this
+// will not reload them unless bForce is TRUE.
+void LoadPrefixLibraries(string sPrefix, int bForce = FALSE);
+
 // ---< RunLibraryScript >---
 // ---< util_i_libraries >---
 // Runs sScript, dispatching into a library if the script is registered as a
@@ -228,6 +236,25 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
     int i, nCount = CountList(sLibraries);
     for (i = 0; i < nCount; i++)
         LoadLibrary(GetListItem(sLibraries, i), bForce);
+}
+
+void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
+{
+    if (sPrefix == "")
+        return;
+    else 
+        sPrefix += "_l_";
+
+    Debug("Attempting to " + (bForce ? "force " : "") + "load libraries " +
+        "prefixed with " + sPrefix);
+
+    int i = 1;
+    string sLibrary = ResManFindPrefix(sPrefix, RESTYPE_NCS, i++);
+    while (sLibrary != "")
+    {
+        LoadLibrary(sLibrary, bForce);
+        sLibrary = ResManFindPrefix(sPrefix, RESTYPE_NCS, i++);
+    }
 }
 
 int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
