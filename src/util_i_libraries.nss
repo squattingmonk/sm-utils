@@ -82,7 +82,7 @@ void LoadLibraries(string sLibraries, int bForce = FALSE);
 
 // ---< LoadPrefixLibraries >---
 // ---< util_i_libraries >---
-// Loads all libraries included script files prefixed with sPrefix.  The scripts
+// Loads all libraries included in script files prefixed with sPrefix.  The scripts
 // inside the library are registered and are accessible via a call to
 // RunLibraryScript().  If any of the libraries have already been loaded, this
 // will not reload them unless bForce is TRUE.
