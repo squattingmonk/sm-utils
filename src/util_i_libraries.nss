@@ -19,11 +19,11 @@
 //                                   Constants
 // -----------------------------------------------------------------------------
 
-const string LIB_RETURN       = "LIB_RETURN";
+const string LIB_RETURN  = "LIB_RETURN";
 const string LIB_ENTRY   = "LIB_ENTRY";
 const string LIB_LIBRARY = "LIB_LIBRARY";
 const string LIB_SCRIPT  = "LIB_SCRIPT";
-const string LIB_INIT         = "LIB_INIT";
+const string LIB_INIT    = "LIB_INIT";
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -242,8 +242,6 @@ void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
 {
     if (sPrefix == "")
         return;
-    else 
-        sPrefix += "_l_";
 
     Debug("Attempting to " + (bForce ? "force " : "") + "load libraries " +
         "prefixed with " + sPrefix);
