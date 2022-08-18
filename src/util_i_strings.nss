@@ -8,6 +8,15 @@
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
+//                                   Constants
+// -----------------------------------------------------------------------------
+
+const string CHARSET_NUMERIC = "0123456789";
+const string CHARSET_ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const string CHARSET_ALPHA_LOWER = "abcdefghijklmnopqrstuvwxyz";
+const string CHARSET_ALPHA_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+// -----------------------------------------------------------------------------
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
@@ -22,12 +31,62 @@ int GetSubStringCount(string sString, string sSubString);
 // the substring was not found at least nNth + 1 times, returns -1.
 int FindSubStringN(string sString, string sSubString, int nNth = 0);
 
+// ---< GetChar >---
+// ---< util_i_strings >---
+// Returns the character at index nPos in sString.
+string GetChar(string sString, int nPos);
+
 // ---< GetStringSlice >---
 // ---< util_i_strings >---
 // Returns a substring of sString from index nStart to nEnd. If nEnd is -1, will
 // return to the end of the string. Basically a convenience wrapper around
 // GetSubString().
 string GetStringSlice(string sString, int nStart, int nEnd = -1);
+
+// ---< ReplaceSubString >---
+// ---< util_i_strings >---
+// Replaces the characters in sString from index nStart to nEnd with sSub.
+string ReplaceSubString(string sString, string sSub, int nStart, int nEnd);
+
+// ---< HasSubString >---
+// ---< util_i_strings >---
+// Returns whether sString contains sSubString after nStart chars.
+int HasSubString(string sString, string sSubString, int nStart = 0);
+
+// ---< GetAnyCharsInSet >---
+// ---< util_i_strings >---
+// Returns whether any characters in sSet are in sString
+int GetAnyCharsInSet(string sString, string sSet);
+
+// ---< GetAllCharsInSet >---
+// ---< util_i_strings >---
+// Returns whether all characters in sString are in sSet.
+int GetAllCharsInSet(string sString, string sSet);
+
+// ---< GetIsUpperCase >---
+// ---< util_i_strings >---
+// Returns whether all letters in sString are upper-case.
+int GetIsUpperCase(string sString);
+
+// ---< GetIsLowerCase >---
+// ---< util_i_strings >---
+// Returns whether all letters x in sString are lower-case.
+int GetIsLowerCase(string sString);
+
+// ---< GetIsAlpha >---
+// ---< util_i_strings >---
+// Returns whether all characters in sString are letters.
+int GetIsAlpha(string sString);
+
+// ---< GetIsNumeric >---
+// ---< util_i_strings >---
+// Returns whether all characters in sString are digits.
+int GetIsNumeric(string sString);
+
+// ---< GetIsAlphaNumeric >---
+// ---< util_i_strings >---
+// Returns whether all characters in sString are letter or digits.
+int GetIsAlphaNumeric(string sString);
 
 // ---< TrimStringLeft >---
 // ---< util_i_strings >---
@@ -132,6 +191,11 @@ int FindSubStringN(string sString, string sSubString, int nNth = 0)
     return nPos;
 }
 
+string GetChar(string sString, int nPos)
+{
+    return GetSubString(sString, nPos, 1);
+}
+
 string GetStringSlice(string sString, int nStart, int nEnd = -1)
 {
     int nLength = GetStringLength(sString);
@@ -142,6 +206,68 @@ string GetStringSlice(string sString, int nStart, int nEnd = -1)
         return "";
 
     return GetSubString(sString, nStart, nEnd - nStart);
+}
+
+string ReplaceSubString(string sString, string sSub, int nStart, int nEnd)
+{
+    int nLength = GetStringLength(sString);
+    if (nStart < 0 || nStart >= nLength || nStart >= nEnd)
+        return sString;
+
+    return GetSubString(sString, 0, nStart) + sSub +
+           GetSubString(sString, nEnd, nLength - nEnd);
+}
+
+int HasSubString(string sString, string sSubString, int nStart = 0)
+{
+    return FindSubString(sString, sSubString, nStart) >= 0;
+}
+
+int GetAnyCharsInSet(string sString, string sSet)
+{
+    int i, nLength = GetStringLength(sString);
+    for (i = 0; i < nLength; i++)
+    {
+        if (HasSubString(sSet, GetChar(sString, i)))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+int GetAllCharsInSet(string sString, string sSet)
+{
+    int i, nLength = GetStringLength(sString);
+    for (i = 0; i < nLength; i++)
+    {
+        if (!HasSubString(sSet, GetChar(sString, i)))
+            return FALSE;
+    }
+    return TRUE;
+}
+
+int GetIsUpperCase(string sString)
+{
+    return GetAllCharsInSet(sString, CHARSET_ALPHA_UPPER + CHARSET_NUMERIC);
+}
+
+int GetIsLowerCase(string sString)
+{
+    return GetAllCharsInSet(sString, CHARSET_ALPHA_LOWER + CHARSET_NUMERIC);
+}
+
+int GetIsAlpha(string sString)
+{
+    return GetAllCharsInSet(sString, CHARSET_ALPHA);
+}
+
+int GetIsNumeric(string sString)
+{
+    return GetAllCharsInSet(sString, CHARSET_NUMERIC);
+}
+
+int GetIsAlphaNumeric(string sString)
+{
+    return GetAllCharsInSet(sString, CHARSET_ALPHA + CHARSET_NUMERIC);
 }
 
 string TrimStringLeft(string sString, string sRemove = " ")
