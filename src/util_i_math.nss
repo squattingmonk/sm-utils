@@ -35,6 +35,12 @@ int max(int a, int b);
 // Returns the smaller of two integers
 int min(int a, int b);
 
+// ---< sign >---
+// ---< util_i_math >---
+// Returns the sign of an integer (i.e., returns -1 if negative, 0 if 0, or 1 if
+// positive).
+int sign(int n);
+
 // ---< fmax >---
 // ---< util_i_math >---
 // Returns the larger of two floats.
@@ -83,6 +89,11 @@ int max(int a, int b)
 int min(int a, int b)
 {
     return (b > a) ? a : b;
+}
+
+int sign(int n)
+{
+    return (n > 0) ? 1 : (n < 0) ? -1 : 0;
 }
 
 float fmax(float a, float b)
