@@ -70,7 +70,8 @@ float frac(float f);
 
 // ---< fmod >---
 // ---< util_i_math >---
-// Returns a % b (modulo function).
+// Returns a % b (modulo function). For consistency with NWN's integer modulo
+// operator, the result has the same sign as a (i.e., fmod(-1, 2) == -1).
 float fmod(float a, float b);
 
 // ---< floor >---
