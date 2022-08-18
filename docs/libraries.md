@@ -275,6 +275,11 @@ The following is the same library definition as above, but uses variable
 incrementation to define the function entry numbers. The various subsections are 
 defined by modifying the value of, in this case, `n`, but any variable may be used.
 
+>**Note** Dividing functions into sections is a technique, not a requirement.  This
+example uses an increment of 100 numbers between sections.  If another increment is
+used, that number should be reflected in the value of `n` and the `case` values 
+in `OnLibraryScript()`.
+
 ``` c
 void OnLibraryLoad()
 {
