@@ -42,33 +42,33 @@ const string VARLIST_TYPE_JSON     = "JL:";
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< GetVectorObject >---
+// ---< VectorToJson >---
 // ---< util_i_varlists >---
 // Returns a json vector object encoded from vector vPosition. This
 // function should be used if creating elements to be used
 // with SetVectorList().
-json GetVectorObject(vector vPosition = [0.0, 0.0, 0.0]);
+json VectorToJson(vector vPosition = [0.0, 0.0, 0.0]);
 
-// ---< GetVectorObject >---
+// ---< JsonToVector >---
 // ---< util_i_varlists >---
 // Returns a vector decoded from json vector object jPosition. This
 // function should be used to decode elements of a list returned by
 // GetVectorList().
-vector GetObjectVector(json jPosition);
+vector JsonToVector(json jPosition);
 
-// ---< GetLocationObject >---
+// ---< LocationToJson >---
 // ---< util_i_varlists >---
 // Returns a json location object encoded from location lLocation.
 // This function should be used when creating elements to be used
 // with SetLocationList().
-json GetLocationObject(location lLocation);
+json LocationToJson(location lLocation);
 
-// ---< GetObjectLocation >---
+// ---< JsonToLocation >---
 // ---< util_i_varlists >---
 // Returns a location decoded from json location object jLocation.
 // This function should be used to decode elements of a list returned
 // by GetLocationList().
-location GetObjectLocation(json jLocation);
+location JsonToLocation(json jLocation);
 
 // ---< AddListFloat >---
 // ---< util_i_varlists >---
@@ -538,14 +538,14 @@ json GetIntList(object oTarget, string sListName = "");
 // ---< util_i_varlists >---
 // Retrieves the location list sListName from oTarget.
 // Elements of the returned array can be decoded with
-// GetObjectLocation().
+// JsonToLocation().
 json GetLocationList(object oTarget, string sListName = "");
 
 // ---< GetVectorList >---
 // ---< util_i_varlists >---
 // Retrieves the vector list sListName from oTarget.
 // Elements of the returned array can be decoded with
-// GetObjectVector().
+// JsonToVector().
 json GetVectorList(object oTarget, string sListName = "");
 
 // ---< GetObjectList >---
@@ -583,14 +583,14 @@ void SetIntList(object oTarget, json jList, string sListName = "");
 // ---< util_i_varlists >---
 // Sets the location list jList as sListName on oTarget.
 // jList must be an array of location objects. A location object
-// can be encoded by passing a location to GetLocationObject().
+// can be encoded by passing a location to LocationToJson().
 void SetLocationList(object oTarget, json jList, string sListName = "");
 
 // ---< SetVectorList >---
 // ---< util_i_varlists >---
 // Sets the vector list jList as sListName on oTarget.
 // jList must be an array of vector objects. A vector object
-// can be encoded by passing a vector to GetVectorObject()..
+// can be encoded by passing a vector to VectorToJson()..
 void SetVectorList(object oTarget, json jList, string sListName = "");
 
 // ---< SetObjectList >---
@@ -1196,7 +1196,7 @@ void _SortList(object oTarget, string sListType, string sListName, int nOrder)
 //                              Public Functions
 // -----------------------------------------------------------------------------
 
-json GetVectorObject(vector vPosition = [0.0, 0.0, 0.0])
+json VectorToJson(vector vPosition = [0.0, 0.0, 0.0])
 {
     json jPosition = JsonObject();
          jPosition = JsonObjectSet(jPosition, "x", JsonFloat(vPosition.x));
@@ -1204,7 +1204,7 @@ json GetVectorObject(vector vPosition = [0.0, 0.0, 0.0])
     return           JsonObjectSet(jPosition, "z", JsonFloat(vPosition.z));
 }
 
-vector GetObjectVector(json jPosition)
+vector JsonToVector(json jPosition)
 {
     float x = JsonGetFloat(JsonObjectGet(jPosition, "x"));
     float y = JsonGetFloat(JsonObjectGet(jPosition, "y"));
@@ -1213,18 +1213,18 @@ vector GetObjectVector(json jPosition)
     return Vector(x, y, z);
 }
 
-json GetLocationObject(location lLocation)
+json LocationToJson(location lLocation)
 {
     json jLocation = JsonObject();
          jLocation = JsonObjectSet(jLocation, "area", JsonString(ObjectToString(GetAreaFromLocation(lLocation))));
-         jLocation = JsonObjectSet(jLocation, "position", GetVectorObject(GetPositionFromLocation(lLocation)));
+         jLocation = JsonObjectSet(jLocation, "position", VectorToJson(GetPositionFromLocation(lLocation)));
     return           JsonObjectSet(jLocation, "facing", JsonFloat(GetFacingFromLocation(lLocation)));
 }
 
-location GetObjectLocation(json jLocation)
+location JsonToLocation(json jLocation)
 {
     object oArea = StringToObject(JsonGetString(JsonObjectGet(jLocation, "area")));
-    vector vPosition = GetObjectVector(JsonObjectGet(jLocation, "position"));
+    vector vPosition = JsonToVector(JsonObjectGet(jLocation, "position"));
     float fFacing = JsonGetFloat(JsonObjectGet(jLocation, "facing"));
 
     return Location(oArea, vPosition, fFacing);
@@ -1242,13 +1242,13 @@ int AddListInt(object oTarget, int nValue, string sListName = "", int bAddUnique
 
 int AddListLocation(object oTarget, location lValue, string sListName = "", int bAddUnique = FALSE)
 {
-    json jLocation = GetLocationObject(lValue);
+    json jLocation = LocationToJson(lValue);
     return _InsertListElement(oTarget, VARLIST_TYPE_LOCATION, sListName, jLocation, -1, bAddUnique);
 }
 
 int AddListVector(object oTarget, vector vValue, string sListName = "", int bAddUnique = FALSE)
 {
-    json jVector = GetVectorObject(vValue);
+    json jVector = VectorToJson(vValue);
     return _InsertListElement(oTarget, VARLIST_TYPE_VECTOR, sListName, jVector, -1, bAddUnique);
 }
 
@@ -1287,7 +1287,7 @@ location GetListLocation(object oTarget, int nIndex = 0, string sListName = "")
     if (jValue == JsonNull())
         return Location(OBJECT_INVALID, Vector(), 0.0);
     else
-        return GetObjectLocation(jValue);
+        return JsonToLocation(jValue);
 }
 
 vector GetListVector(object oTarget, int nIndex = 0, string sListName = "")
@@ -1297,7 +1297,7 @@ vector GetListVector(object oTarget, int nIndex = 0, string sListName = "")
     if (jValue == JsonNull())
         return Vector();
     else
-        return GetObjectVector(jValue);
+        return JsonToVector(jValue);
 }
 
 object GetListObject(object oTarget, int nIndex = 0, string sListName = "")
@@ -1364,13 +1364,13 @@ int RemoveListInt(object oTarget, int nValue, string sListName = "", int bMainta
 
 int RemoveListLocation(object oTarget, location lValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    json jLocation = GetLocationObject(lValue);
+    json jLocation = LocationToJson(lValue);
     return _RemoveListElement(oTarget, VARLIST_TYPE_LOCATION, sListName, jLocation);
 }
 
 int RemoveListVector(object oTarget, vector vValue, string sListName = "", int bMaintainOrder = FALSE)
 {
-    json jVector = GetVectorObject(vValue);
+    json jVector = VectorToJson(vValue);
     return _RemoveListElement(oTarget, VARLIST_TYPE_VECTOR, sListName, jVector);
 }
 
@@ -1402,13 +1402,13 @@ int FindListInt(object oTarget, int nValue, string sListName = "")
 
 int FindListLocation(object oTarget, location lValue, string sListName = "")
 {
-    json jLocation = GetLocationObject(lValue);
+    json jLocation = LocationToJson(lValue);
     return _FindListElement(oTarget, VARLIST_TYPE_LOCATION, sListName, jLocation);
 }
 
 int FindListVector(object oTarget, vector vValue, string sListName = "")
 {
-    json jVector = GetVectorObject(vValue);
+    json jVector = VectorToJson(vValue);
     return _FindListElement(oTarget, VARLIST_TYPE_VECTOR, sListName, jVector);
 }
 
@@ -1475,13 +1475,13 @@ int InsertListInt(object oTarget, int nIndex, int nValue, string sListName = "",
 
 int InsertListLocation(object oTarget, int nIndex, location lValue, string sListName = "", int bAddUnique = FALSE)
 {
-    json jLocation = GetLocationObject(lValue);
+    json jLocation = LocationToJson(lValue);
     return _InsertListElement(oTarget, VARLIST_TYPE_LOCATION, sListName, jLocation, nIndex, bAddUnique);
 }
 
 int InsertListVector(object oTarget, int nIndex, vector vValue, string sListName = "", int bAddUnique = FALSE)
 {
-    json jVector = GetVectorObject(vValue);
+    json jVector = VectorToJson(vValue);
     return _InsertListElement(oTarget, VARLIST_TYPE_VECTOR, sListName, jVector, nIndex, bAddUnique);
 }
 
@@ -1513,13 +1513,13 @@ void SetListInt(object oTarget, int nIndex, int nValue, string sListName = "")
 
 void SetListLocation(object oTarget, int nIndex, location lValue, string sListName = "")
 {
-    json jLocation = GetLocationObject(lValue);
+    json jLocation = LocationToJson(lValue);
     _SetListElement(oTarget, VARLIST_TYPE_LOCATION, sListName, nIndex, jLocation);
 }
 
 void SetListVector(object oTarget, int nIndex, vector vValue, string sListName = "")
 {
-    json jVector = GetVectorObject(vValue);
+    json jVector = VectorToJson(vValue);
     _SetListElement(oTarget, VARLIST_TYPE_VECTOR, sListName, nIndex, jVector);
 }
 
