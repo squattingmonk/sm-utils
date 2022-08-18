@@ -259,3 +259,166 @@ void OnLibraryScript(string sScript, int nEntry)
     }
 }
 ```
+
+If maintaining the function reference (`nEntry`) numbers proves challenging due
+to the size of the library, you can use variable incrementation to assign and
+access function reference numbers.  This technique will require less time to build a
+library, however, order is exceptionally important.  
+
+>***Warning*** If a function is no longer registered by `RegisterLibraryScript` in
+`OnLibraryLoad()`, it *must* be removed from `OnLibraryScript()` or this technique
+may route the request to an undesired function.  Additionally, the functions
+routed in `OnLibraryScript()` must be inserted in the same order they are registered
+in `OnLibraryLoad()`.
+
+The following is the same library definition as above, but uses variable
+incrementation to define the function entry numbers. The various subsections are 
+defined by modifying the value of, in this case, `n`, but any variable may be used.
+
+>**Note** Dividing functions into sections is a technique, not a requirement.  This
+example uses an increment of 100 numbers between sections.  If another increment is
+used, that number should be reflected in the value of `n` and the `case` values 
+in `OnLibraryScript()`.
+
+``` c
+void OnLibraryLoad()
+{
+    // Event functions
+    int n = 100;
+    RegisterLibraryScript("prr_OnComponentActivate",                 n++);
+    RegisterLibraryScript("prr_OnClientEnter",                       n++);
+
+    // Dialog utility functions
+    n = 200;
+    RegisterLibraryScript("prr_SetDatabaseInt",                      n++);
+    RegisterLibraryScript("prr_GetDatabaseInt",                      n++);
+
+    RegisterLibraryScript("prr_SetHasMetNPC",                        n++);
+    RegisterLibraryScript("prr_GetHasMetNPC",                        n++);
+
+    RegisterLibraryScript("prr_GetReactionHate",                     n++);
+    RegisterLibraryScript("prr_GetReactionNeutral",                  n++);
+    RegisterLibraryScript("prr_GetReactionLike",                     n++);
+
+    RegisterLibraryScript("prr_SkillCheckHigh",                      n++);
+    RegisterLibraryScript("prr_SkillCheckMid",                       n++);
+    RegisterLibraryScript("prr_SkillCheckLow",                       n++);
+    RegisterLibraryScript("prr_SkillCheckCustom",                    n++);
+
+    // Dialog reputation functions
+    n = 300;
+    RegisterLibraryScript("prr_ReputationIncreaseHigh",              n++);
+    RegisterLibraryScript("prr_ReputationIncreaseMid",               n++);
+    RegisterLibraryScript("prr_ReputationIncreaseLow",               n++);
+    RegisterLibraryScript("prr_ReputationDecreaseHigh",              n++);
+    RegisterLibraryScript("prr_ReputationDecreaseMid",               n++);
+    RegisterLibraryScript("prr_ReputationDecreaseLow",               n++);
+    RegisterLibraryScript("prr_ReputationChangeCustom",              n++);
+
+    RegisterLibraryScript("prr_ReputationIncreaseHigh_Party",        n++);
+    RegisterLibraryScript("prr_ReputationIncreaseMid_Party",         n++);
+    RegisterLibraryScript("prr_ReputationIncreaseLow_Party",         n++);
+    RegisterLibraryScript("prr_ReputationDecreaseHigh_Party",        n++);
+    RegisterLibraryScript("prr_ReputationDecreaseMid_Party",         n++);
+    RegisterLibraryScript("prr_ReputationDecreaseLow_Party",         n++);
+    RegisterLibraryScript("prr_ReputationChangeCustom_Party",        n++);
+
+    // Dialog faction reputation functions
+    n = 400;
+    RegisterLibraryScript("prr_FactionReputationIncreaseHigh",       n++);
+    RegisterLibraryScript("prr_FactionReputationIncreaseMid",        n++);
+    RegisterLibraryScript("prr_FactionReputationIncreaseLow",        n++);
+    RegisterLibraryScript("prr_FactionReputationDecreaseHigh",       n++);
+    RegisterLibraryScript("prr_FactionReputationDecreaseMid",        n++);
+    RegisterLibraryScript("prr_FactionReputationDecreaseLow",        n++);
+    RegisterLibraryScript("prr_FactionReputationChangeCustom",       n++);
+
+    RegisterLibraryScript("prr_FactionReputationIncreaseHigh_Party", n++);
+    RegisterLibraryScript("prr_FactionReputationIncreaseMid_Party",  n++);
+    RegisterLibraryScript("prr_FactionReputationIncreaseLow_Party",  n++);
+    RegisterLibraryScript("prr_FactionReputationDecreaseHigh_Party", n++);
+    RegisterLibraryScript("prr_FactionReputationDecreaseMid_Party",  n++);
+    RegisterLibraryScript("prr_FactionReputationDecreaseLow_Party",  n++);
+    RegisterLibraryScript("prr_FactionReputationChangeCustom_Party", n++);
+
+    // General Utility functions
+    n = 500;
+    RegisterLibraryScript("prr_CaptureChatText",                     n++);
+}
+
+void OnLibraryScript(string sScript, int nEntry)
+{
+    int n = nEntry / 100 * 100;
+    switch (n)
+    {
+        case 100:
+        {
+            if      (nEntry == n++) prr_OnComponentActivate();
+            else if (nEntry == n++) prr_OnClientEnter();
+        } break;
+
+        case 200:
+        {
+            if      (nEntry == n++) prr_SetDatabaseInt();
+            else if (nEntry == n++) prr_GetDatabaseInt();
+
+            else if (nEntry == n++) prr_SetHasMetNPC();
+            else if (nEntry == n++) prr_GetDatabaseInt();
+
+            else if (nEntry == n++) prr_GetReactionHate();
+            else if (nEntry == n++) prr_GetReactionNeutral();
+            else if (nEntry == n++) prr_GetReactionLike();
+
+            else if (nEntry == n++) prr_SkillCheckHigh();
+            else if (nEntry == n++) prr_SkillCheckMid();
+            else if (nEntry == n++) prr_SkillCheckLow();
+            else if (nEntry == n++) prr_SkillCheckCustom();
+        } break;
+
+        case 300:
+        {
+            if      (nEntry == n++) prr_ReputationIncreaseHigh();
+            else if (nEntry == n++) prr_ReputationIncreaseMid();
+            else if (nEntry == n++) prr_ReputationIncreaseLow();
+            else if (nEntry == n++) prr_ReputationDecreaseHigh();
+            else if (nEntry == n++) prr_ReputationDecreaseMid();
+            else if (nEntry == n++) prr_ReputationDecreaseLow();
+            else if (nEntry == n++) prr_ReputationChangeCustom();
+
+            else if (nEntry == n++) prr_ReputationIncreaseHigh_Party();
+            else if (nEntry == n++) prr_ReputationIncreaseMid_Party();
+            else if (nEntry == n++) prr_ReputationIncreaseLow_Party();
+            else if (nEntry == n++) prr_ReputationDecreaseHigh_Party();
+            else if (nEntry == n++) prr_ReputationDecreaseMid_Party();
+            else if (nEntry == n++) prr_ReputationDecreaseLow_Party();
+            else if (nEntry == n++) prr_ReputationChangeCustom_Party();
+        } break;
+
+        case 400:
+        {
+            if      (nEntry == n++) prr_FactionReputationIncreaseHigh();
+            else if (nEntry == n++) prr_FactionReputationIncreaseMid();
+            else if (nEntry == n++) prr_FactionReputationIncreaseLow();
+            else if (nEntry == n++) prr_FactionReputationDecreaseHigh();
+            else if (nEntry == n++) prr_FactionReputationDecreaseMid();
+            else if (nEntry == n++) prr_FactionReputationDecreaseLow();
+            else if (nEntry == n++) prr_FactionReputationChangeCustom();
+
+            else if (nEntry == n++) prr_FactionReputationIncreaseHigh_Party();
+            else if (nEntry == n++) prr_FactionReputationIncreaseMid_Party();
+            else if (nEntry == n++) prr_FactionReputationIncreaseLow_Party();
+            else if (nEntry == n++) prr_FactionReputationDecreaseHigh_Party();
+            else if (nEntry == n++) prr_FactionReputationDecreaseMid_Party();
+            else if (nEntry == n++) prr_FactionReputationDecreaseLow_Party();
+            else if (nEntry == n++) prr_FactionReputationChangeCustom_Party();
+        } break;
+
+        case 500:
+        {
+            if      (nEntry == n++) prr_CaptureChatText();
+        } break;
+
+        default: CriticalError("Library function " + sScript + " not found");
+    }
+}
+```
