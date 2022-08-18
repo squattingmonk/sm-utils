@@ -51,10 +51,10 @@ float fmax(float a, float b);
 // Returns the smaller of two floats.
 float fmin(float a, float b);
 
-// ---< floor >---
+// ---< trunc >---
 // ---< util_i_math >---
-// Returns f rounded to the nearest whole number.
-float floor(float f);
+// Returns f with any fractional part removed.
+float trunc(float f);
 
 // ---< frac >---
 // ---< util_i_math >---
@@ -106,17 +106,17 @@ float fmin(float a, float b)
     return (b > a) ? a : b;
 }
 
-float floor(float f)
+float trunc(float f)
 {
     return IntToFloat(FloatToInt(f));
 }
 
 float frac(float f)
 {
-    return f - floor(f);
+    return f - trunc(f);
 }
 
 float fmod(float a, float b)
 {
-    return a - b * floor(a / b);
+    return a - b * trunc(a / b);
 }
