@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_color.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
+//     URL: https://github.com/squattingmonk/sm-utils
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds functions used to color strings with color codes. These codes
@@ -75,76 +75,83 @@ struct HSV GetHSV(float fHue, float fSaturation, float fValue);
 
 // ----- Type Conversion -------------------------------------------------------
 
-// ---< HexToRGB >---
-// ---< util_i_color >---
-// Converts a hex color into an RGB struct.
+/// @brief Converts a hexadecimal to a struct RGB
+/// @param nColor Hexadecimal to convert to struct RGB
+/// @returns struct RGB conversion of nColor
 struct RGB HexToRGB(int nColor);
 
-// ---< RGBToHex >---
-// ---< util_i_color >---
-// Converts an RGB struct into a hex color.
+/// @brief Converts struct RGB to hexadecimal
+/// @param rgb struct RGB to convert to hexadecimal
+/// @returns Hexadecimal conversion of struct RGB rgb
 int RGBToHex(struct RGB rgb);
 
-// ---< RGBToHSV >---
-// ---< util_i_color >---
-// Converts the color represented by an RGB struct into an HSV struct.
+/// @brief Converts an struct RGB to a struct HSV
+/// @param rgb struct RGB to convert to struct HSV
+/// @returns struct HSV conversion of struct RGB rgb
 struct HSV RGBToHSV(struct RGB rgb);
 
-// ---< HSVToRGB >---
-// ---< util_i_color >---
-// Converts an HSV struct into an RGB struct.
+/// @brief Converts a struct HSV to a struct RGB
+/// @param hsv struct HSV to convert to struct RGB
+/// @returns struct RGB conversion of struct HSV hsv
 struct RGB HSVToRGB(struct HSV hsv);
 
-// ---< HexToHSV >---
-// ---< util_i_color >---
-// Converts a hex color into an HSV struct.
+/// @brief Converts a hexadecimal to struct HSV
+/// @param nColor Hexadecimal to convert to struct HSV
+/// @returns struct HSV conversion of nColor
 struct HSV HexToHSV(int nColor);
 
-// ---< HSVToHex >---
-// ---< util_i_color >---
-// Converts an HSV struct into a hex color.
+/// @brief Converts a struct HSV to hexadecimal
+/// @param hsv struct HSV to convert to hexadecimal
+/// @returns Hexademical conversion of struct HSV hsv
 int HSVToHex(struct HSV hsv);
 
 // ----- Coloring Functions ----------------------------------------------------
 
-// ---< GetColorCode >---
-// ---< util_i_color >---
-// Returns a color code that can be used to color a string.
+/// @brief Constructs a color code that can be used to color a string
+/// @param nRed Integer representing intensity of red channel
+/// @param nGreen Integer representing intensity of green channel
+/// @param nBlue Integer representing intensity of blue channel
+/// @returns Prefix used to color strings displayed to players
 string GetColorCode(int nRed, int nGreen, int nBlue);
 
-// ---< HexToColor >---
-// ---< util_i_color >---
-// Returns a color code representing a hex color.
+/// @brief Constructs a color code that can be used to color a string
+/// @param nColor Hexadecimal representation of an RGB color
+/// @returns Prefix used to color strings displayed to players
 string HexToColor(int nColor);
 
-// ---< ColorToHex >---
-// ---< util_i_color >---
-// Returns a hex color representing a color code.
+/// @brief Converts a color code prefix to a hexadecimal
+/// @param sColor Color code prefix
+/// @returns Hexadecimal conversion of sColor
 int ColorToHex(string sColor);
 
-// ---< ColorString >---
-// ---< util_i_color >---
-// Returns sString colored with a color code.
+/// @brief Colors a string with a color code
+/// @param sString String to color
+/// @param sColor Color code prefix
+/// @returns sString with color code prefix and suffix
 string ColorString(string sString, string sColor);
 
-// ---< HexColorString >---
-// ---< util_i_color >---
-// Returns sString colored with a hex color.
+/// @brief Colors a string with a hexadcimal color
+/// @param sString String to color
+/// @param nColor Hexadecimal color
+/// @returns sString with color code prefix and suffix
 string HexColorString(string sString, int nColor);
 
-// ---< RGBColorString >---
-// ---< util_i_color >---
-// Returns sString colored with an RGB color.
+/// @brief Colors a string with a struct RGB color
+/// @param sString String to color
+/// @param rgb struct RGB color
+/// @returns sString with color code prefix and suffix
 string RGBColorString(string sString, struct RGB rgb);
 
-// ---< HSVColorString >---
-// ---< util_i_color >---
-// Returns sString colored with an HSV color.
+
+/// @brief Colors a string with a struct HSV color
+/// @param sString String to color
+/// @param hsv struct HSV color
+/// @returns sString with color code prefix and suffix
 string HSVColorString(string sString, struct HSV hsv);
 
-// ---< UnColorString >---
-// ---< util_i_color >---
-// Returns sString, stripped of any color codes.
+/// @brief Removes color code prefixes and suffixes
+/// @param sString String to uncolor
+/// @returns sString with color codes removed
 string UnColorString(string sString);
 
 // -----------------------------------------------------------------------------

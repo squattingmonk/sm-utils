@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_datapoint.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
+//     URL: https://github.com/squattingmonk/sm-utils
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds functions for creating and interacting with data points. Data
@@ -20,45 +20,58 @@ const string DATA_ITEM   = "nw_it_msmlmisc22";
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< CreateDatapoint >---
-// ---< util_i_datapoint >---
-// Creates a datapoint that oOwner can use to store sSystem-related variables.
-// If oOwner is invalid, it will be the module. The placeable is created at
-// oOwner's location (or the module starting location if oOwner is an area or
-// the module).
+/// @brief Creates a datapoint (placeable) that stores variables for a
+///     specified system
+/// @param sSystem Name of system associated with this datapoint
+/// @param oOwner (optional) Parent object of this datapoint; if omitted,
+///     defaults to GetModule();
+/// @note A datapoint is created at oOwner's location; if oOwner is invalid or
+///     is an area object, the datapoint is created at the module starting
+///     location.
+/// @returns sSystem's datapoint object
 object CreateDatapoint(string sSystem, object oOwner = OBJECT_INVALID);
 
-// ---< GetDatapoint >---
-// ---< util_i_datapoint >---
-// Returns the object that oOwner uses to store sSystem-related variables. If
-// oOwner is invalid, it will be the module. If the datapoint has not been
-// created and bCreate is TRUE, the system will create one. The system-generated
-// datapoint is an invisible placeable created at oOwner's location (or the
-// module starting location if oOwner is an area or the module).
+/// @brief Retrieves a datapoint (placeable) that stores variables for a
+///     specified system
+/// @param sSystem Name of system associated with this datapoint
+/// @param oOwner (optional) Parent object of this datapoint; if omitted, 
+///     defaults to GetModule()
+/// @param bCreate If TRUE and the datapoint cannot be found, a new datapoint
+///     will be created at oOwner's location; if oOwner is invalid or is an
+///     area object, the datapoint is created at the module starting location
+/// @returns sSystem's datapoint object
 object GetDatapoint(string sSystem, object oOwner = OBJECT_INVALID, int bCreate = TRUE);
 
-// ---< SetDatapoint >---
-// ---< util_i_datapoint >---
-// Sets oTarget as the object that oOwner uses to store sSystem-related
-// variables. If oOwner is invalid, it will be the module. Useful if you want
-// more control over the resref, object type, or location of your datapoint.
+/// @brief Sets a datapoint (game object) as the object that stores variables
+///     for a specified system
+/// @param sSystem Name of system associated with this datapoint
+/// @param oTarget Object to be used as a datapoint
+/// @param oOwner (optional) Parent object of this datapoint; if omitted,
+///     default to GetModule()
+/// @note Allows any valid game object to be used as a datapoint
 void SetDatapoint(string sSystem, object oTarget, object oOwner = OBJECT_INVALID);
 
-// ---< CreateDataItem >---
-// ---< util_i_datapoint >---
-// Creates a data item on oDatapoint that it can use to store sSubSystem-related
-// variables.
+/// @brief Creates a data item (item) that stores variables for a specified
+///     sub-system
+/// @param oDatapoint Datapoint object on which to place the data item
+/// @param sSubSystem Name of sub-system associated with this data item
+/// @returns sSubSystem's data item object
 object CreateDataItem(object oDatapoint, string sSubSystem);
 
-// ---< GetDataItem >---
-// ---< util_i_datapoint >---
-// Returns the item that oDatapoint uses to store sSubSystem-related variables.
+/// @brief Retrieves a data item (item) that stores variables for a specified
+///     sub-system
+/// @param oDatapoint Datapoint object from which to retrieve the data item
+/// @param sSubSystem Name of sub-system associated with the data item
+/// @returns sSubSystem's data item object
 object GetDataItem(object oDatapoint, string sSubSystem);
 
-// ---< SetDataItem >---
-// ---< util_i_datapoint >---
-// Sets oItem as the object that oDatapoint uses to store sSubSystem-related
-// variables.
+/// @brief Sets a data item (item) as the object that stores variables for a
+///     specified sub-system
+/// @param oDatapoint Datapoint object on which to place the data item
+/// @param sSubSystem Name of sub-system assocaited with the data item
+/// @param oItem Item to be used as a data item
+/// @note oItem must a valid game item that can be placed into an object's
+///     inventory
 void SetDataItem(object oDatapoint, string sSubSystem, object oItem);
 
 // -----------------------------------------------------------------------------

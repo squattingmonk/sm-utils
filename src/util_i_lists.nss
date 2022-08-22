@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //    File: util_i_lists.nss
 //  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
+//     URL: https://github.com/squattingmonk/sm-utils
 // Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 // -----------------------------------------------------------------------------
 // This file holds compatibility functions for converting between CSV and
@@ -26,44 +26,39 @@ const int LIST_TYPE_STRING = 2;
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< SplitList >---
-// ---< util_i_lists >---
-// Splits a comma-separated string list into a local variable list of the given
-// type.
-// Parameters:
-// - oTarget: the object on which to create the list
-// - sList: the CSV list to operate on
-// - sListName: the name of the list to create or add to
-// - bAddUnique: only add items to the list if they are not already there?
-// - nListType: the type of list to create
-//   Possible values:
-//   - LIST_TYPE_STRING (default)
-//   - LIST_TYPE_FLOAT
-//   - LIST_TYPE_INT
+/// @brief Splits a comma-separated value list into a local variable list of the
+///     given type.
+/// @param oTarget Object on which to create the list
+/// @param sList Source CSV list
+/// @param sListName Name of the list to create or add to
+/// @param bAddUnique If TRUE, prevents duplicate list items
+/// @param nListType Type of list to create
+///     LIST_TYPE_STRING (default)
+///     LIST_TYPE_FLOAT
+///     LIST_TYPE_INT
+/// @returns JSON array of split CSV list
 json SplitList(object oTarget, string sList, string sListName = "", int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
 
-// ---< JoinList >---
-// ---< util_i_lists >---
-// Joins a local variable list of a given type into a comma-separated list.
-// Parameters:
-// - oTarget: the object on which to find the local variable list
-// - sListName: the name of the local variable list
-// - bAddUnique: only add items to the list if they are not already there?
-// - nListType: the type of the local variable list
-//   Possible values:
-//   - LIST_TYPE_STRING (default)
-//   - LIST_TYPE_FLOAT
-//   - LIST_TYPE_INT
+/// @brief Joins a local variable list of a given type into a comma-separated
+///     value list
+/// @param oTarget Object from which to source the local variable list
+/// @param sListName Name of the local variable list
+/// @param bAddUnique If TRUE, prevents duplicate list items
+/// @param nListType Type of local variable list
+///     LIST_TYPE_STRING (default)
+///     LIST_TYPE_FLOAT
+///     LIST_TYPE_INT
+/// @returns Joined CSV list of local variable list
 string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
 
-// ---< ListToJson >---
-// ---< util_i_lists >---
-// Converts a CSV list to a json array.
+/// @brief Converts a comma-separated value list to a JSON array
+/// @param sList Source CSV list
+/// @returns JSON array representation of CSV list
 json ListToJson(string sList);
 
-// ---< ListToJson >---
-// ---< util_i_lists >---
-// Converts a json array to a CSV list.
+/// @brief Converts a JSON array to a comma-separate value list
+/// @param jArray JSON array list
+/// @returns CSV list of JSON array values
 string JsonToList(json jArray);
 
 // -----------------------------------------------------------------------------
