@@ -42,6 +42,7 @@ This package contains the following resources:
 | `util_i_math.nss`      | Common math utilities                        |
 | `util_i_strings.nss`   | String manipulation utilities                |
 | `util_i_color.nss`     | RGB, HSV, and hex color utilities            |
+| `util_i_constants.nss` | Constant value retrieval functions           |
 
 Note: `sm-utils` relies on script extensions added by
 [nwnsc](https://github.com/nwneetools/nwnsc). This prevents error messages when
