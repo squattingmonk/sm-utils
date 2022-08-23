@@ -141,6 +141,12 @@ const string ERA_OFFSET = "Offset";
 
 // ----- Conversions -----------------------------------------------------------
 
+int YearsToDays(int nYears);
+
+
+int MonthsToDays(int nMonths);
+
+
 float Years(int nYears = 1);
 
 
@@ -163,7 +169,6 @@ float Milliseconds(int nMilliseconds = 1);
 
 
 int HoursToMinutes(int nHours = 1);
-
 
 // ----- Times -----------------------------------------------------------------
 
@@ -192,6 +197,9 @@ void SetCurrentTime(struct Time t);
 
 
 void AdvanceCurrentTime(float fSeconds);
+
+
+struct Time GetPrecisionTime(struct Time t, int nUnit);
 
 
 // ----- Durations -------------------------------------------------------------
@@ -227,15 +235,64 @@ struct Time SubtractTime(struct Time t, float fSub);
 
 json TimeToJsonArray(struct Time t, int bNormalize = TRUE);
 
+json TimeToJsonObject(struct Time t, int bNormalize = TRUE);
+
+json TimeToJson(struct Time t, int bNormalize = TRUE);
+
 
 struct Time JsonArrayToTime(json j, int bNormalize = TRUE);
 
-
-json TimeToJsonObject(struct Time t, int bNormalize = TRUE);
-
-
 struct Time JsonObjectToTime(json j, int bNormalize = TRUE);
 
+struct Time JsonToTime(json j, int bNormalize = TRUE);
+
+// ----- Locales ---------------------------------------------------------------
+
+string GetLocaleString(json jLocale, string sKey, string sPrefix = "");
+
+
+json SetLocaleString(json j, string sKey, string sValue);
+
+
+json NewLocale();
+
+
+string GetDefaultLocale();
+
+
+void SetDefaultLocale(string sName = DEFAULT_LOCALE);
+
+
+json GetLocale(string sLocale = "", int bInit = TRUE);
+
+
+void SetLocale(json jLocale, string sLocale = "");
+
+
+void DeleteLocale(string sLocale = "");
+
+
+int HasLocale(string sLocale = "");
+
+
+string MonthToString(int nMonth, string sMonths = "", string sLocale = "");
+
+
+string DayToString(int nDay, string sDays = "", string sLocale = "");
+
+
+// ----- Eras ------------------------------------------------------------------
+
+json DefineEra(string sName, struct Time tStart, int nOffset = 0, string sFormat = "%Ey %EC");
+
+
+json AddEra(json jLocale, json jEra);
+
+
+json GetEra(json jLocale, struct Time t);
+
+
+int GetEraYear(json jEra, int nYear);
 
 
 // ----- Formatting ------------------------------------------------------------
@@ -246,15 +303,22 @@ string TimeToString(struct Time t, int bNormalize = TRUE);
 string DurationToString(float fDur, int bShowSignIfPos = TRUE);
 
 
-string GetMonthName(int nMonth, string sMonths = "");
+struct Time StringToTime(string sTime, int nMinsPerHour = 0);
 
 
-string GetWeekdayName(int nDay, string sWeekdays = "");
+string IntToOrdinalString(int n, string sSuffixes = "th, st, nd, rd, th, th, th, th, th, th, th, th, th, th");
+
 
 string FormatTime(struct Time t, string sFormat = "%X", string sLocale = "");
 
-string FormatDuration(float fDur, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "");
 
+string FormatDate(struct Time t, string sFormat = "%x", string sLocale = "");
+
+
+string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "");
+
+
+string FormatDuration(float fDur, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "");
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
