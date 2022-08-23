@@ -207,7 +207,7 @@ struct Time GetPrecisionTime(struct Time t, int nUnit);
 struct Time DurationToTime(float fDur);
 
 
-float GetTimeInterval(struct Time a, struct Time b, int bNormalize = TRUE);
+float GetDuration(struct Time a, struct Time b, int bNormalize = TRUE);
 
 
 float GetTimeSince(struct Time tSince, int bNormalize = TRUE);
@@ -597,7 +597,7 @@ struct Time DurationToTime(float fDur)
     return t;
 }
 
-float GetTimeInterval(struct Time a, struct Time b, int bNormalize = TRUE)
+float GetDuration(struct Time a, struct Time b, int bNormalize = TRUE)
 {
     // Durations always use real seconds, so we normalize time to the game clock
     if (bNormalize)
@@ -619,23 +619,23 @@ float GetTimeInterval(struct Time a, struct Time b, int bNormalize = TRUE)
 
 float GetTimeSince(struct Time tSince, int bNormalize = TRUE)
 {
-    return GetTimeInterval(tSince, GetCurrentTime(), bNormalize);
+    return GetDuration(tSince, GetCurrentTime(), bNormalize);
 }
 
 float GetTimeUntil(struct Time tUntil, int bNormalize = TRUE)
 {
     // We do this backwards to ensure we normalize to tUntil.MinsPerHour
-    return GetTimeInterval(tUntil, GetCurrentTime(), bNormalize) * -1;
+    return GetDuration(tUntil, GetCurrentTime(), bNormalize) * -1;
 }
 
 int GetIsTimeAfter(struct Time a, struct Time b, int bNormalize = TRUE)
 {
-    return GetIsTimeValid(b) && GetTimeInterval(a, b, bNormalize) < 0.0;
+    return GetIsTimeValid(b) && GetDuration(a, b, bNormalize) < 0.0;
 }
 
 int GetIsTimeBefore(struct Time a, struct Time b, int bNormalize = TRUE)
 {
-    return GetIsTimeValid(a) && GetTimeInterval(a, b, bNormalize) > 0.0;
+    return GetIsTimeValid(a) && GetDuration(a, b, bNormalize) > 0.0;
 }
 
 int GetIsTimeEqual(struct Time a, struct Time b, int bNormalize = TRUE)
@@ -889,7 +889,7 @@ json GetEra(json jLocale, struct Time t)
         json jCmp = JsonArrayGet(jEras, i);
         struct Time tCmp = JsonToTime(JsonObjectGet(jCmp, ERA_START));
 
-        float fCmp = GetTimeInterval(tCmp, t);
+        float fCmp = GetDuration(tCmp, t);
         if (fCmp == 0.0)
             return jCmp;
         if (fCmp > 0.0 && (fEra <= 0.0 || fCmp < fEra))
@@ -978,7 +978,7 @@ string IntToOrdinalString(int n, string sSuffixes = "th, st, nd, rd, th, th, th,
     return IntToString(n) + GetListItem(sSuffixes, nIndex);
 }
 
-// Private function for FormatTime() and FormatInterval(). To reduce code
+// Private function for FormatTime() and FormatDuration(). To reduce code
 // duplication, we convert everything to a Time when formatting. If we are
 // actually trying to format a duration, we disable some format codes that only
 // make sense in the context of a time.
