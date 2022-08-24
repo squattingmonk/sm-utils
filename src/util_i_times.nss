@@ -45,7 +45,14 @@ const int TIME_UNIT_SECOND      = 5;
 const int TIME_UNIT_MILLISECOND = 6;
 
 // These are the characters used as flags in time format codes.
-const string TIME_FLAG_CHARS = "EO^-_ 0123456789";
+const string TIME_FLAG_CHARS = "EO^-_0123456789";
+
+const int TIME_FLAG_ERA       = 0x01; ///< `E`: use era-based formatting
+const int TIME_FLAG_ORDINAL   = 0x02; ///< `O`: use ordinal numbers
+const int TIME_FLAG_UPPERCASE = 0x04; ///< `^`: use uppercase letters
+const int TIME_FLAG_NO_PAD    = 0x08; ///< `-`: do not pad numbers
+const int TIME_FLAG_SPACE_PAD = 0x10; ///< `_`: pad numbers with spaces
+const int TIME_FLAG_ZERO_PAD  = 0x20; ///< `0`: pad numbers with zeros
 
 // These are the characters allowed in time format codes.
 const string TIME_FORMAT_CHARS = "aAbBpPIljwu+CyYmdeHkMSfDFRTcxXr%";
@@ -1120,52 +1127,40 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
     json jLocale = GetLocale(sLocale);
     json jEra    = GetEra(jLocale, t);
     string sOrdinals = GetLocaleString(jLocale, LOCALE_ORDINAL_SUFFIXES, DEFAULT_ORDINAL_SUFFIXES);
+    int nDigitsIndex = log2(TIME_FLAG_ZERO_PAD);
 
     while ((nPos = FindSubString(sFormat, "%", nOffset)) != -1)
     {
         nOffset = nPos;
 
         // Check for flags
-        int bEra, bOrdinal, bNoPad, bUpper, nFlag, bAllowEmpty;
+        int nFlag, nFlags;
         string sPadding, sWidth, sChar;
 
         while ((nFlag = FindSubString(TIME_FLAG_CHARS, (sChar = GetChar(sFormat, ++nPos)))) != -1)
         {
-            // Notice("FormatTime sFormat=\"" + sFormat + "\" " +
-            //        "nOffset=" + IntToString(nOffset) + " " +
-            //        "nPos=" + IntToString(nPos) + " " +
-            //        "sChar=\"" + sChar + "\" " +
-            //        "nFlag=" + IntToString(nFlag));
-            switch (nFlag)
+            // If this character is not a digit after 0, we create a flag for it
+            // and add it to our list of flags.
+            if (nFlag < nDigitsIndex)
+                nFlags |= (1 << nFlag);
+            else
             {
-                case 0: bEra     = TRUE; break;
-                case 1: bOrdinal = TRUE; break;
-                case 2: bUpper   = TRUE; break;
-                case 3: bNoPad   = TRUE; break;
-                case 4:
-                case 5: sPadding = " ";  break;
-                case 6: sPadding = "0";  break;
-                default:
+                // The user has specified a width for the item. Parse all the
+                // numbers.
+                sWidth = ""; // in case the user added a width twice and separated with another flag.
+                while (GetIsNumeric(sChar))
                 {
-                    // The user has specified an amount of padding
-                    while (GetIsNumeric(sChar))
-                    {
-                        sWidth += sChar;
-                        sChar = GetChar(sFormat, ++nPos);
-                        // Notice("FormatTime sFormat=\"" + sFormat + "\" " +
-                        //        "nOffset=" + IntToString(nOffset) + " " +
-                        //        "nPos=" + IntToString(nPos) + " " +
-                        //        "sChar=\"" + sChar + "\" " +
-                        //        "sWidth=\"" + sWidth + "\"");
-                    }
-
-                    nPos--;
+                    sWidth += sChar;
+                    sChar = GetChar(sFormat, ++nPos);
                 }
+
+                nPos--;
             }
         }
 
         string sValue;
         int nValue;
+        int bAllowEmpty;
         int nPadding = 2; // Most numeric formats use this
 
         // We offset where we start looking for format codes based on whether
@@ -1265,16 +1260,16 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
                 break;
 
             case TIME_FORMAT_YEAR_CENTURY: // %C, %EC
-                if (bEra)
+                if (nFlags & TIME_FLAG_ERA)
                     sValue = JsonGetString(JsonObjectGet(jEra, ERA_NAME));
                 nValue = t.Year / 100;
                 break;
             case TIME_FORMAT_YEAR_SHORT: // %y, %Ey
-                nValue = bEra ? GetEraYear(jEra, t.Year) : t.Year % 100;
+                nValue = (nFlags & TIME_FLAG_ERA) ? GetEraYear(jEra, t.Year) : t.Year % 100;
                 break;
 
             case TIME_FORMAT_YEAR_LONG: // %Y, %EY
-                if (bEra)
+                if (nFlags & TIME_FLAG_ERA)
                 {
                     sValue = JsonGetString(JsonObjectGet(jEra, ERA_FORMAT));
                     if (sValue != "")
@@ -1305,19 +1300,19 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
                 continue;
             case TIME_FORMAT_LOCALE_DATETIME: // %c, %Ec
                 sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATETIME, DEFAULT_FORMAT_DATETIME);
-                if (bEra)
+                if (nFlags & TIME_FLAG_ERA)
                     sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATETIME_ERA, sValue);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
             case TIME_FORMAT_LOCALE_DATE: // %x, %Ex
                 sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATE, DEFAULT_FORMAT_DATE);
-                if (bEra)
+                if (nFlags & TIME_FLAG_ERA)
                     sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATE_ERA, sValue);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
             case TIME_FORMAT_LOCALE_TIME: // %c, %Ec
                 sValue = GetLocaleString(jLocale, LOCALE_FORMAT_TIME, DEFAULT_FORMAT_TIME);
-                if (bEra)
+                if (nFlags & TIME_FLAG_ERA)
                     sValue = GetLocaleString(jLocale, LOCALE_FORMAT_TIME_ERA, sValue);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
@@ -1327,22 +1322,26 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
                 continue;
         }
 
-        if ((sValue == "" && !bAllowEmpty) && bOrdinal)
-            sValue = IntToOrdinalString(nValue);
+        if ((sValue == "" && !bAllowEmpty) && (nFlags & TIME_FLAG_ORDINAL))
+            sValue = IntToOrdinalString(nValue, sOrdinals);
 
-        if (bNoPad)
+        if (nFlags & TIME_FLAG_NO_PAD)
             sPadding = "";
         else if (sValue != "" || bAllowEmpty)
             sPadding = " " + sWidth;
         else
         {
-            sPadding = sPadding != "" ? sPadding : "0";
+            if (nFlags & TIME_FLAG_SPACE_PAD)
+                sPadding = " ";
+            else if (nFlags & TIME_FLAG_ZERO_PAD || sPadding == "")
+                sPadding = "0";
+
             sPadding += sWidth != "" ? sWidth : IntToString(nPadding);
         }
 
         if (sValue != "" || bAllowEmpty)
         {
-            if (bUpper)
+            if (nFlags & TIME_FLAG_UPPERCASE)
                 sValue = GetStringUpperCase(sValue);
             jValues = JsonArrayInsert(jValues, JsonString(sValue));
             sFormat = ReplaceSubString(sFormat, "%" + sPadding + "s", nOffset, nPos + 1);
