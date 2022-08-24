@@ -1,6 +1,7 @@
 /// ----------------------------------------------------------------------------
-/// @file  util_i_times.nss
-/// @brief Functions for managing times, dates, and durations.
+/// @file   util_i_times.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @brief  Functions for managing times, dates, and durations.
 /// ----------------------------------------------------------------------------
 
 #include "util_i_math"
@@ -95,16 +96,16 @@ const string LOCALE_PREFIX = "*Locale: ";
 // Stores the default locale on the module
 const string LOCALE_DEFAULT = "*DefaultLocale";
 
-// Suffix for keys based on eras
-const string LOCALE_ERA = "Era";
-const string LOCALE_ABBR = "Abbr";
-
 // Each of these keys stores a CSV list which is evaluated by a format code
 const string LOCALE_DAYS        = "Days";       // day names (%A)
 const string LOCALE_DAYS_ABBR   = "DaysAbbr";   // abbreviated day names (%a)
 const string LOCALE_MONTHS      = "Months";     // month names (%B)
 const string LOCALE_MONTHS_ABBR = "MonthsAbbr"; // abbreviated month names (%b)
 const string LOCALE_AMPM        = "AMPM";       // AM/PM elements (%p and %P)
+
+// This key stores a CSV list of suffixes used to convert integers to ordinals
+// (e.g., 0th, 1st, etc.).
+const string LOCALE_ORDINAL_SUFFIXES = "OrdinalSuffixes"; // %On
 
 // Each of these keys stores a locale-specific format string which is aliased by
 // a format code.
@@ -466,8 +467,11 @@ string DurationToString(float fDur);
 /// @brief Convert an integer into an ordinal number (e.g., 1 -> 1st, 2 -> 2nd).
 /// @param n The number to convert.
 /// @param sSuffixes A CSV list of suffixes for each integer, starting at 0. If
-///     the n <= the length of the list, only the last digit will be checked.
-string IntToOrdinalString(int n, string sSuffixes = "th, st, nd, rd, th, th, th, th, th, th, th, th, th, th");
+///     the n <= the length of the list, only the last digit will be checked. If
+///     "", will use the suffixes provided by the locale instead.
+/// @param sLocale The name of the locale to use when formatting the number. If
+///     "", will use the default locale.
+string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "");
 
 /// @brief Format a Time into a string.
 /// @param t The Time to format.
@@ -885,6 +889,7 @@ json SetLocaleString(json j, string sKey, string sValue)
 json NewLocale()
 {
     json j = JsonObject();
+    j = SetLocaleString(j, LOCALE_ORDINAL_SUFFIXES, DEFAULT_ORDINAL_SUFFIXES);
     j = SetLocaleString(j, LOCALE_DAYS,             DEFAULT_DAYS);
     j = SetLocaleString(j, LOCALE_DAYS_ABBR,        DEFAULT_DAYS_ABBR);
     j = SetLocaleString(j, LOCALE_MONTHS,           DEFAULT_MONTHS);
@@ -894,6 +899,15 @@ json NewLocale()
     j = SetLocaleString(j, LOCALE_FORMAT_DATE,      DEFAULT_FORMAT_DATE);
     j = SetLocaleString(j, LOCALE_FORMAT_TIME,      DEFAULT_FORMAT_TIME);
     j = SetLocaleString(j, LOCALE_FORMAT_TIME_AMPM, DEFAULT_FORMAT_TIME_AMPM);
+
+    if (DEFAULT_FORMAT_DATETIME_ERA != "")
+        j = SetLocaleString(j, LOCALE_FORMAT_DATETIME_ERA, DEFAULT_FORMAT_DATETIME_ERA);
+
+    if (DEFAULT_FORMAT_DATE_ERA != "")
+        j = SetLocaleString(j, LOCALE_FORMAT_DATE_ERA, DEFAULT_FORMAT_DATE_ERA);
+
+    if (DEFAULT_FORMAT_TIME_ERA != "")
+        j = SetLocaleString(j, LOCALE_FORMAT_TIME_ERA, DEFAULT_FORMAT_TIME_ERA);
 
     j = JsonObjectSet(j, LOCALE_ERAS, JsonArray());
 
@@ -1080,8 +1094,14 @@ string DurationToString(float fDur)
     return FormatFloat(fDur, "%.3f");
 }
 
-string IntToOrdinalString(int n, string sSuffixes = "th, st, nd, rd, th, th, th, th, th, th, th, th, th, th")
-{ //                                                 0   1   2   3   4   5   6   7   8   9   10  11  12  13
+string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "")
+{
+    if (sSuffixes == "")
+    {
+        json jLocale = GetLocale(sLocale);
+        sSuffixes = GetLocaleString(jLocale, LOCALE_ORDINAL_SUFFIXES, DEFAULT_ORDINAL_SUFFIXES);
+    }
+
     int nIndex = abs(n) % 100;
     if (nIndex >= CountList(sSuffixes))
         nIndex = abs(n) % 10;
@@ -1099,11 +1119,10 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
     json jValues = JsonArray();
     json jLocale = GetLocale(sLocale);
     json jEra    = GetEra(jLocale, t);
-    // Notice("Era: " + JsonDump(jEra));
+    string sOrdinals = GetLocaleString(jLocale, LOCALE_ORDINAL_SUFFIXES, DEFAULT_ORDINAL_SUFFIXES);
 
     while ((nPos = FindSubString(sFormat, "%", nOffset)) != -1)
     {
-        // Notice("FormatTime sFormat=\"" + sFormat + "\" nOffset=" + IntToString(nOffset) + " nPos=" + IntToString(nPos));
         nOffset = nPos;
 
         // Check for flags
@@ -1153,8 +1172,6 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
         // this is a Time or Duration. Durations cannot use time codes that only
         // make sense in the context of a Time.
         int nFormat = FindSubString(TIME_FORMAT_CHARS, sChar, bDur ? DURATION_FORMAT_OFFSET : 0);
-
-        // Notice("Got char: " + sChar + " (" + IntToString(nFormat) +")");
         switch (nFormat)
         {
             case -1:
@@ -1189,7 +1206,6 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
             case TIME_FORMAT_SIGN: // %+
                 sValue = nDur < 0 ? "-" : nDur > 0 ? "+" : "";
                 bAllowEmpty = TRUE;
-                // sValue = nDur < 0 ? "-" : "+";
                 break;
             case TIME_FORMAT_MONTH: // %m
                 nValue = t.Month;
@@ -1336,8 +1352,6 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
             jValues = JsonArrayInsert(jValues, JsonInt(nValue));
             sFormat = ReplaceSubString(sFormat, "%" + sPadding + "d", nOffset, nPos + 1);
         }
-
-        // Notice("strftime post-loop sFormat=\"" + sFormat + "\" nOffset=" + IntToString(nOffset) + " nPos=" + IntToString(nPos));
 
         // Continue parsing from the end of the format string
         nOffset = nPos + GetStringLength(sPadding);

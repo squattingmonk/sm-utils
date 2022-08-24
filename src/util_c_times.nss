@@ -1,40 +1,56 @@
-// -----------------------------------------------------------------------------
-//    File: util_c_times.nss
-//  System: Utilities (configuration script)
-//     URL: https://github.com/squattingmonk/sm-utils
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-// -----------------------------------------------------------------------------
-// This script contains configuration settings for util_i_times.nss.
-//
-// You can change the values of any of constants below, but do not change the
-// names of the constants themselves. You can also add your own constants for
-// use in your module.
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_c_times.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @brief  Configuration settings for util_i_times.nss.
+/// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
-//                                     Names
+//                                    Locale
+// -----------------------------------------------------------------------------
+// A locale is a group of localization settings stored as key-value pairs on a
+// json object which is then stored on the module and accessed by a name. Some
+// functions can take a locale name as an optional parameter so they can access
+// those settings. If no name is provided, those functions will use the default
+// locale instead.
 // -----------------------------------------------------------------------------
 
-// This is a 12-element comma-separated list of month names. `%B` evaluates to
-// the item at index `(month - 1) % 12`.
+/// This is the name for the default locale. All settings below will apply to
+/// this locale.
+const string DEFAULT_LOCALE = "EN_US";
+
+// -----------------------------------------------------------------------------
+//                                 Translations
+// -----------------------------------------------------------------------------
+
+/// This is a 12-element comma-separated list of month names. `%B` evaluates to
+/// the item at index `(month - 1) % 12`.
 const string DEFAULT_MONTHS = "January, February, March, April, May, June, July, August, September, October, November, December";
 
-// This is a 12-element comma-separated list of abbreviated month names. `%b`
-// evaluates to the item at index `(month - 1) % 12`.
+/// This is a 12-element comma-separated list of abbreviated month names. `%b`
+/// evaluates to the item at index `(month - 1) % 12`.
 const string DEFAULT_MONTHS_ABBR = "Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec";
 
-// This is a 7-element comma-separated list of weekday names. `%A` evaluates to
-// the item at index `(day - 1) % 7`.
+/// This is a 7-element comma-separated list of weekday names. `%A` evaluates to
+/// the item at index `(day - 1) % 7`.
 const string DEFAULT_DAYS = "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday";
 
-// This is a 7-element comma-separated list of abbreviated day names. `%a`
-// evaluates to the item at index `(day - 1) % 7`.
+/// This is a 7-element comma-separated list of abbreviated day names. `%a`
+/// evaluates to the item at index `(day - 1) % 7`.
 const string DEFAULT_DAYS_ABBR = "Mon, Tue, Wed, Thu, Fri, Sat, Sun";
 
-// This is a 2-element comma-separated list with the preferred representation of
-// AM/PM. Noon is treated as PM and midnight is treated as AM. Evaluated by `%p`
-// (uppercase) and `%P` (lowercase).
+/// This is a 2-element comma-separated list with the preferred representation
+/// of AM/PM. Noon is treated as PM and midnight is treated as AM. Evaluated by
+/// `%p` (uppercase) and `%P` (lowercase).
 const string DEFAULT_AMPM = "AM, PM";
+
+/// This is a comma-separated list of suffixes for ordinal numbers. The list
+/// should start with the suffix for 0. When formatting using the ordinal flag
+/// (e.g., "Today is the %Od day of %B"), the number being formatted is used as
+/// an index into this list. If the last two digits of the number are greater
+/// than or equal to the length of the list, only the last digit of the number
+/// is used. The default value will handle all integers in English.
+const string DEFAULT_ORDINAL_SUFFIXES = "th, st, nd, rd, th, th, th, th, th, th, th, th, th, th";
+//                                       0   1   2   3   4   5   6   7   8   9   10  11  12  13
 
 // -----------------------------------------------------------------------------
 //                                  Formatting
@@ -45,19 +61,28 @@ const string DEFAULT_AMPM = "AM, PM";
 // codes in these values to prevent an infinite loop.
 // -----------------------------------------------------------------------------
 
-// This is a string used to format a date and time. Aliased by `%c`.
+/// This is a string used to format a date and time. Aliased by `%c`.
 const string DEFAULT_FORMAT_DATETIME = "%Y-%m-%d %H:%M:%S:%f";
 
-// This is a string used to format a date without the time. Aliased by `%x`.
+/// This is a string used to format a date without the time. Aliased by `%x`.
 const string DEFAULT_FORMAT_DATE = "%Y-%m-%d";
 
-// This is a string used to format a time without the date. Aliased by `%X`.
+/// This is a string used to format a time without the date. Aliased by `%X`.
 const string DEFAULT_FORMAT_TIME = "%H:%M:%S";
 
-// This is a string used to format a time using AM/PM. Aliased by `%r`.
+/// This is a string used to format a time using AM/PM. Aliased by `%r`.
 const string DEFAULT_FORMAT_TIME_AMPM = "%I:%M:%S %p";
 
+/// This is a string used to format a date and time when era-based formatting is
+/// used. If "", will fall back to DEFAULT_FORMAT_DATETIME. Aliased by `%Ec`.
+const string DEFAULT_FORMAT_DATETIME_ERA = "";
 
+/// This is a string used to format a date without the time when era-based
+/// formatting is used. If "", will fall back to DEFAULT_FORMAT_DATE. Aliased by
+/// `%Ex`.
+const string DEFAULT_FORMAT_DATE_ERA = "";
 
-
-const string DEFAULT_LOCALE = "en";
+/// This is a string used to format a time without the date when era-based
+/// formatting is used. If "", will fall back to DEFAULT_FORMAT_TIME. Aliased by
+/// `%EX`.
+const string DEFAULT_FORMAT_TIME_ERA = "";
