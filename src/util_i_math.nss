@@ -8,6 +8,9 @@
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
+/// @brief Return the closest integer to the binary logarithm of a number.
+int log2(int n);
+
 /// @brief Restrict an integer to a range.
 /// @param nValue The number to evaluate.
 /// @param nMin The minimum value for the number.
@@ -73,6 +76,14 @@ float round(float f);
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
+
+int log2(int n)
+{
+    int nResult;
+    while (n >>= 1)
+        nResult++;
+    return nResult;
+}
 
 int clamp(int nValue, int nMin, int nMax)
 {
