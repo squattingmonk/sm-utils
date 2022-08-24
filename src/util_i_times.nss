@@ -3,6 +3,138 @@
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 /// @brief  Functions for managing times, dates, and durations.
 /// ----------------------------------------------------------------------------
+/// @details
+/// # Formatting
+/// ----------------------------------------------------------------------------
+/// You can format a Time using the FormatTime() function. This function takes a
+/// Time as the first parameter (`t`) and a *format specification string*
+/// (`sFormat`) as the second parameter. The format specification string may
+/// contain special character sequences called *conversion specifications*, each
+/// of which is introduced by the `%` character and terminated by some other
+/// character known as a *conversion specifier character*. All other character
+/// sequences are *ordinary character sequences*.
+///
+/// The characters of ordinary character sequences are copied verbatim from
+/// `sFormat` to the returned value. However, the characters of conversion
+/// specifications are replaced as shown in the list below. Some sequences may
+/// have their output customized using a *locale*, which can be passed using the
+/// third parameter of FormatTime() (`sLocale`).
+///
+/// ## Conversion Specifiers
+/// - `%a`: The abbreviated name of the weekday according to the current locale.
+///         The specific names used in the current locale can be set using the
+///         key `LOCALE_DAYS_ABBR`. If no abbreviated names are available in the
+///         locale, will fall back to the full day name.
+/// - `%A`: The full name of the weekday according to the current locale.
+///         The specific names used in the current locale can be set using the
+///         key `LOCALE_DAYS`.
+/// - `%b`: The abbreviated name of the month according to the current locale.
+///         The specific names used in the current locale can be set using the
+///         key `LOCALE_MONTHS_ABBR`. If no abbreviated names are available in
+///         the locale, will fall back to the full month name.
+/// - `%B`: The full name of the month according to the current locale. The
+///         specific names used in the current locale can be set using the key
+///         `LOCALE_MONTHS`.
+/// - `%c`: The preferred date and time representation for the current locale.
+///         The specific format used in the current locale can be set using the
+///         key `LOCALE_FORMAT_DATETIME` for the `%c` conversion specification
+///         and `LOCALE_FORMAT_DATETIME_ERA` for the `%Ec` conversion
+///         specification. With the default settings, this is equivalent to
+///         `%Y-%m-%d %H:%M:%S:%f`. This is the default value of `sFormat` for
+///         FormatDateTime().
+/// - `%C`: The century number (year / 100) as a 2-or-3-digit integer (00..320).
+///         (The `%EC` conversion specification corresponds to the name of the
+///         era, which can be set using the era key `ERA_NAME`.)
+/// - `%d`: The day of the month as a 2-digit decimal number (01..28).
+/// - `%D`: Equivalent to `%m/%d/%y`, the standard US time format. Note that
+///         this may be ambiguous and confusing for non-Americans.
+/// - `%e`: The day of the month as a decimal number, but a leading zero is
+///         replaced by a space. Equivalent to `%_d`.
+/// - `%E`: Modifier: use alternative "era-based" format (see below).
+/// - `%f`: The millisecond as a 3-digit decimal number (000..999).
+/// - `%F`: Equivalent to `%Y-%m-%d`, the ISO 8601 date format.
+/// - `%H`: The hour (24-hour clock) as a 2-digit decimal number (00..23).
+/// - `%I`: The hour (12-hour clock) as a 2-digit decimal number (01..12).
+/// - `%j`: The day of the year as a 3-digit decimal number (000..336).
+/// - `%k`: The hour (24-hour clock) as a decimal number (0..23). Single digits
+///         are preceded by a space. Equivalent to `%_H`.
+/// - `%l`: The hour (12-hour clock) as a decimal number (1..12). Single digits
+///         are preceded by a space. Equivalent to `%_I`.
+/// - `%m`: The month as a 2-digit decimal number (01..12).
+/// - `%M`: The minute as a 2-digit decimal number (00..59, depending on
+///         `t.MinsPerHour`).
+/// - `%O`: Modifier: use ordinal numbers (1st, 2nd, etc.) (see below).
+/// - `%p`: Either "AM" or "PM" according to the given Time, or the
+///         corresponding values from the locale. The specific word used can be
+///         set for the current locale using the key `LOCALE_AMPM`.
+/// - `%P`: Like `%p`, but lowercase. Yes, it's silly that it's not the other
+///         way around.
+/// - `%r`: The preferred AM/PM time representation for the current locale. The
+///         specific format used in the current locale can be set using the key
+///         `LOCALE_FORMAT_TIME_AMPM`. With the default settings, this is
+///         equivalent to `%I:%M:%S %p`.
+/// - `%R`: The time in 24-hour notation. Equivalent to `%H:%M`. For a version
+///         including seconds, see `%T`.
+/// - `%S`: The second as a 2-digit decimal number (00..59).
+/// - `%T`: The time in 24-hour notation. Equivalent to `%H:%M:%S`. For a
+///         version without seconds, see `%R`.
+/// - `%u`: The day of the  week as a 1-indexed decimal (1..7).
+/// - `%w`: The day of the week as a 0-indexed decimal (0..6).
+/// - `%x`: The preferred date representation for the current locale without the
+///         time. The specific format used in the current locale can be set
+///         using the key `LOCALE_FORMAT_TIME` for the `%x` conversion
+///         specification and `LOCALE_FORMAT_TIME_ERA` for the `%Ex` conversion
+///         specification. With the default settings, this is equivalent to
+///         `%Y-%m-%d`. This is the default value of `sFormat` for FomatDate().
+/// - `%X`: The preferred time representation for the current locale without the
+///         date. The specific format used in the current locale can be set
+///         using the key `LOCALE_FORMAT_DATE` for the `%X` conversion
+///         specification and `LOCALE_FORMAT_DATE_ERA` for the `%EX` conversion
+///         specification. With the default settings, this is equivalent to
+///         `%H:%M:%S`. This is the default value of `sFormat` for FormatTime().
+/// - `%y`: The year as a 2-digit decimal number without the century (00..99).
+///         (The `%Ey` conversion specification corresponds to the year since
+///         the beginning of the era denoted by the `%EC` conversion
+///         specification.)
+/// - `%Y`: The year as a decimal number including the century (0000..32000).
+///         (The `%EY` conversion specification corresponds to era key
+///         `ERA_FORMAT`; with the default era settings, this is equivalent to
+///         `%Ey %EC`.)
+/// - `%+`: A literal `+` if the duration is positive or `-` if it is negative.
+///         Only valid using FormatDuration().
+/// - `%%`: A literal `%` character.
+///
+/// ## Modifier Characters
+/// Some conversion specifications can be modified by preceding the conversion
+/// specifier character by the `E` or `O` *modifier* to indicate that an
+/// alternative format should be used. If the alternative format does not exist
+/// for the locale, the behavior will be as if the unmodified conversion
+/// specification were used.
+///
+/// The `E` modifier signifies using an alternative era-based representation.
+/// The following are valid: `%Ec`, `%EC`, `%Ex`, `%EX`, `%Ey`, and `%EY`.
+///
+/// The `O` modifier signifies representing numbers in ordinal form (e.g., 1st,
+/// 2nd, etc.). The ordinal suffixes for each number can be set using the locale
+/// key `LOCALE_ORDINAL_SUFFIXES`. The following are valid: `%Od`, `%Oe`, `%OH`,
+/// `%OI`, `%Om`, `%OM`, `%OS`, `%Ou`, `%Ow`, `%Oy`, and `%OY`.
+///
+/// ## Flag Characters
+/// Between the `%` character and the conversion specifier character, an
+/// optional flag and field width may be specified. (These should precede the
+/// `E` or `O` characters, if present).
+///
+/// The following flag characters are permitted:
+/// - `_`: (underscore) Pad a numeric result string with spaces.
+/// - `-`: (dash) Do not pad a numeric result string.
+/// - `0`: Pad a numeric result string with zeroes even if the conversion
+///        specifier character uses space-padding by default.
+/// - `^`: Convert alphabetic characters in the result string to uppercase.
+///
+/// An optional decimal width specifier may follow the (possibly absent) flag.
+/// If the natural size of the field is smaller than this width, the result
+/// string is padded (on the left) to the specified width. The string is never
+/// truncated.
 
 #include "util_i_math"
 #include "util_i_strings"
