@@ -121,8 +121,8 @@
 ///
 /// ## Flag Characters
 /// Between the `%` character and the conversion specifier character, an
-/// optional flag and field width may be specified. (These should precede the
-/// `E` or `O` characters, if present).
+/// optional *flag* and *field width* may be specified. (These should precede
+/// the `E` or `O` characters, if present).
 ///
 /// The following flag characters are permitted:
 /// - `_`: (underscore) Pad a numeric result string with spaces.
@@ -135,6 +135,36 @@
 /// If the natural size of the field is smaller than this width, the result
 /// string is padded (on the left) to the specified width. The string is never
 /// truncated.
+///
+/// ## Examples
+///
+/// ```
+/// struct Time t = StringToTime("1372-06-01 13:00:00:000");
+///
+/// // Default formatting
+/// FormatDateTime(t); // "1372-06-01 13:00:00:000"
+/// FormatDate(t); // "1372-06-01"
+/// FormatTime(t); // "13:00:00:000"
+///
+/// // Using custom formats
+/// FormatTime(t, "Today is %A, %B %Od."); // "Today is Monday, June 1st."
+/// FormatTime(t, "%I:%M %p"); // "01:00 PM"
+/// FormatTime(t, "%-I:%M %p"); // "1:00 PM"
+///
+/// // Locale and Era-based formatting
+/// json jLocale = JsonObject();
+/// jLocale = SetLocaleString(jLocale, LOCALE_DAYS, "Moonday, Treeday, Heavensday, Valarday, Shipday, Starday, Sunday");
+/// jLocale = SetLocaleString(jLocale, LOCALE_MONTHS, "Narvinye, Nenime, Sulime, Varesse, Lotesse, Narie, Cermie, Urime, Yavannie, Narquelie, Hisime, Ringare");
+/// jLocale = AddEra(jLocale, DefineEra("First Age", GetTime()));
+/// jLocale = AddEra(jLocale, DefineEra("Second Age", GetTime(590), 1, "%Ey 2E"));
+/// SetLocale(jLocale, "ME");
+///
+/// FormatTime(t, "Today is %A, %B %Od, %EY.");       // "Today is Monday, June 1st, 1372."
+/// FormatTime(t, "Today is %A, %B %Od, %EY.", "ME"); // "Today is Moonday, Narie 1st, 783 2E."
+///
+/// // You can combine the `%E` and `%O` modifiers
+/// FormatTime(t, "It is the %EOy year of the %EC.", "ME"); // "It is the 783rd year of the Second Age."
+/// ```
 
 #include "util_i_math"
 #include "util_i_strings"
