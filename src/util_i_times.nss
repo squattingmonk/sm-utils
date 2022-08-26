@@ -4,8 +4,205 @@
 /// @brief  Functions for managing times, dates, and durations.
 /// ----------------------------------------------------------------------------
 /// @details
-/// # Formatting
+/// # Concepts
+/// - Duration: a float value representing an *amount of time* in seconds. A
+///   duration can be easily passed to many game functions that expect a time,
+///   such as DelayCommand(), PlayAnimation(), etc.
+/// - Time: a struct value representing a particular *moment in time* as
+///   measured using the game calendar and clock. A Time has a field for the
+///   year, month, day, hour, minute, second, and millisecond. Note that the
+///   month and day count from 1, while all other units count from 0 (including
+///   years, since NWN allows year 0). A Time also has a field to set the
+///   minutes-per-hour (defaults to the module setting, which defaults to 2).
+/// - Game Time: a Time with a minutes-per-hour setting of 60. This allows you
+///   to convert the time shown by the game clock into a time that matches how
+///   the characters in the game would perceive it. For example, with the
+///   default minutes-per-hour setting of 2, the Time "13:01" would correspond
+///   to a Game Time of "13:30".
+/// - Normalizing Times: You can normalize a Time to ensure none of its units
+///   are overflowing their bounds. For example, a Time with a Minute field of 0
+///   and Second field of 90 would be normalized to a Minute of 1 and a Second
+///   of 30. When normalizing a Time, you can also change the minutes-per-hour
+///   setting. This is how the functions in this file convert between Time and
+///   Game Time.
+///
 /// ----------------------------------------------------------------------------
+/// # Usage
+///
+/// ## Creating a Time
+/// You can create a Time using GetTime():
+/// ```
+/// struct Time t = GetTime(1372, 6, 1, 13);
+/// ```
+///
+/// You could also parse an ISO 8601 time string into a Time:
+/// ```
+/// struct Time t = StringToTime("1372-06-01 13:00:00:000");
+/// ```
+///
+/// You can also create a Time manually by declaring a Time struct and setting
+/// the fields independently:
+///
+/// ```
+/// struct Time t;
+/// t.Year = 1372;
+/// t.Month = 6;
+/// t.Day = 1;
+/// t.Hour = 13;
+/// // ...
+/// ```
+///
+/// When not using the GetTime() function, it's a good idea to normalize the
+/// resultant Time to distribute the field values correctly:
+/// ```
+/// sruct Time t;
+/// t.Second = 90;
+///
+/// t = NormalizeTime(t);
+/// Assert(t.Minute == 1);
+/// Assert(t.Second == 30);
+/// ```
+///
+/// ## Converting Between Time and Game Time
+///
+/// ```
+/// // Assuming the default module setting of 2 minutes per hour
+/// struct Time tTime = StringToTime("1372-06-01 13:01:00:000");
+/// Assert(tTime.Hour == 13);
+/// Assert(tTime.Minute == 1);
+///
+/// struct Time tGame = TimeToGameTime(tTime);
+/// Assert(tGame.Hour == 13);
+/// Assert(tGame.Minute == 30);
+///
+/// struct tBack = GameTimeToTime(tGame);
+/// Assert(tTime == tBack);
+/// ```
+///
+/// ## Getting the Current Time
+/// ```
+/// struct Time tTime = GetCurrentTime();
+/// struct Time tGame = GetCurrentGameTime();
+/// ```
+///
+/// ## Setting the Current Time
+/// @note You can only set the time forward in NWN.
+///
+/// ```
+/// struct Time t = StringToTime("2022-08-25 13:00:00:000");
+/// SetCurrentTime(t);
+/// ```
+///
+/// Alternatively, you can advance Time by a duration:
+/// ```
+/// AdvanceCurrentTime(120.0);
+/// ```
+///
+/// ## Dropping units from a Time
+/// You can reduce the precision of a time:
+/// ```
+/// struct Time a = GetTime(1372, 6, 1, 13);
+/// struct Time b = GetTime(1372, 6, 1);
+/// struct Time c = GetPrecisionTime(a, TIME_UNIT_DAY);
+/// Assert(a != b);
+/// Assert(b == c);
+/// ```
+///
+/// ## Saving a Time
+/// The easiest way to save a time and get it later is to use the SetLocalTime()
+/// and GetLocalTime() functions. These functions convert a Time into json and
+/// save it as a local variable.
+///
+/// In this example, we save the server start time OnModuleLoad and then get it
+/// later:
+/// ```
+/// // OnModuleLoad
+/// SetLocalTime(GetModule(), "ServerStart", GetCurrentTime());
+///
+/// // later on...
+/// struct Time tServerStart = GetLocalTime(GetModule(), "ServerStart");
+/// ```
+///
+/// If you want to store a Time in a database, you can convert it into json or
+/// into a string before passing it to a query. The json method is preferable
+/// for persistent storage, since it is guaranteed to be correct if the module's
+/// minutes-per-hour setting changes after the value is stored:
+/// ```
+/// struct Time tTime = GetCurrentTime();
+/// json jTime = TimeToJson(tTime);
+/// string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
+/// sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
+/// SqlBindJson(q, "@time", jTime);
+/// SqlStep(q);
+/// ```
+///
+/// You can then convert the json back into a Time:
+/// ```
+/// string Time tTime;
+/// string sSql = "SELECT value FROM data WHERE varname='ServerTime';";
+/// sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
+/// if (SqlStep(q))
+///     tTime = JsonToTime(SqlGetJson(q, 0));
+/// ```
+///
+/// For simpler applications (such as saving to the module's volatile database),
+/// converting to a string works fine and could even be preferable since you can
+/// use sqlite's `<`, `>`, and `=` operators to check if one time is before,
+/// after, or equal to another.
+/// ```
+/// struct Time tTime = GetCurrentTime();
+/// string sTime = TimeToString();
+/// string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
+/// sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
+/// SqlBindString(q, "@time", sTime);
+/// SqlStep(q);
+/// ```
+///
+/// ## Comparing Times
+/// To check the amount of time between two Times:
+/// ```
+/// struct Time a = StringToTime("1372-06-01 13:00:00:000");
+/// struct Time b = StringToTime("1372-06-01 13:01:30:500");
+/// float fDur = GetDuration(a, b);
+/// Assert(fDur == 90.5);
+/// ```
+///
+/// To check if one time is before or after another:
+/// ```
+/// struct Time a = StringToTime("1372-06-01 13:00:00:000");
+/// struct Time b = StringToTime("1372-06-01 13:01:30:500");
+/// Assert(GetIsTimeBefore(a, b));
+/// Assert(!GetIsTimeAfter(a, b));
+/// ```
+///
+/// To check if two times are equal:
+/// ```
+/// struct Time a = StringToTime("1372-06-01 13:00:00:000");
+/// struct Time b = StringToTime("1372-06-01 13:01:00:000");
+/// struct Time c = TimeToGameTime(b);
+///
+/// Assert(!GetIsTimeEqual(a, b));
+/// Assert(GetTimeIsEqual(b, c));
+/// Assert(b != c);
+/// ```
+///
+/// To check if a duration has passed since a Time:
+/// ```
+/// int CheckForMinRestTime(object oPC, float fMinTime)
+/// {
+///     struct Time tLast = GetLocalTime(oPC, "LastRest");
+///     return GetDurationSince(tSince) >= fMinTime;
+/// }
+/// ```
+///
+/// To calculate the duration until a Time is reached:
+/// ```
+/// struct Time tMidnight = GetTime(GetCalendarYear(), GetCalendarMonth(), GetCalendarDay() + 1);
+/// float fDurToMidnight = GetDurationUntil(tMidnight);
+/// ```
+/// ----------------------------------------------------------------------------
+/// # Formatting
+///
 /// You can format a Time using the FormatTime() function. This function takes a
 /// Time as the first parameter (`t`) and a *format specification string*
 /// (`sFormat`) as the second parameter. The format specification string may
