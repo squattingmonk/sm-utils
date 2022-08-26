@@ -1043,13 +1043,17 @@ struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0)
     // Everything should be positive, so if the year is negative, we borrowed
     // more time than was available, making this a negative time. In this case
     // we return "0000-00-00 00:00:00:000".
-    return (t.Year < 0 || t.Year > 32000) ? tInvalid : t;
+    if (t.Year < 0 || t.Year > 32000)
+        return tInvalid;
+    return t;
 }
 
 int GetIsTimeValid(struct Time t, int bNormalize = TRUE)
 {
     struct Time tInvalid;
-    return (bNormalize ? NormalizeTime(t) : t) != tInvalid;
+    if (bNormalize)
+        t = NormalizeTime(t);
+    return t != tInvalid;
 }
 
 struct Time GetTime(int nYear = 0, int nMonth = 1, int nDay = 1, int nHour = 0, int nMinute = 0, int nSecond = 0, int nMillisecond = 0, int nMinsPerHour = 0)
@@ -1253,7 +1257,9 @@ struct Time JsonToTime(json j, int bNormalize = TRUE)
     t.Millisecond = JsonGetInt(JsonObjectGet(j, "Millisecond"));
     t.MinsPerHour = JsonGetInt(JsonObjectGet(j, "MinsPerHour"));
 
-    return bNormalize ? NormalizeTime(t) : t;
+    if (bNormalize)
+        t = NormalizeTime(t);
+    return t;
 }
 
 struct Time GetLocalTime(object oObject, string sVarName)
@@ -1483,7 +1489,11 @@ struct Time StringToTime(string sTime, int nMinsPerHour = 0)
         // return the partial time. However, if we run into an unexpected
         // character, we should yield an invalid time.
         if (sChar != GetChar(sDelims, nUnit++))
-            return sChar == "" ? t : tInvalid;
+        {
+            if (sChar == "")
+                return t;
+            return tInvalid;
+        }
     }
 
     return t;
