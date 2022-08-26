@@ -62,27 +62,36 @@ const string DEFAULT_ORDINAL_SUFFIXES = "th, st, nd, rd, th, th, th, th, th, th,
 // -----------------------------------------------------------------------------
 
 /// This is a string used to format a date and time. Aliased by `%c`.
-const string DEFAULT_FORMAT_DATETIME = "%Y-%m-%d %H:%M:%S:%f";
+const string DEFAULT_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S:%f";
 
 /// This is a string used to format a date without the time. Aliased by `%x`.
-const string DEFAULT_FORMAT_DATE = "%Y-%m-%d";
+const string DEFAULT_DATE_FORMAT = "%Y-%m-%d";
 
 /// This is a string used to format a time without the date. Aliased by `%X`.
-const string DEFAULT_FORMAT_TIME = "%H:%M:%S";
+const string DEFAULT_TIME_FORMAT = "%H:%M:%S";
 
 /// This is a string used to format a time using AM/PM. Aliased by `%r`.
-const string DEFAULT_FORMAT_TIME_AMPM = "%I:%M:%S %p";
+const string DEFAULT_AMPM_FORMAT = "%I:%M:%S %p";
 
 /// This is a string used to format a date and time when era-based formatting is
-/// used. If "", will fall back to DEFAULT_FORMAT_DATETIME. Aliased by `%Ec`.
-const string DEFAULT_FORMAT_DATETIME_ERA = "";
+/// used. If "", will fall back to DEFAULT_DATETIME_FORMAT. Aliased by `%Ec`.
+const string DEFAULT_ERA_DATETIME_FORMAT = "";
 
 /// This is a string used to format a date without the time when era-based
-/// formatting is used. If "", will fall back to DEFAULT_FORMAT_DATE. Aliased by
+/// formatting is used. If "", will fall back to DEFAULT_DATE_FORMAT. Aliased by
 /// `%Ex`.
-const string DEFAULT_FORMAT_DATE_ERA = "";
+const string DEFAULT_ERA_DATE_FORMAT = "";
 
 /// This is a string used to format a time without the date when era-based
-/// formatting is used. If "", will fall back to DEFAULT_FORMAT_TIME. Aliased by
+/// formatting is used. If "", will fall back to DEFAULT_TIME_FORMAT. Aliased by
 /// `%EX`.
-const string DEFAULT_FORMAT_TIME_ERA = "";
+const string DEFAULT_ERA_TIME_FORMAT = "";
+
+/// This is a string used to format years when era-based formatting is used. If
+/// "", will always use the current year. Aliased by `%EY`.
+const string DEFAULT_ERA_YEAR_FORMAT = "%Ey %EC";
+
+/// This is a string used to format the era name when era-based formatting is
+/// used. Normally, each era has its own name, but setting this can allow you
+/// to display an era name even if you don't set up any eras for your locale.
+const string DEFAULT_ERA_NAME = "";

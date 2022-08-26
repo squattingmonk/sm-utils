@@ -234,11 +234,11 @@
 ///         `LOCALE_MONTHS`.
 /// - `%c`: The preferred date and time representation for the current locale.
 ///         The specific format used in the current locale can be set using the
-///         key `LOCALE_FORMAT_DATETIME` for the `%c` conversion specification
-///         and `LOCALE_FORMAT_DATETIME_ERA` for the `%Ec` conversion
-///         specification. With the default settings, this is equivalent to
-///         `%Y-%m-%d %H:%M:%S:%f`. This is the default value of `sFormat` for
-///         FormatDateTime().
+///         key `LOCALE_DATETIME_FORMAT` for the `%c` conversion specification
+///         and `ERA_DATETIME_FORMAT` for the `%Ec` conversion specification.
+///         With the default settings, this is equivalent to `%Y-%m-%d
+///         %H:%M:%S:%f`. This is the default value of `sFormat` for
+///         `FormatDateTime()`.
 /// - `%C`: The century number (year / 100) as a 2-or-3-digit integer (00..320).
 ///         (The `%EC` conversion specification corresponds to the name of the
 ///         era, which can be set using the era key `ERA_NAME`.)
@@ -268,8 +268,8 @@
 ///         way around.
 /// - `%r`: The preferred AM/PM time representation for the current locale. The
 ///         specific format used in the current locale can be set using the key
-///         `LOCALE_FORMAT_TIME_AMPM`. With the default settings, this is
-///         equivalent to `%I:%M:%S %p`.
+///         `LOCALE_AMPM_FORMAT`. With the default settings, this is equivalent
+///         to `%I:%M:%S %p`.
 /// - `%R`: The time in 24-hour notation. Equivalent to `%H:%M`. For a version
 ///         including seconds, see `%T`.
 /// - `%S`: The second as a 2-digit decimal number (00..59).
@@ -279,16 +279,18 @@
 /// - `%w`: The day of the week as a 0-indexed decimal (0..6).
 /// - `%x`: The preferred date representation for the current locale without the
 ///         time. The specific format used in the current locale can be set
-///         using the key `LOCALE_FORMAT_TIME` for the `%x` conversion
-///         specification and `LOCALE_FORMAT_TIME_ERA` for the `%Ex` conversion
+///         using the key `LOCALE_TIME_FORMAT` for the `%x` conversion
+///         specification and `ERA_TIME_FORMAT` for the `%Ex` conversion
 ///         specification. With the default settings, this is equivalent to
-///         `%Y-%m-%d`. This is the default value of `sFormat` for FomatDate().
+///         `%Y-%m-%d`. This is the default value of `sFormat` for
+///         `FomatDate()`.
 /// - `%X`: The preferred time representation for the current locale without the
 ///         date. The specific format used in the current locale can be set
-///         using the key `LOCALE_FORMAT_DATE` for the `%X` conversion
-///         specification and `LOCALE_FORMAT_DATE_ERA` for the `%EX` conversion
+///         using the key `LOCALE_DATE_FORMAT` for the `%X` conversion
+///         specification and `ERA_DATE_FORMAT` for the `%EX` conversion
 ///         specification. With the default settings, this is equivalent to
-///         `%H:%M:%S`. This is the default value of `sFormat` for FormatTime().
+///         `%H:%M:%S`. This is the default value of `sFormat` for
+///         `FormatTime()`.
 /// - `%y`: The year as a 2-digit decimal number without the century (00..99).
 ///         (The `%Ey` conversion specification corresponds to the year since
 ///         the beginning of the era denoted by the `%EC` conversion
@@ -478,17 +480,17 @@ const string LOCALE_ORDINAL_SUFFIXES = "OrdinalSuffixes"; // %On
 
 // Each of these keys stores a locale-specific format string which is aliased by
 // a format code.
-const string LOCALE_FORMAT_DATETIME  = "DateTimeFormat"; // %c
-const string LOCALE_FORMAT_DATE      = "DateFormat";     // %x
-const string LOCALE_FORMAT_TIME      = "TimeFormat";     // %X
-const string LOCALE_FORMAT_TIME_AMPM = "TimeFormatAMPM"; // %r
+const string LOCALE_DATETIME_FORMAT  = "DateTimeFormat"; // %c
+const string LOCALE_DATE_FORMAT      = "DateFormat";     // %x
+const string LOCALE_TIME_FORMAT      = "TimeFormat";     // %X
+const string LOCALE_AMPM_FORMAT      = "AMPMFormat";     // %r
 
 // Each of these keys stores a locale-specific era-based format string which is
 // aliased by a format code using the `E` modifier. If no string is stored at
 // this key, it will resolve to the non-era based format above.
-const string LOCALE_FORMAT_DATETIME_ERA = "DateTimeFormatEra"; // %Ec
-const string LOCALE_FORMAT_DATE_ERA     = "DateFormatEra";     // %Ex
-const string LOCALE_FORMAT_TIME_ERA     = "TimeFormatEra";     // %EX
+const string ERA_DATETIME_FORMAT = "EraDateTimeFormat"; // %Ec
+const string ERA_DATE_FORMAT     = "EraDateFormat";     // %Ex
+const string ERA_TIME_FORMAT     = "EraTimeFormat";     // %EX
 
 // Key for Eras json array. Each element of the array is a json object having
 // the three keys below.
@@ -498,7 +500,7 @@ const string LOCALE_ERAS = "Eras";
 const string ERA_NAME = "Name";
 
 // Key for a format string for the year in the era. Aliased by %EY.
-const string ERA_FORMAT = "Format";
+const string ERA_YEAR_FORMAT = "YearFormat";
 
 // Key for the start of the era. Stored as a date in the form yyyy-mm-dd.
 const string ERA_START = "Start";
@@ -829,6 +831,14 @@ json GetEra(json jLocale, struct Time t);
 /// @param nYear An NWN calendar year (0..32000)
 /// @returns The number of the year in the era, or nYear if jEra is not valid.
 int GetEraYear(json jEra, int nYear);
+
+/// @brief Gets a string from an era, falling back to a locale if not set.
+/// @param jEra The era to check
+/// @param jLocale The locale to fall back to
+/// @param sKey The key to get the string from
+/// @note If sKey begins with "Era" and was not found on the era or the locale,
+///     will check jLocale for sKey without the "Era" prefix.
+string GetEraString(json jEra, json jLocale, string sKey);
 
 // ----- Formatting ------------------------------------------------------------
 
@@ -1301,19 +1311,22 @@ json NewLocale()
     j = SetLocaleString(j, LOCALE_MONTHS,           DEFAULT_MONTHS);
     j = SetLocaleString(j, LOCALE_MONTHS_ABBR,      DEFAULT_MONTHS_ABBR);
     j = SetLocaleString(j, LOCALE_AMPM,             DEFAULT_AMPM);
-    j = SetLocaleString(j, LOCALE_FORMAT_DATETIME,  DEFAULT_FORMAT_DATETIME);
-    j = SetLocaleString(j, LOCALE_FORMAT_DATE,      DEFAULT_FORMAT_DATE);
-    j = SetLocaleString(j, LOCALE_FORMAT_TIME,      DEFAULT_FORMAT_TIME);
-    j = SetLocaleString(j, LOCALE_FORMAT_TIME_AMPM, DEFAULT_FORMAT_TIME_AMPM);
+    j = SetLocaleString(j, LOCALE_DATETIME_FORMAT,  DEFAULT_DATETIME_FORMAT);
+    j = SetLocaleString(j, LOCALE_DATE_FORMAT,      DEFAULT_DATE_FORMAT);
+    j = SetLocaleString(j, LOCALE_TIME_FORMAT,      DEFAULT_TIME_FORMAT);
+    j = SetLocaleString(j, LOCALE_AMPM_FORMAT,      DEFAULT_AMPM_FORMAT);
 
-    if (DEFAULT_FORMAT_DATETIME_ERA != "")
-        j = SetLocaleString(j, LOCALE_FORMAT_DATETIME_ERA, DEFAULT_FORMAT_DATETIME_ERA);
+    if (DEFAULT_ERA_DATETIME_FORMAT != "")
+        j = SetLocaleString(j, ERA_DATETIME_FORMAT, DEFAULT_ERA_DATETIME_FORMAT);
 
-    if (DEFAULT_FORMAT_DATE_ERA != "")
-        j = SetLocaleString(j, LOCALE_FORMAT_DATE_ERA, DEFAULT_FORMAT_DATE_ERA);
+    if (DEFAULT_ERA_DATE_FORMAT != "")
+        j = SetLocaleString(j, ERA_DATE_FORMAT, DEFAULT_ERA_DATE_FORMAT);
 
-    if (DEFAULT_FORMAT_TIME_ERA != "")
-        j = SetLocaleString(j, LOCALE_FORMAT_TIME_ERA, DEFAULT_FORMAT_TIME_ERA);
+    if (DEFAULT_ERA_TIME_FORMAT != "")
+        j = SetLocaleString(j, ERA_TIME_FORMAT, DEFAULT_ERA_TIME_FORMAT);
+
+    if (DEFAULT_ERA_NAME != "")
+        j = SetLocaleString(j, ERA_NAME, DEFAULT_ERA_NAME);
 
     j = JsonObjectSet(j, LOCALE_ERAS, JsonArray());
 
@@ -1378,13 +1391,13 @@ string DayToString(int nDay, string sDays = "", string sLocale = "")
 
 // ----- Eras ------------------------------------------------------------------
 
-json DefineEra(string sName, struct Time tStart, int nOffset = 0, string sFormat = "%Ey %EC")
+json DefineEra(string sName, struct Time tStart, int nOffset = 0, string sFormat = DEFAULT_ERA_YEAR_FORMAT)
 {
     json jEra = JsonObject();
-    jEra = JsonObjectSet(jEra, ERA_NAME,   JsonString(sName));
-    jEra = JsonObjectSet(jEra, ERA_FORMAT, JsonString(sFormat));
-    jEra = JsonObjectSet(jEra, ERA_START,  TimeToJson(tStart));
-    jEra = JsonObjectSet(jEra, ERA_OFFSET, JsonInt(nOffset));
+    jEra = JsonObjectSet(jEra, ERA_NAME,        JsonString(sName));
+    jEra = JsonObjectSet(jEra, ERA_YEAR_FORMAT, JsonString(sFormat));
+    jEra = JsonObjectSet(jEra, ERA_START,       TimeToJson(tStart));
+    jEra = JsonObjectSet(jEra, ERA_OFFSET,      JsonInt(nOffset));
     return jEra;
 }
 
@@ -1429,6 +1442,20 @@ int GetEraYear(json jEra, int nYear)
     int nOffset = JsonGetInt(JsonObjectGet(jEra, ERA_OFFSET));
     struct Time tStart = JsonToTime(JsonObjectGet(jEra, ERA_START));
     return nYear - tStart.Year + nOffset;
+}
+
+string GetEraString(json jEra, json jLocale, string sKey)
+{
+    json jValue = JsonObjectGet(jEra, sKey);
+    if (JsonGetType(jValue) != JSON_TYPE_STRING)
+    {
+        jValue = JsonObjectGet(jLocale, sKey);
+        if (JsonGetType(jValue) != JSON_TYPE_STRING &&
+           (GetStringSlice(sKey, 0, 2) == "Era"))
+            jValue = JsonObjectGet(jLocale, GetStringSlice(sKey, 3));
+    }
+
+    return JsonGetString(jValue);
 }
 
 // ----- Formatting ------------------------------------------------------------
@@ -1632,26 +1659,31 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
                 break;
             case TIME_FORMAT_AMPM_UPPER: // %p
             case TIME_FORMAT_AMPM_LOWER: // %P
-                sValue = GetLocaleString(jLocale, LOCALE_AMPM, DEFAULT_AMPM);
+                bAllowEmpty = TRUE;
+                sValue = GetLocaleString(jLocale, LOCALE_AMPM);
                 sValue = GetListItem(sValue, t.Hour % 24 >= 12);
                 if (nFormat == TIME_FORMAT_AMPM_LOWER)
                     sValue = GetStringLowerCase(sValue);
                 break;
             case TIME_FORMAT_NAME_OF_DAY_LONG: // %A
-                sValue = GetLocaleString(jLocale, LOCALE_DAYS, DEFAULT_DAYS);
+                bAllowEmpty = TRUE;
+                sValue = GetLocaleString(jLocale, LOCALE_DAYS);
                 sValue = DayToString(t.Day, sValue);
                 break;
             case TIME_FORMAT_NAME_OF_DAY_ABBR: // %a
-                sValue = GetLocaleString(jLocale, LOCALE_DAYS, DEFAULT_DAYS_ABBR);
+                bAllowEmpty = TRUE;
+                sValue = GetLocaleString(jLocale, LOCALE_DAYS);
                 sValue = GetLocaleString(jLocale, LOCALE_DAYS_ABBR, sValue);
                 sValue = DayToString(t.Day, sValue);
                 break;
             case TIME_FORMAT_NAME_OF_MONTH_LONG: // %B
-                sValue = GetLocaleString(jLocale, LOCALE_MONTHS, DEFAULT_MONTHS);
+                bAllowEmpty = TRUE;
+                sValue = GetLocaleString(jLocale, LOCALE_MONTHS);
                 sValue = MonthToString(t.Month, sValue);
                 break;
             case TIME_FORMAT_NAME_OF_MONTH_ABBR: // %b
-                sValue = GetLocaleString(jLocale, LOCALE_MONTHS, DEFAULT_MONTHS_ABBR);
+                bAllowEmpty = TRUE;
+                sValue = GetLocaleString(jLocale, LOCALE_MONTHS);
                 sValue = GetLocaleString(jLocale, LOCALE_MONTHS_ABBR, sValue);
                 sValue = MonthToString(t.Month, sValue);
                 break;
@@ -1664,7 +1696,7 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
 
             case TIME_FORMAT_YEAR_CENTURY: // %C, %EC
                 if (nFlags & TIME_FLAG_ERA)
-                    sValue = JsonGetString(JsonObjectGet(jEra, ERA_NAME));
+                    sValue = GetEraString(jEra, jLocale, ERA_NAME);
                 nValue = t.Year / 100;
                 break;
             case TIME_FORMAT_YEAR_SHORT: // %y, %Ey
@@ -1674,7 +1706,7 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
             case TIME_FORMAT_YEAR_LONG: // %Y, %EY
                 if (nFlags & TIME_FLAG_ERA)
                 {
-                    sValue = JsonGetString(JsonObjectGet(jEra, ERA_FORMAT));
+                    sValue = GetEraString(jEra, jLocale, ERA_YEAR_FORMAT);
                     if (sValue != "")
                     {
                         sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
@@ -1702,25 +1734,28 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
                 sFormat = ReplaceSubString(sFormat, "%H:%M:%S", nOffset, nPos + 1);
                 continue;
             case TIME_FORMAT_LOCALE_DATETIME: // %c, %Ec
-                sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATETIME, DEFAULT_FORMAT_DATETIME);
                 if (nFlags & TIME_FLAG_ERA)
-                    sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATETIME_ERA, sValue);
+                    sValue = GetEraString(jEra, jLocale, ERA_DATETIME_FORMAT);
+                else
+                    sValue = GetLocaleString(jLocale, LOCALE_DATETIME_FORMAT, DEFAULT_DATETIME_FORMAT);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
             case TIME_FORMAT_LOCALE_DATE: // %x, %Ex
-                sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATE, DEFAULT_FORMAT_DATE);
                 if (nFlags & TIME_FLAG_ERA)
-                    sValue = GetLocaleString(jLocale, LOCALE_FORMAT_DATE_ERA, sValue);
+                    sValue = GetEraString(jEra, jLocale, ERA_DATE_FORMAT);
+                else
+                    sValue = GetLocaleString(jLocale, LOCALE_DATE_FORMAT, DEFAULT_DATE_FORMAT);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
             case TIME_FORMAT_LOCALE_TIME: // %c, %Ec
-                sValue = GetLocaleString(jLocale, LOCALE_FORMAT_TIME, DEFAULT_FORMAT_TIME);
                 if (nFlags & TIME_FLAG_ERA)
-                    sValue = GetLocaleString(jLocale, LOCALE_FORMAT_TIME_ERA, sValue);
+                    sValue = GetEraString(jEra, jLocale, ERA_TIME_FORMAT);
+                else
+                    sValue = GetLocaleString(jLocale, LOCALE_TIME_FORMAT, DEFAULT_TIME_FORMAT);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
             case TIME_FORMAT_LOCALE_TIME_AMPM: // %r
-                sValue = GetLocaleString(jLocale, LOCALE_FORMAT_TIME_AMPM, DEFAULT_FORMAT_TIME_AMPM);
+                sValue = GetLocaleString(jLocale, LOCALE_AMPM_FORMAT, DEFAULT_AMPM_FORMAT);
                 sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
                 continue;
         }
