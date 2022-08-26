@@ -7,7 +7,7 @@
 /// # Concepts
 /// - Duration: a float value representing an *amount of time* in seconds. A
 ///   duration can be easily passed to many game functions that expect a time,
-///   such as DelayCommand(), PlayAnimation(), etc.
+///   such as `DelayCommand()`, `PlayAnimation()`, etc.
 /// - Time: a struct value representing a particular *moment in time* as
 ///   measured using the game calendar and clock. A Time has a field for the
 ///   year, month, day, hour, minute, second, and millisecond. Note that the
@@ -25,25 +25,24 @@
 ///   of 30. When normalizing a Time, you can also change the minutes-per-hour
 ///   setting. This is how the functions in this file convert between Time and
 ///   Game Time.
-///
 /// ----------------------------------------------------------------------------
 /// # Usage
 ///
 /// ## Creating a Time
-/// You can create a Time using GetTime():
-/// ```
+/// You can create a Time using `GetTime()`:
+/// ```nwscript
 /// struct Time t = GetTime(1372, 6, 1, 13);
 /// ```
 ///
 /// You could also parse an ISO 8601 time string into a Time:
-/// ```
+/// ```nwscript
 /// struct Time t = StringToTime("1372-06-01 13:00:00:000");
 /// ```
 ///
 /// You can also create a Time manually by declaring a Time struct and setting
 /// the fields independently:
 ///
-/// ```
+/// ```nwscript
 /// struct Time t;
 /// t.Year = 1372;
 /// t.Month = 6;
@@ -52,10 +51,10 @@
 /// // ...
 /// ```
 ///
-/// When not using the GetTime() function, it's a good idea to normalize the
+/// When not using the `GetTime()` function, it's a good idea to normalize the
 /// resultant Time to distribute the field values correctly:
-/// ```
-/// sruct Time t;
+/// ```nwscript
+/// struct Time t;
 /// t.Second = 90;
 ///
 /// t = NormalizeTime(t);
@@ -65,7 +64,7 @@
 ///
 /// ## Converting Between Time and Game Time
 ///
-/// ```
+/// ```nwscript
 /// // Assuming the default module setting of 2 minutes per hour
 /// struct Time tTime = StringToTime("1372-06-01 13:01:00:000");
 /// Assert(tTime.Hour == 13);
@@ -80,7 +79,7 @@
 /// ```
 ///
 /// ## Getting the Current Time
-/// ```
+/// ```nwscript
 /// struct Time tTime = GetCurrentTime();
 /// struct Time tGame = GetCurrentGameTime();
 /// ```
@@ -88,19 +87,19 @@
 /// ## Setting the Current Time
 /// @note You can only set the time forward in NWN.
 ///
-/// ```
+/// ```nwscript
 /// struct Time t = StringToTime("2022-08-25 13:00:00:000");
 /// SetCurrentTime(t);
 /// ```
 ///
 /// Alternatively, you can advance Time by a duration:
-/// ```
+/// ```nwscript
 /// AdvanceCurrentTime(120.0);
 /// ```
 ///
 /// ## Dropping units from a Time
 /// You can reduce the precision of a time:
-/// ```
+/// ```nwscript
 /// struct Time a = GetTime(1372, 6, 1, 13);
 /// struct Time b = GetTime(1372, 6, 1);
 /// struct Time c = GetPrecisionTime(a, TIME_UNIT_DAY);
@@ -109,13 +108,13 @@
 /// ```
 ///
 /// ## Saving a Time
-/// The easiest way to save a time and get it later is to use the SetLocalTime()
-/// and GetLocalTime() functions. These functions convert a Time into json and
-/// save it as a local variable.
+/// The easiest way to save a time and get it later is to use the
+/// `SetLocalTime()` and `GetLocalTime()` functions. These functions convert a
+/// Time into json and save it as a local variable.
 ///
 /// In this example, we save the server start time OnModuleLoad and then get it
 /// later:
-/// ```
+/// ```nwscript
 /// // OnModuleLoad
 /// SetLocalTime(GetModule(), "ServerStart", GetCurrentTime());
 ///
@@ -127,7 +126,7 @@
 /// into a string before passing it to a query. The json method is preferable
 /// for persistent storage, since it is guaranteed to be correct if the module's
 /// minutes-per-hour setting changes after the value is stored:
-/// ```
+/// ```nwscript
 /// struct Time tTime = GetCurrentTime();
 /// json jTime = TimeToJson(tTime);
 /// string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
@@ -137,7 +136,7 @@
 /// ```
 ///
 /// You can then convert the json back into a Time:
-/// ```
+/// ```nwscript
 /// string Time tTime;
 /// string sSql = "SELECT value FROM data WHERE varname='ServerTime';";
 /// sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
@@ -149,7 +148,7 @@
 /// converting to a string works fine and could even be preferable since you can
 /// use sqlite's `<`, `>`, and `=` operators to check if one time is before,
 /// after, or equal to another.
-/// ```
+/// ```nwscript
 /// struct Time tTime = GetCurrentTime();
 /// string sTime = TimeToString();
 /// string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
@@ -160,7 +159,7 @@
 ///
 /// ## Comparing Times
 /// To check the amount of time between two Times:
-/// ```
+/// ```nwscript
 /// struct Time a = StringToTime("1372-06-01 13:00:00:000");
 /// struct Time b = StringToTime("1372-06-01 13:01:30:500");
 /// float fDur = GetDuration(a, b);
@@ -168,7 +167,7 @@
 /// ```
 ///
 /// To check if one time is before or after another:
-/// ```
+/// ```nwscript
 /// struct Time a = StringToTime("1372-06-01 13:00:00:000");
 /// struct Time b = StringToTime("1372-06-01 13:01:30:500");
 /// Assert(GetIsTimeBefore(a, b));
@@ -176,7 +175,7 @@
 /// ```
 ///
 /// To check if two times are equal:
-/// ```
+/// ```nwscript
 /// struct Time a = StringToTime("1372-06-01 13:00:00:000");
 /// struct Time b = StringToTime("1372-06-01 13:01:00:000");
 /// struct Time c = TimeToGameTime(b);
@@ -187,7 +186,7 @@
 /// ```
 ///
 /// To check if a duration has passed since a Time:
-/// ```
+/// ```nwscript
 /// int CheckForMinRestTime(object oPC, float fMinTime)
 /// {
 ///     struct Time tLast = GetLocalTime(oPC, "LastRest");
@@ -196,15 +195,15 @@
 /// ```
 ///
 /// To calculate the duration until a Time is reached:
-/// ```
+/// ```nwscript
 /// struct Time tMidnight = GetTime(GetCalendarYear(), GetCalendarMonth(), GetCalendarDay() + 1);
 /// float fDurToMidnight = GetDurationUntil(tMidnight);
 /// ```
 /// ----------------------------------------------------------------------------
 /// # Formatting
 ///
-/// You can format a Time using the FormatTime() function. This function takes a
-/// Time as the first parameter (`t`) and a *format specification string*
+/// You can format a Time using the `FormatTime()` function. This function takes
+/// a Time as the first parameter (`t`) and a *format specification string*
 /// (`sFormat`) as the second parameter. The format specification string may
 /// contain special character sequences called *conversion specifications*, each
 /// of which is introduced by the `%` character and terminated by some other
@@ -215,7 +214,7 @@
 /// `sFormat` to the returned value. However, the characters of conversion
 /// specifications are replaced as shown in the list below. Some sequences may
 /// have their output customized using a *locale*, which can be passed using the
-/// third parameter of FormatTime() (`sLocale`).
+/// third parameter of `FormatTime()` (`sLocale`).
 ///
 /// ## Conversion Specifiers
 /// - `%a`: The abbreviated name of the weekday according to the current locale.
@@ -300,7 +299,7 @@
 ///         `ERA_FORMAT`; with the default era settings, this is equivalent to
 ///         `%Ey %EC`.)
 /// - `%+`: A literal `+` if the duration is positive or `-` if it is negative.
-///         Only valid using FormatDuration().
+///         Only valid using `FormatDuration()`.
 /// - `%%`: A literal `%` character.
 ///
 /// ## Modifier Characters
@@ -337,7 +336,7 @@
 ///
 /// ## Examples
 ///
-/// ```
+/// ```nwscript
 /// struct Time t = StringToTime("1372-06-01 13:00:00:000");
 ///
 /// // Default formatting
@@ -349,21 +348,142 @@
 /// FormatTime(t, "Today is %A, %B %Od."); // "Today is Monday, June 1st."
 /// FormatTime(t, "%I:%M %p"); // "01:00 PM"
 /// FormatTime(t, "%-I:%M %p"); // "1:00 PM"
+/// ```
+/// ----------------------------------------------------------------------------
+/// # Advanced Usage
 ///
-/// // Locale and Era-based formatting
+/// ## Locales
+///
+/// A locale is a json object that contains localization settings for formatting
+/// functions. A default locale will be constructed using the configuration
+/// values in `util_c_times.nss`, but you can also construct locales yourself.
+/// An application for this might be having different areas in the module use
+/// different month or day names, etc.
+///
+/// A locale is a simple json object:
+/// ```nwscript
+/// json jLocale = JsonObject();
+/// ```
+///
+/// Alternatively, you can initialize a locale with the default values from
+/// util_c_times:
+/// ```nwscript
+/// json jLocale = NewLocale();
+/// ```
+///
+/// Keys are then added using `SetLocaleString()`:
+/// ```nwscript
+/// jLocale = SetLocaleString(jLocale, LOCALE_DAYS, "Moonday, Treeday, etc.");
+/// ```
+///
+/// Keys can be retrieved using `GetLocaleString()`, which takes an optional
+/// default value if the key is not set:
+/// ```nwscript
+/// string sDays     = GetLocaleString(jLocale, LOCALE_DAYS);
+/// string sDaysAbbr = GetLocaleString(jLocale, LOCALE_DAYS_ABBR, sDays);
+/// ```
+///
+/// Locales can be saved with a name. That names can then be passed to
+/// formatting functions:
+/// ```nwscript
 /// json jLocale = JsonObject();
 /// jLocale = SetLocaleString(jLocale, LOCALE_DAYS, "Moonday, Treeday, Heavensday, Valarday, Shipday, Starday, Sunday");
 /// jLocale = SetLocaleString(jLocale, LOCALE_MONTHS, "Narvinye, Nenime, Sulime, Varesse, Lotesse, Narie, Cermie, Urime, Yavannie, Narquelie, Hisime, Ringare");
-/// jLocale = AddEra(jLocale, DefineEra("First Age", GetTime()));
-/// jLocale = AddEra(jLocale, DefineEra("Second Age", GetTime(590), 1, "%Ey 2E"));
 /// SetLocale(jLocale, "ME");
+/// FormatTime(t, "Today is %A, %B %Od.");       // "Today is Monday, June 1st
+/// FormatTime(t, "Today is %A, %B %Od.", "ME"); // "Today is Moonday, Narie 1st
+/// ```
 ///
-/// FormatTime(t, "Today is %A, %B %Od, %EY.");       // "Today is Monday, June 1st, 1372."
+/// You can change the default locale so that you don't have to pass the name
+/// every time:
+/// ```nwscript
+/// SetDefaultLocale("ME");
+/// FormatTime(t, "Today is %A, %B %Od."); // "Today is Moonday, Narie 1st
+/// ```
+///
+/// The following keys are currently supported:
+/// - `LOCALE_DAYS`: a CSV list of 7 weekday names. Accessed by `%A`.
+/// - `LOCALE_DAYS_ABBR`: a CSV list of 7 abbreviated weekday names. If not set,
+///    the `FormatTime()` function will use `LOCALE_DAYS` instead. Accessed by
+///    `%a`.
+/// - `LOCALE_MONTHS`: a CSV list of 12 month names. Accessed by `%B`.
+/// - `LOCALE_MONTHS_ABBR`: a CSV list of 12 abbreviated month names. If not
+///   set, the `FormatTime()` function will use `LOCALE_MONTHS` instead.
+///   Accessed by `%b`.
+/// - `LOCALE_AMPM`: a CSV list of 2 AM/PM elements. Accessed by `%p` and `%P`.
+/// - `LOCALE_ORDINAL_SUFFIXES`: a CSV list of suffixes for constructing ordinal
+///   numbers. See util_c_times's documentation of `DEFAULT_ORDINAL_SUFFIXES`
+///   for details.
+/// - `LOCALE_DATETIME_FORMAT`: a date and time format string. Aliased by `%c`.
+/// - `LOCALE_DATE_FORMAT`: a date format string. Aliased by `%x`.
+/// - `LOCALE_TIME_FORMAT`: a time format string. Aliased by `%X`.
+/// - `LOCALE_AMPM_FORMAT`: a time format string using AM/PM form. Aliased
+///   by `%r`.
+/// - `ERA_DATETIME_FORMAT`: a format string to display the date and time. If
+///   not set, will fall back to `LOCALE_DATETIME_FORMAT`. Aliased by `%Ec`.
+/// - `ERA_DATE_FORMAT`: a format string to display the date without the time.
+///   If not set, will fall back to `LOCALE_DATE_FORMAT`. Aliased by `%Ex`.
+/// - `ERA_TIME_FORMAT`: a format string to display the time without the date.
+///   If not set, will fall back to `LOCALE_TIME_FORMAT`. Aliased by `%EX`.
+/// - `ERA_YEAR_FORMAT`: a format string to display the year. If not set, will
+///   display the year. Aliased by `%EY`.
+/// - `ERA_NAME`: the name of an era. If not set and no era matches the current
+///   year, will display the century. Aliased by `%EC`.
+///
+/// ## Eras
+/// Locales can also hold an array of eras. Eras are json objects which name a
+/// time range. When formatting using the `%E` modifier, the start Times of each
+/// era in the array are compared to the Time to be formatted; the era with the
+/// latest start that is still before the Time is selected. Format codes can
+/// then refer to the era's name, year relative to the era start, and other
+/// era-specific formats.
+///
+/// An era can be created using `DefineEra()`. This function takes a name and a
+/// start Time. See the documentation for `DefineEra()` for further info:
+/// ```nwscript
+/// // Create an era that begins at the first possible calendar time
+/// json jFirst = DefineEra("First Age", GetTime());
+///
+/// // Create an era that begins on a particular year
+/// json jSecond = DefineEra("Second Age", GetTime(590));
+/// ```
+///
+/// The `{Get/Set}LocaleString()` functions also apply to eras:
+/// ```nwscript
+/// jSecond = SetLocaleString(jSecond, ERA_DATETIME_FORMAT, "%B %Od, %EY");
+/// jSecond = SetLocaleString(jSecond, ERA_YEAR_FORMAT, "%EY 2E");
+/// ```
+///
+/// You can add an era to a locale using `AddEra()`:
+/// ```nwscript
+/// json jLocale = GetLocale("ME");
+/// jLocale = SetLocaleString(jLocale, LOCALE_DAYS, "Moonday, Treeday, Heavensday, Valarday, Shipday, Starday, Sunday");
+/// jLocale = SetLocaleString(jLocale, LOCALE_MONTHS, "Narvinye, Nenime, Sulime, Varesse, Lotesse, Narie, Cermie, Urime, Yavannie, Narquelie, Hisime, Ringare");
+/// jLocale = AddEra(jLocale, jFirst);
+/// jLocale = AddEra(jLocale, jSecond);
+/// SetLocale(jLocale, "ME");
+/// ```
+///
+/// You can then access the era settings using the `%E` modifier:
+/// ```nwscript
 /// FormatTime(t, "Today is %A, %B %Od, %EY.", "ME"); // "Today is Moonday, Narie 1st, 783 2E."
 ///
 /// // You can combine the `%E` and `%O` modifiers
 /// FormatTime(t, "It is the %EOy year of the %EC.", "ME"); // "It is the 783rd year of the Second Age."
 /// ```
+///
+/// The following keys are available to eras:
+/// - `ERA_NAME`: the name of the era. Aliased by `%EC`.
+/// - `ERA_DATETIME_FORMAT`: a format string to display the date and time. If
+///   not set, will fall back to the value on the locale. Aliased by `%Ec`.
+/// - `ERA_DATE_FORMAT`: a format string to display the date without the time.
+///   If not set, will fall back to the value on the locale. Aliased by `%Ex`.
+/// - `ERA_TIME_FORMAT`: a format string to display the time without the date.
+///   If not set, will fall back to the value on the locale. Aliased by `%EX`.
+/// - `ERA_YEAR_FORMAT`: a format string to display the year. Defaults to
+///   `%Ey %EC`. If not set, will fall back to the value on the locale. Aliased
+///   by `%EY`.
+/// ----------------------------------------------------------------------------
 
 #include "util_i_math"
 #include "util_i_strings"
