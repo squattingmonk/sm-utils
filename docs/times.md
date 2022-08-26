@@ -117,7 +117,7 @@ struct Time tGame = GetCurrentGameTime();
 
 ### Setting the Current Time
 
-@note You can only set the time forward in NWN.
+Note: You can only set the time forward in NWN.
 
 ```nwscript
 struct Time t = StringToTime("2022-08-25 13:00:00:000");
