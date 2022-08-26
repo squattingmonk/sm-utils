@@ -56,9 +56,9 @@ const string DEFAULT_ORDINAL_SUFFIXES = "th, st, nd, rd, th, th, th, th, th, th,
 //                                  Formatting
 // -----------------------------------------------------------------------------
 // These are strings that are used to format dates and times. Refer to the
-// comments on `FormatTime()` in util_i_times for the meaning of format codes.
-// Some codes are aliases for these values, so take care to avoid using those
-// codes in these values to prevent an infinite loop.
+// comments in `util_i_times.nss` for the meaning of format codes. Some codes
+// are aliases for these values, so take care to avoid using those codes in
+// these values to prevent an infinite loop.
 // -----------------------------------------------------------------------------
 
 /// This is a string used to format a date and time. Aliased by `%c`.

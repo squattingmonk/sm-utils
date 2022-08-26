@@ -996,7 +996,8 @@ string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "");
 ///     "", will use the default locale.
 /// @note This function differs only from FormatDateTime() in the default value
 ///     of sFormat. Character codes that apply to dates are still valid.
-/// @note See FormatDateTime() for the list of possible format codes.
+/// @note See the documentation at the top of this file for the list of possible
+///     format codes.
 string FormatTime(struct Time t, string sFormat = "%X", string sLocale = "");
 
 /// @brief Format a Time into a string.
@@ -1007,7 +1008,8 @@ string FormatTime(struct Time t, string sFormat = "%X", string sLocale = "");
 ///     "", will use the default locale.
 /// @note This function differs only from FormatDateTime() in the default value
 ///     of sFormat. Character codes that apply to times are still valid.
-/// @note See FormatDateTime() for the list of possible format codes.
+/// @note See the documentation at the top of this file for the list of possible
+///     format codes.
 string FormatDate(struct Time t, string sFormat = "%x", string sLocale = "");
 
 /// @brief Format a Time into a string.
@@ -1016,6 +1018,8 @@ string FormatDate(struct Time t, string sFormat = "%x", string sLocale = "");
 ///     default value is equivalent to "%Y-%m-%d %H:%M:%S:%f".
 /// @param sLocale The name of the locale to use when formatting the Time. If
 ///     "", will use the default locale.
+/// @note See the documentation at the top of this file for the list of possible
+///     format codes.
 string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "");
 
 /// @brief Format a duration into a string.
@@ -1025,6 +1029,8 @@ string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
 ///     fDur (+ or -).
 /// @param sLocale The name of the locale to use when formatting the duration.
 ///     If "", will use the default locale.
+/// @note See the documentation at the top of this file for the list of possible
+///     format codes.
 string FormatDuration(float fDur, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "");
 
 // -----------------------------------------------------------------------------
