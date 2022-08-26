@@ -259,6 +259,9 @@ const int DURATION_FORMAT_OFFSET = TIME_FORMAT_SIGN;
 
 // ----- VarNames --------------------------------------------------------------
 
+// Prefix for local times to avoid collision
+const string TIME_PREFIX = "*Time: ";
+
 // Prefix for locale names stored on the module to avoid collision
 const string LOCALE_PREFIX = "*Locale: ";
 
@@ -511,6 +514,22 @@ json TimeToJson(struct Time t, int bNormalize = TRUE);
 /// @param j The json object to convert
 /// @param bNormalize Whether to normalize the time after converting
 struct Time JsonToTime(json j, int bNormalize = TRUE);
+
+/// @brief Return a Time from a local variable.
+/// @param oObject The object to get the local variable from
+/// @param sVarName The varname for the local variable
+struct Time GetLocalTime(object oObject, string sVarName);
+
+/// @brief Store a Time as a local variable.
+/// @param oObject The object to store the local variable on
+/// @param sVarName The varname for the local variable
+/// @param tValue The Time to store
+void SetLocalTime(object oObject, string sVarName, struct Time tValue);
+
+/// @brief Delete a Time from a local variable.
+/// @param oObject The object to delete the local variable from
+/// @param sVarName The varname for the local variable
+void DeleteLocalTime(object oObject, string sVarName);
 
 // ----- Locales ---------------------------------------------------------------
 
@@ -1038,6 +1057,21 @@ struct Time JsonToTime(json j, int bNormalize = TRUE)
     t.MinsPerHour = JsonGetInt(JsonObjectGet(j, "MinsPerHour"));
 
     return bNormalize ? NormalizeTime(t) : t;
+}
+
+struct Time GetLocalTime(object oObject, string sVarName)
+{
+    return JsonToTime(GetLocalJson(oObject, TIME_PREFIX + sVarName));
+}
+
+void SetLocalTime(object oObject, string sVarName, struct Time tValue)
+{
+    SetLocalJson(oObject, TIME_PREFIX + sVarName, TimeToJson(tValue));
+}
+
+void DeleteLocalTime(object oObject, string sVarName)
+{
+    DeleteLocalJson(oObject, TIME_PREFIX + sVarName);
 }
 
 // ----- Locales ---------------------------------------------------------------
