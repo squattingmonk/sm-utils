@@ -1454,9 +1454,7 @@ json NewLocale()
     if (DEFAULT_ERA_NAME != "")
         j = SetLocaleString(j, ERA_NAME, DEFAULT_ERA_NAME);
 
-    j = JsonObjectSet(j, LOCALE_ERAS, JsonArray());
-
-    return j;
+    return JsonObjectSet(j, LOCALE_ERAS, JsonArray());
 }
 
 string GetDefaultLocale()
@@ -1523,8 +1521,7 @@ json DefineEra(string sName, struct Time tStart, int nOffset = 0, string sFormat
     jEra = JsonObjectSet(jEra, ERA_NAME,        JsonString(sName));
     jEra = JsonObjectSet(jEra, ERA_YEAR_FORMAT, JsonString(sFormat));
     jEra = JsonObjectSet(jEra, ERA_START,       TimeToJson(tStart));
-    jEra = JsonObjectSet(jEra, ERA_OFFSET,      JsonInt(nOffset));
-    return jEra;
+    return JsonObjectSet(jEra, ERA_OFFSET,      JsonInt(nOffset));
 }
 
 json AddEra(json jLocale, json jEra)
@@ -1534,8 +1531,7 @@ json AddEra(json jLocale, json jEra)
         jEras = JsonArray();
 
     jEras = JsonArrayInsert(jEras, jEra);
-    jLocale = JsonObjectSet(jLocale, LOCALE_ERAS, jEras);
-    return jLocale;
+    return JsonObjectSet(jLocale, LOCALE_ERAS, jEras);
 }
 
 json GetEra(json jLocale, struct Time t)
