@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
-/// @file   util_c_times.nss
+/// @file   util_c_strftime.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-/// @brief  Configuration settings for util_i_times.nss.
+/// @brief  Configuration settings for util_i_strftime.nss.
 /// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ const string DEFAULT_ORDINAL_SUFFIXES = "th, st, nd, rd, th, th, th, th, th, th,
 //                                  Formatting
 // -----------------------------------------------------------------------------
 // These are strings that are used to format dates and times. Refer to the
-// comments in `util_i_times.nss` for the meaning of format codes. Some codes
+// comments in `util_i_strftime.nss` for the meaning of format codes. Some codes
 // are aliases for these values, so take care to avoid using those codes in
 // these values to prevent an infinite loop.
 // -----------------------------------------------------------------------------

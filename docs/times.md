@@ -1,17 +1,25 @@
 # Core Utilities: Times
 
 `util_i_times.nss` contains utilities for dealing with times, dates, and
-durations. It includes `util_c_times.nss` which contains configuration settings
-to help with formatting times to your liking.
-
-`util_i_times.nss` includes the following scripts:
-- `util_c_times.nss`
+durations. `util_i_times.nss` requires the following scripts:
 - `util_i_debug.nss`
 - `util_i_math.nss`
 - `util_i_strings.nss`
-- `util_i_csvlists.nss`
 - `util_i_color.nss`
 - `util_c_color.nss`
+
+`util_i_strftime.nss` contains advanced formatting functions for times; it
+includes `util_c_strftime.nss` which contains configuration settings to help
+with formatting times to your liking. `util_i_strftime.nss` includes the
+following scripts:
+- `util_i_debug.nss`
+- `util_i_math.nss`
+- `util_i_strings.nss`
+- `util_i_color.nss`
+- `util_c_color.nss`
+- `util_i_csvlists.nss`
+- `util_i_times.nss`
+- `util_c_strftime.nss`
 
 ## Contents
 
@@ -29,9 +37,9 @@ to help with formatting times to your liking.
   - [Modifier Characters](#modifier-characters)
   - [Flag Characters](#flag-characters)
   - [Examples](#examples)
-- [Advanced Usage](#advanced-usage)
-  - [Locales](#locales)
-  - [Eras](#eras)
+  - [Advanced Usage](#advanced-usage)
+    - [Locales](#locales)
+    - [Eras](#eras)
 
 ## Concepts
 
@@ -56,6 +64,8 @@ to help with formatting times to your liking.
   This is how the functions in this file convert between Time and Game Time.
 
 ## Usage
+
+The scripts in this section only require `util_i_times.nss`.
 
 ### Creating a Time
 
@@ -237,6 +247,9 @@ float fDurToMidnight = GetDurationUntil(tMidnight);
 
 ## Formatting
 
+The `Format*()` functions require `util_i_strftime.nss` and
+`util_c_strftime.nss`.
+
 You can format a Time using the `FormatTime()` function. This function takes a
 Time as the first parameter (`t`) and a *format specification string*
 (`sFormat`) as the second parameter. The format specification string may contain
@@ -386,9 +399,9 @@ FormatTime(t, "%I:%M %p"); // "01:00 PM"
 FormatTime(t, "%-I:%M %p"); // "1:00 PM"
 ```
 
-## Advanced Usage
+### Advanced Usage
 
-### Locales
+#### Locales
 
 A locale is a json object that contains localization settings for formatting
 functions. A default locale will be constructed using the configuration values
@@ -466,7 +479,7 @@ The following keys are currently supported:
 - `ERA_NAME`: the name of an era. If not set and no era matches the current
   year, will display the century. Aliased by `%EC`.
 
-### Eras
+#### Eras
 
 Locales can also hold an array of eras. Eras are json objects which name a time
 range. When formatting using the `%E` modifier, the start Times of each era in
