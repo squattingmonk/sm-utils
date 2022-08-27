@@ -1259,7 +1259,7 @@ void AdvanceCurrentTime(float fSeconds)
         SetTime(t.Hour, t.Minute, t.Second, t.Millisecond);
         SetCalendar(t.Year, t.Month, t.Day);
     }
-    else
+    else if (fSeconds < 0.0)
     {
         CriticalError("Cannot advance time by a negative amount (" +
                       FloatToString(fSeconds, 0, 3) + " seconds)");
