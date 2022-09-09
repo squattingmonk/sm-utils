@@ -5,56 +5,83 @@
 /// ----------------------------------------------------------------------------
 /// @details
 /// # Concepts
-/// - Duration: a float value representing an *amount of time* in seconds. A
-///   duration can be easily passed to many game functions that expect a time,
-///   such as `DelayCommand()`, `PlayAnimation()`, etc.
-/// - Time: a struct value representing a particular *moment in time* as
-///   measured using the game calendar and clock. A Time has a field for the
-///   year, month, day, hour, minute, second, and millisecond. Note that the
-///   month and day count from 1, while all other units count from 0 (including
-///   years, since NWN allows year 0). A Time also has a field to set the
-///   minutes-per-hour (defaults to the module setting, which defaults to 2).
-/// - Game Time: a Time with a minutes-per-hour setting of 60. This allows you
-///   to convert the time shown by the game clock into a time that matches how
-///   the characters in the game would perceive it. For example, with the
-///   default minutes-per-hour setting of 2, the Time "13:01" would correspond
-///   to a Game Time of "13:30".
+/// - Time: a struct value that may represent either a *calendar time* or a
+///   *duration*. A Time has a field for years, months, day, hours, minutes,
+///   seconds, and milliseconds. A Time also has a field to set the minutes per
+///   hour (defaults to the module setting, which defaults to 2).
+/// - Calendar Time: A Time representing a particular *moment in time* as
+///   measured using the game calendar and clock. In a calendar Time, the month
+///   and day count from 1, while all other units count from 0 (including
+///   years, since NWN allows year 0). A calendar Time must always be positive.
+/// - Duration Time: A Time representing an *amount of time*. All units in a
+///   duration Time count from 0. A duration Time may be negative, representing
+///   going back in time. This can be useful for calculations. A duration Time
+///   can be converted to seconds to pass it to game functions that expect a
+///   time, such as `DelayCommand()`, `PlayAnimation()`, etc.
+/// - Game Time: a Time (either calendar Time or duration Time) with a minutes
+///   per hour setting of 60. This allows you to convert the time shown by the
+///   game clock into a time that matches how the characters in the game would
+///   perceive it. For example, with the default minutes per hour setting of 2,
+///   the Time "13:01" would correspond to a Game Time of "13:30".
 /// - Normalizing Times: You can normalize a Time to ensure none of its units
 ///   are overflowing their bounds. For example, a Time with a Minute field of 0
 ///   and Second field of 90 would be normalized to a Minute of 1 and a Second
-///   of 30. When normalizing a Time, you can also change the minutes-per-hour
-///   setting. This is how the functions in this file convert between Time and
-///   Game Time.
+///   of 30. Normalizing a Time also causes all non-zero units to take the same
+///   sign (either positive or negative), so a Time with a Minute of 1 and a
+///   Second of -30 would normalize to a Second of 30. When normalizing a Time,
+///   you can also change the minutes per hour setting. This is how the
+///   functions in this file convert between Time and Game Time.
+///
+/// **Note**: For brevity, some functions have a `*Time` variant and a
+/// `*Duration` variant. In these cases, the `*Time` variant refers to a
+/// calendar Time (e.g., `StringToTime()` converts to a calendar Time while
+/// `StringToDuration()` refers to a duration Time). If no `*Duration` variant
+/// of the function is present, the function may refer to a calendar Time *or* a
+/// duration Time (e.g., `TimeToString()` accepts both types).
 /// ----------------------------------------------------------------------------
 /// # Usage
 ///
 /// ## Creating a Time
-/// You can create a Time using `GetTime()`:
+/// You can create a calendar Time using `GetTime()` and a duration Time with
+/// `GetDuration()`:
 /// ```nwscript
 /// struct Time t = GetTime(1372, 6, 1, 13);
+/// struct Time d = GetDuration(1372, 5, 0, 13);
 /// ```
 ///
-/// You could also parse an ISO 8601 time string into a Time:
+/// You could also parse an ISO 8601 time string into a calendar Time or
+/// duration Time:
 /// ```nwscript
-/// struct Time t = StringToTime("1372-06-01 13:00:00:000");
+/// struct Time tTime = StringToTime("1372-06-01 13:00:00:000");
+/// struct Time tDur = StringToDuration("1372-05-00 13:00:00:000");
+///
+/// // Negative durations are allowed:
+/// struct Time tNeg = StringToDuration("-1372-05-00 13:00:00:000");
+///
+/// // Missing units are assumed to be their lowest bound:
+/// struct Time a = StringToTime("1372-06-01 00:00:00:000");
+/// struct Time b = StringToTime("1372-06-01");
+/// struct Time c = StringToTime("1372-06");
+/// Assert(a == b);
+/// Assert(b == c);
 /// ```
 ///
-/// You can also create a Time manually by declaring a Time struct and setting
-/// the fields independently:
-///
+/// You can also create a Time manually by declaring a new Time struct and
+/// setting the fields independently:
 /// ```nwscript
 /// struct Time t;
-/// t.Year = 1372;
+/// t.Type  = TIME_TYPE_CALENDAR;
+/// t.Year  = 1372;
 /// t.Month = 6;
-/// t.Day = 1;
-/// t.Hour = 13;
+/// t.Day   = 1;
+/// t.Hour  = 13;
 /// // ...
 /// ```
 ///
 /// When not using the `GetTime()` function, it's a good idea to normalize the
 /// resultant Time to distribute the field values correctly:
 /// ```nwscript
-/// struct Time t;
+/// struct Time t = NewTime();
 /// t.Second = 90;
 ///
 /// t = NormalizeTime(t);
@@ -92,23 +119,26 @@
 /// SetCurrentTime(t);
 /// ```
 ///
-/// Alternatively, you can advance Time by a duration:
+/// Alternatively, you can advance the current Time by a duration Time:
 /// ```nwscript
-/// AdvanceCurrentTime(120.0);
+/// AdvanceCurrentTime(FloatToDuration(120.0));
 /// ```
 ///
 /// ## Dropping units from a Time
-/// You can reduce the precision of a time:
+/// You can reduce the precision of a Time. Units smaller than the precision
+/// limit will be at their lower bound:
 /// ```nwscript
 /// struct Time a = GetTime(1372, 6, 1, 13);
 /// struct Time b = GetTime(1372, 6, 1);
 /// struct Time c = GetPrecisionTime(a, TIME_UNIT_DAY);
+/// struct Time d = GetPrecisionTime(a, TIME_UNIT_MONTH);
 /// Assert(a != b);
 /// Assert(b == c);
+/// Assert(b == d);
 /// ```
 ///
 /// ## Saving a Time
-/// The easiest way to save a time and get it later is to use the
+/// The easiest way to save a Time and get it later is to use the
 /// `SetLocalTime()` and `GetLocalTime()` functions. These functions convert a
 /// Time into json and save it as a local variable.
 ///
@@ -125,11 +155,11 @@
 /// If you want to store a Time in a database, you can convert it into json or
 /// into a string before passing it to a query. The json method is preferable
 /// for persistent storage, since it is guaranteed to be correct if the module's
-/// minutes-per-hour setting changes after the value is stored:
+/// minutes per hour setting changes after the value is stored:
 /// ```nwscript
 /// struct Time tTime = GetCurrentTime();
 /// json jTime = TimeToJson(tTime);
-/// string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
+/// string sSql = "INSERT INTO data (varname, value) VALUES ('ServerTime', @time);";
 /// sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
 /// SqlBindJson(q, "@time", jTime);
 /// SqlStep(q);
@@ -151,21 +181,13 @@
 /// ```nwscript
 /// struct Time tTime = GetCurrentTime();
 /// string sTime = TimeToString();
-/// string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
+/// string sSql = "INSERT INTO data (varname, value) VALUES ('ServerTime', @time);";
 /// sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
 /// SqlBindString(q, "@time", sTime);
 /// SqlStep(q);
 /// ```
 ///
 /// ## Comparing Times
-/// To check the amount of time between two Times:
-/// ```nwscript
-/// struct Time a = StringToTime("1372-06-01 13:00:00:000");
-/// struct Time b = StringToTime("1372-06-01 13:01:30:500");
-/// float fDur = GetDuration(a, b);
-/// Assert(fDur == 90.5);
-/// ```
-///
 /// To check if one time is before or after another:
 /// ```nwscript
 /// struct Time a = StringToTime("1372-06-01 13:00:00:000");
@@ -182,22 +204,33 @@
 ///
 /// Assert(!GetIsTimeEqual(a, b));
 /// Assert(GetTimeIsEqual(b, c));
+///
+/// // To check for exactly equal:
 /// Assert(b != c);
+/// ```
+///
+/// To check the amount of time between two Times:
+/// ```nwscript
+/// struct Time a = StringToTime("1372-06-01 13:00:00:000");
+/// struct Time b = StringToTime("1372-06-01 13:01:30:500");
+/// struct Time tDur = GetDurationBetween(a, b);
+/// Assert(DurationToFloat(tDur) == 90.5);
 /// ```
 ///
 /// To check if a duration has passed since a Time:
 /// ```nwscript
 /// int CheckForMinRestTime(object oPC, float fMinTime)
 /// {
-///     struct Time tLast = GetLocalTime(oPC, "LastRest");
-///     return GetDurationSince(tSince) >= fMinTime;
+///     struct Time tSince = GetDurationSince(GetLocalTime(oPC, "LastRest"));
+///     return DurationToFloat(tSince) >= fMinTime;
 /// }
 /// ```
 ///
 /// To calculate the duration until a Time is reached:
 /// ```nwscript
 /// struct Time tMidnight = GetTime(GetCalendarYear(), GetCalendarMonth(), GetCalendarDay() + 1);
-/// float fDurToMidnight = GetDurationUntil(tMidnight);
+/// struct Time tDurToMidnight = GetDurationUntil(tMidnight);
+/// float fDurToMidnight = DurationToFloat(tDurToMidnight);
 /// ```
 /// ----------------------------------------------------------------------------
 
@@ -210,16 +243,21 @@
 // -----------------------------------------------------------------------------
 
 /// @struct Time
-/// @brief A datatype holding a calendar date and clock time.
-/// @note Since this represents a calendar date, the month and day count from 1,
-///     but the year still counts from 0 (since NWN allows year 0).
+/// @brief A datatype representing either an amount of time or a moment in time.
+/// @note Times with a Type field of TIME_TYPE_DURATION represent an amount of
+///     time as represented on a stopwatch. All duration units count from 0.
+/// @note Times with a Type field of TIME_TYPE_CALENDAR represent a moment in
+///     time as represented on a calendar. This means the month and day count
+///     from 1, but all other units count from 0 (including the year, since NWN
+///     allows year 0).
 struct Time
 {
+    int Type;        ///< TIME_TYPE_DURATION || TIME_TYPE_CALENDAR
     int Year;        ///< 0..32000
-    int Month;       ///< 1..12
-    int Day;         ///< 1..28
+    int Month;       ///< 0..11 for duration Times, 1..12 for calendar Times
+    int Day;         ///< 0..27 for duration Times, 1..28 for calendar Times
     int Hour;        ///< 0..23
-    int Minute;      ///< 0.._MinsPerHour
+    int Minute;      ///< 0..MinsPerHour
     int Second;      ///< 0..59
     int Millisecond; ///< 0..999
     int MinsPerHour; ///< The minutes per hour setting: 1..60
@@ -229,7 +267,7 @@ struct Time
 //                                   Constants
 // -----------------------------------------------------------------------------
 
-// These are the units in a valid time.
+// These are the units in a valid Time.
 const int TIME_UNIT_YEAR        = 0;
 const int TIME_UNIT_MONTH       = 1;
 const int TIME_UNIT_DAY         = 2;
@@ -238,42 +276,31 @@ const int TIME_UNIT_MINUTE      = 4;
 const int TIME_UNIT_SECOND      = 5;
 const int TIME_UNIT_MILLISECOND = 6;
 
-// Prefix for local times to avoid collision
+// These are the types of Times.
+const int TIME_TYPE_DURATION = 0; ///< Represents an amount of time
+const int TIME_TYPE_CALENDAR = 1; ///< Represents a moment in time
+
+// Prefix for local variables to avoid collision
 const string TIME_PREFIX = "*Time: ";
+
+// These are field names for json objects
+const string TIME_TYPE        = "Type";
+const string TIME_YEAR        = "Year";
+const string TIME_MONTH       = "Month";
+const string TIME_DAY         = "Day";
+const string TIME_HOUR        = "Hour";
+const string TIME_MINUTE      = "Minute";
+const string TIME_SECOND      = "Second";
+const string TIME_MILLISECOND = "Millisecond";
+const string TIME_MINSPERHOUR = "MinsPerHour";
+
+/// Uninitialized Time value. Can be compared to Times returned from functions
+/// to see if the Time is valid.
+struct Time TIME_INVALID;
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
-
-// ----- Conversions -----------------------------------------------------------
-
-/// @brief Convert years to a duration in seconds.
-/// @param nYears The number of years to convert
-float Years(int nYears);
-
-/// @brief Convert months to a duration in seconds.
-/// @param nMonths The number of months to convert
-float Months(int nMonths);
-
-/// @brief Convert days to a duration in seconds.
-/// @param nDays The number of days to convert
-float Days(int nDays);
-
-/// @brief Convert hours to a duration in seconds.
-/// @param nHours The number of hours to convert
-float Hours(int nHours);
-
-/// @brief Convert minutes to a duration in seconds.
-/// @param nMinutes The number of minutes to convert
-float Minutes(int nMinutes);
-
-/// @brief Convert seconds to a duration in seconds.
-/// @param nSeconds The number of seconds to convert
-float Seconds(int nSeconds);
-
-/// @brief Convert milliseconds to a duration in seconds.
-/// @param nYears The number of milliseconds to convert
-float Milliseconds(int nMilliseconds);
 
 /// @brief Convert hours to minutes.
 /// @param nHours The number of hours to convert
@@ -282,7 +309,40 @@ int HoursToMinutes(int nHours = 1);
 
 // ----- Times -----------------------------------------------------------------
 
-/// @brief Distribute units in a time, optionally converting minutes per hour.
+/// @brief Return whether any unit in a Time is less than its lower bound.
+/// @param t The Time to check.
+int GetAnyTimeUnitNegative(struct Time t);
+
+/// @brief Return whether any unit in a Time is greater than its lower bound.
+/// @param t The Time to check.
+int GetAnyTimeUnitPositive(struct Time t);
+
+/// @brief Return the sign of a Time.
+/// @param t The Time to check.
+/// @returns 0 if all units equal the lower bound, -1 if any unit is less than
+///     the lower bound, or 1 if any unit is greater than the lower bound.
+/// @note The Time must be normalized to yield an acurate result.
+int GetTimeSign(struct Time t);
+
+/// @brief Create a new calendar Time.
+/// @param nMinsPerHour The number of minutes per hour (1..60). If 0, will use
+///     the module's default setting.
+struct Time NewTime(int nMinsPerHour = 0);
+
+/// @brief Create a new duration Time.
+/// @param nMinsPerHour The number of minutes per hour (1..60). If 0, will use
+///     the module's default setting.
+struct Time NewDuration(int nMinsPerHour = 0);
+
+/// @brief Convert a calendar Time into a duration Time.
+/// @note This is safe to call on a duration Time.
+struct Time TimeToDuration(struct Time t);
+
+/// @brief Convert a duration Time into a calendar Time.
+/// @note This is safe to call on a calendar Time.
+struct Time DurationToTime(struct Time t);
+
+/// @brief Distribute units in a Time, optionally converting minutes per hour.
 /// @details Units that overflow their range have the excess added to the next
 ///     highest unit (e.g., 1500 msec -> 1 sec, 500 msec). If `nMinsPerHour`
 ///     does not match `t.MinsPerHour`, the minutes, seconds, and milliseconds
@@ -290,8 +350,11 @@ int HoursToMinutes(int nHours = 1);
 /// @param t The Time to normalize
 /// @param nMinsPerHour The number of minutes per hour to normalize with. If 0,
 ///     will use `t.MinsPerHour`.
-/// @note If any unit in `t` falls outside the bounds after normalization, an
-///     invalid time is returned. You can check for this using GetIsTimeValid().
+/// @note If `t` is a duration Time, all non-zero units will be either positive
+///     or negative (i.e., not a mix of both).
+/// @note If `t` is a calendar Time and any unit in `t` falls outside the bounds
+///     after normalization, an invalid Time is returned. You can check for this
+///     using GetIsTimeValid().
 struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0);
 
 /// @brief Check if any unit in a normalized time is outside its range.
@@ -302,130 +365,175 @@ struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0);
 /// @returns TRUE if valid, FALSE otherwise.
 int GetIsTimeValid(struct Time t, int bNormalize = TRUE);
 
-/// @brief Generate a Time.
+/// @brief Create a duration Time, representing an amount of time.
+/// @note All units count from 0. Negative numbers are allowed.
+/// @param nYear The number of years
+/// @param nMonth The number of months
+/// @param nDay The number of days
+/// @param nHour The number of hours
+/// @param nMinute The number of minutes
+/// @param nSecond The number of seconds
+/// @param nMillisecond The number of milliseconds
+/// @param nMinsPerHour The number of minutes per hour (1..60). If 0, will use
+///     the module's default setting.
+/// @returns A normalized duration Time.
+struct Time GetDuration(int nYears = 0, int nMonths = 0, int nDays = 0, int nHours = 0, int nMinutes = 0, int nSeconds = 0, int nMilliseconds = 0, int nMinsPerHour = 0);
+
+/// @brief Create a calendar Time, representing a moment in time.
 /// @param nYear The year (0..32000)
 /// @param nMonth The month of the year (1..12)
 /// @param nDay The day of the month (1..28)
 /// @param nHour The hour (0..23)
 /// @param nMinute The minute (0..nMinsPerHour)
-/// @param nSecond The second (1..60)
-/// @param nMillisecond The millisecond (0..1000)
+/// @param nSecond The second (0..59)
+/// @param nMillisecond The millisecond (0..999)
 /// @param nMinsPerHour The number of minutes per hour (1..60). If 0, will use
 ///     the module's default setting.
-/// @returns A normalized Time
+/// @returns A normalized calendar Time.
 struct Time GetTime(int nYear = 0, int nMonth = 1, int nDay = 1, int nHour = 0, int nMinute = 0, int nSecond = 0, int nMillisecond = 0, int nMinsPerHour = 0);
 
-/// @brief Convert a Time to an in-game time.
+/// @brief Convert a Time to an in-game time (i.e., 60 minutes per hour).
 /// @param t The Time to convert
 /// @note Alias for NormalizeTime(t, 60).
 struct Time TimeToGameTime(struct Time t);
 
-/// @brief Convert an in-game time to a Time.
+/// @brief Convert an in-game time (i.e., 60 minutes per hour) to a Time.
 /// @param t The Time to convert
 /// @note Alias for NormalizeTime(t, HoursToMinutes()).
 struct Time GameTimeToTime(struct Time t);
 
-/// @brief Get a Time representing the current calendar date and clock time.
-/// @returns A Time with a `MinsPerHour` equivalent to the module's setting.
+/// @brief Add a Time to another.
+/// @param a The Time to modify
+/// @param b The Time to add
+/// @returns A Time of the same type an minutes per hour as `a`.
+/// @note You can safely mix calendar or duration Times, as well as Times with
+///     different minutes per hour settings.
+struct Time AddTime(struct Time t, struct Time t);
+
+/// @brief Subtract a Time from another.
+/// @param a The Time to modify
+/// @param b The Time to subtract
+/// @returns A Time of the same type an minutes per hour as `a`.
+/// @note You can safely mix calendar or duration Times, as well as Times with
+///     different minutes per hour settings.
+struct Time SubtractTime(struct Time a, struct Time b);
+
+/// @brief Get the current calendar date and clock time as a calendar Time.
+/// @note A calendar Time with a `MinsPerHour` matching to the module's setting.
 struct Time GetCurrentTime();
 
-/// @brief Get a Time representing the current calendar date and in-game time.
-/// @returns A Time with a `MinsPerHour` of 60.
+/// @brief Get the current calendar date and in-game time as a calendar Time.
+/// @returns A calendar Time with a `MinsPerHour` of 60.
 /// @note Alias for TimeToGameTime(GetCurrentTime()).
 struct Time GetCurrentGameTime();
 
-/// @brief Set the current calendar date and clock time
-/// @param t The time to set the calendar and clock to. Must be a valid Time
-///     that is after the current time.
+/// @brief Set the current calendar date and clock time.
+/// @param t The time to set the calendar and clock to. Must be a valid calendar
+///     Time that is after the current time.
 void SetCurrentTime(struct Time t);
 
-/// @brief Set the current calendar date and clock time forwards by a duration.
-/// @param fSeconds A duration in seconds by which to advance the time. Must be
-///     positive.
-void AdvanceCurrentTime(float fSeconds);
+/// @brief Set the current calendar date and clock time forwards.
+/// @param t A duration Time by which to advance the time. Must be positive.
+void AdvanceCurrentTime(struct Time t);
 
 /// @brief Drop smaller units from a Time.
-/// @param t The time to modify
+/// @param t The Time to modify
 /// @param nUnit A TIME_UNIT_* constant representing the maximum precision.
 ///     Units more precise than this are set to their lowest value.
 struct Time GetPrecisionTime(struct Time t, int nUnit);
 
-// ----- Durations -------------------------------------------------------------
+/// @brief Get the duration of the interval between two Times.
+/// @param a The calendar Time at the start of interval
+/// @param b The calendar Time at the end of the interval
+/// @returns A normalized duration Time. The duration will be negative if a is
+///     after b and positive if b is after a. If the times are equivalent, the
+///     duration will equal 0.
+struct Time GetDurationBetween(struct Time tStart, struct Time tEnd);
 
-/// @brief Get the duration of an interval between two times.
-/// @param a The Time at the start of interval
-/// @param b The Time at the end of the interval
-/// @param bNormalize Whether to normalize a and b to use the module's minutes
-///     per hour setting. Only set this to FALSE if you know a and b are both
-///     normalized and use the module's setting.
-/// @returns A duration in seconds. If a is after b, will return a negative
-///     number. If a == b, will return 0.0.
-/// @note The returned duration is always in a module's clock seconds,
-///     regardless of the MinsPerHour setting of either a or b. This means
-///     values obtained with this function may be passed directly to game
-///     functions that expect a duration (like DelayCommand() or spell effects).
-float GetDuration(struct Time a, struct Time b, int bNormalize = TRUE);
-
-/// @brief Get the duration of the interval between a time and the current time.
+/// @brief Get the duration of the interval between a Time and the current time.
 /// @param tSince The Time at the start of the interval.
-/// @param bNormalize Whether to normalize tSince to use the module's minutes
-///     per hour setting. Only set this to FALSE if you know tSince is already
-///     normalized and uses the module's setting.
-/// @returns A duration in seconds. If tSince is after the current time, will
-///     return a negative number. If tSince is equal to the current time, will
-///     return 0.0.
-float GetDurationSince(struct Time tSince, int bNormalize = TRUE);
+/// @returns A normalized duration Time. The duration will be negative if a is
+///     after b and positive if b is after a. If the times are equivalent, the
+///     duration will equal 0.
+struct Time GetDurationSince(struct Time tSince);
 
-/// @brief Get the duration of the interval between the current time and a time.
+/// @brief Get the duration of the interval between the current time and a Time.
 /// @param tUntil The Time at the end of the interval.
-/// @param bNormalize Whether to normalize tUntil to use the module's minutes
-///     per hour setting. Only set this to FALSE if you know tUntil is already
-///     normalized and uses the module's setting.
-/// @returns A duration in seconds. If tUntil is before the current time, will
-///     return a negative number. If tUntil is equal to the current time, will
-///     return 0.0.
-float GetDurationUntil(struct Time tUntil, int bNormalize = TRUE);
+/// @returns A normalized duration Time. The duration will be negative if a is
+///     after b and positive if b is after a. If the times are equivalent, the
+///     duration will equal 0.
+struct Time GetDurationUntil(struct Time tUntil);
 
-/// @brief Check whether a time is after another time.
+/// @brief Compare two Times and find which is later.
 /// @param a The Time to check
 /// @param b The Time to check against
-/// @param bNormalize Whether to normalize a and b to use the same minutes per
-///     hour setting. Only set this to FALSE if you know a and b are both
-///     normalized and use the same minutes per hour setting.
+/// @returns 0 if a == b, -1 if a < b, and 1 if a > b.
+int CompareTime(struct Time a, struct Time b);
+
+/// @brief Check whether a Time is after another Time.
+/// @param a The Time to check
+/// @param b The Time to check against
 /// @returns TRUE if a is after b, FALSE otherwise
-int GetIsTimeAfter(struct Time a, struct Time b, int bNormalize = TRUE);
+int GetIsTimeAfter(struct Time a, struct Time b);
 
-/// @brief Check whether a time is after another time.
+/// @brief Check whether a Time is before another Time.
 /// @param a The Time to check
 /// @param b The Time to check against
-/// @param bNormalize Whether to normalize a and b to use the same minutes per
-///     hour setting. Only set this to FALSE if you know a and b are both
-///     normalized and use the same minutes per hour setting.
 /// @returns TRUE if a is before b, FALSE otherwise
-int GetIsTimeBefore(struct Time a, struct Time b, int bNormalize = TRUE);
+int GetIsTimeBefore(struct Time a, struct Time b);
 
-/// @brief Check whether a time is equal to another time.
+/// @brief Check whether a Time is equal to another Time.
 /// @param a The Time to check
 /// @param b The Time to check against
-/// @param bNormalize Whether to normalize a and b to use the same minutes per
-///     hour setting. Only set this to FALSE if you know a and b are both
-///     normalized and use the same minutes per hour setting.
 /// @returns TRUE if a is equivalent to b, FALSE otherwise
-/// @note This checks if the normalized times are equal. If you want to instead
-///     check if two Time structs are exactly equal, use `a == b`.
-int GetIsTimeEqual(struct Time a, struct Time b, int bNormalize = TRUE);
+/// @note This checks if the normalized Times represent equal moments in time.
+///     If you want to instead check if two Time structs are exactly equal, use
+///     `a == b`.
+int GetIsTimeEqual(struct Time a, struct Time b);
 
-/// @brief Increase time by a duration
-/// @param t The Time to increase
-/// @param fDur The duration in seconds to increase by
-/// @note If fDur is negative, will actually decrease the time.
-struct Time IncreaseTime(struct Time t, float fDur);
+// ----- Float Conversion ------------------------------------------------------
 
-/// @brief Decrease time by a duration
-/// @param t The Time to decrease
-/// @param fDur The duration in seconds to decrease by
-/// @note If fDur is negative, will actually increase the time.
-struct Time DecreaseTime(struct Time t, float fDur);
+/// @brief Convert years to seconds.
+/// @param nYears The number of years to convert
+float Years(int nYears);
+
+/// @brief Convert months to seconds.
+/// @param nMonths The number of months to convert
+float Months(int nMonths);
+
+/// @brief Convert days to seconds.
+/// @param nDays The number of days to convert
+float Days(int nDays);
+
+/// @brief Convert hours to seconds.
+/// @param nHours The number of hours to convert
+float Hours(int nHours);
+
+/// @brief Convert minutes to seconds.
+/// @param nMinutes The number of minutes to convert
+float Minutes(int nMinutes);
+
+/// @brief Convert seconds to seconds.
+/// @param nSeconds The number of seconds to convert
+float Seconds(int nSeconds);
+
+/// @brief Convert milliseconds to seconds.
+/// @param nYears The number of milliseconds to convert
+float Milliseconds(int nMilliseconds);
+
+/// @brief Convert a duration Time to a float.
+/// @param t The duration Time to convert.
+/// @returns A float representing the number of seconds in `t`. Always has a
+///     minutes per hour setting equal to the module's.
+/// @note Use this function to pass a Time to a function like DelayCommand().
+/// @note Long durations may lose precision when converting. Use with caution.
+float DurationToFloat(struct Time t);
+
+/// @brief Convert a float to a duration Time.
+/// @param fDur A float representing a number of seconds.
+/// @returns A duration Time with a minutes per hour setting equal to the
+///     module's.
+struct Time FloatToDuration(float fDur);
 
 // ----- Json Conversion -------------------------------------------------------
 
@@ -436,13 +544,13 @@ struct Time DecreaseTime(struct Time t, float fDur);
 ///     per hour setting will change. The object can be converted back using
 ///     JsonToTime().
 /// @param t The Time to convert
-/// @param bNormalize Whether to normalize the time before converting
-json TimeToJson(struct Time t, int bNormalize = TRUE);
+json TimeToJson(struct Time t);
 
 /// @brief Convert a json object into a Time.
 /// @param j The json object to convert
-/// @param bNormalize Whether to normalize the time after converting
-struct Time JsonToTime(json j, int bNormalize = TRUE);
+struct Time JsonToTime(json j);
+
+// ----- Local Variables -------------------------------------------------------
 
 /// @brief Return a Time from a local variable.
 /// @param oObject The object to get the local variable from
@@ -464,26 +572,367 @@ void DeleteLocalTime(object oObject, string sVarName);
 
 /// @brief Convert a Time into a string.
 /// @param t The Time to convert.
-/// @param bNormalize Whether to normalize the time before converting.
+/// @param bNormalize Whether to normalize the Time before converting.
 /// @returns An ISO 8601 formatted datetime, e.g., "1372-06-01 13:00:00:000".
+/// @note If `t` is a duration Time, the returned value will be preceded by a
+///     sign character ("-" if any unit in `t` is negative, "+" otherwise).
 string TimeToString(struct Time t, int bNormalize = TRUE);
 
 /// @brief Convert an ISO 8601 formatted datetime string into a Time.
 /// @param sTime The string to convert.
-/// @param nMinsPerHour The number of minutes per hour expected in the time. If
+/// @param nMinsPerHour The number of minutes per hour expected in the Time. If
 ///     0, will use the module setting.
 /// @note The returned Time is not normalized.
+/// @note If the first character in `sTime` is a sign character (i.e., "+" or
+///     "-"), the returned Time will be a duration. Otherwise, it will be a
+///     calendar Time.
 struct Time StringToTime(string sTime, int nMinsPerHour = 0);
-
-/// @brief Convert a duration to a string.
-/// @param fDur A duration in seconds.
-string DurationToString(float fDur);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
 // -----------------------------------------------------------------------------
 
-// ----- Conversions -----------------------------------------------------------
+int HoursToMinutes(int nHours = 1)
+{
+    return FloatToInt(HoursToSeconds(nHours)) / 60;
+}
+
+// ----- Times -----------------------------------------------------------------
+
+int GetAnyTimeUnitNegative(struct Time t)
+{
+    return t.Year < 0 || t.Month < t.Type || t.Day < t.Type ||
+           t.Hour < 0 || t.Minute < 0 || t.Second < 0 || t.Millisecond < 0;
+}
+
+int GetAnyTimeUnitPositive(struct Time t)
+{
+    return t.Year > 0 || t.Month > t.Type || t.Day > t.Type ||
+           t.Hour > 0 || t. Minute > 0 || t.Second > 0 || t.Millisecond > 0;
+}
+
+int GetTimeSign(struct Time t)
+{
+    return GetAnyTimeUnitNegative(t) ? -1 : GetAnyTimeUnitPositive(t) ? 1 : 0;
+}
+
+struct Time NewTime(int nMinsPerHour = 0)
+{
+    struct Time t;
+    t.Type = TIME_TYPE_CALENDAR;
+    t.MinsPerHour = nMinsPerHour <= 0 ? HoursToMinutes() : clamp(nMinsPerHour, 1, 60);
+    t.Month = 1;
+    t.Day   = 1;
+    return t;
+}
+
+struct Time NewDuration(int nMinsPerHour = 0)
+{
+    struct Time t;
+    t.Type = TIME_TYPE_DURATION;
+    t.MinsPerHour = nMinsPerHour <= 0 ? HoursToMinutes() : clamp(nMinsPerHour, 1, 60);
+    return t;
+}
+
+struct Time TimeToDuration(struct Time t)
+{
+    t.Day   -= t.Type;
+    t.Month -= t.Type;
+    t.Type   = TIME_TYPE_DURATION;
+    return t;
+}
+
+struct Time DurationToTime(struct Time t)
+{
+    t.Day   += (1 - t.Type);
+    t.Month += (1 - t.Type);
+    t.Type   = TIME_TYPE_CALENDAR;
+    return t;
+}
+
+struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0)
+{
+    // Convert everything to a duration for ease of calculation
+    int nType = t.Type;
+    t = TimeToDuration(t);
+
+    // If the conversion factor was not set, we assume it's using the module's.
+    if (t.MinsPerHour <= 0)
+        t.MinsPerHour = HoursToMinutes();
+
+    // We try to distribute units before converting to avoid integer overflow if
+    // the user passed an absurdly large number somewhere.
+    int nFactor;
+    if (abs(t.Millisecond) >= (nFactor = 1000))
+    {
+        t.Second += t.Millisecond / nFactor;
+        t.Millisecond %= nFactor;
+    }
+
+    if (abs(t.Second) >= (nFactor = 60))
+    {
+        t.Minute += t.Second / nFactor;
+        t.Second %= nFactor;
+    }
+
+    if (abs(t.Minute) >= (nFactor = t.MinsPerHour))
+    {
+        t.Hour += t.Minute / nFactor;
+        t.Minute %= nFactor;
+    }
+
+    if (abs(t.Hour) >= (nFactor = 24))
+    {
+        t.Day += t.Hour / nFactor;
+        t.Hour %= nFactor;
+    }
+
+    if (abs(t.Day) >= (nFactor = 28))
+    {
+        t.Month += t.Day / nFactor;
+        t.Day %= nFactor;
+    }
+
+    if (abs(t.Month) >= (nFactor = 12))
+    {
+        t.Year += t.Month / nFactor;
+        t.Month %= nFactor;
+    }
+
+    // If this is > 0, we will adjust the time's conversion factor to match the
+    // requested value. Otherwise, assume we're using the same conversion factor
+    // and just prettifying units.
+    nMinsPerHour = nMinsPerHour > 0 ? clamp(nMinsPerHour, 1, 60) : t.MinsPerHour;
+
+    // Convert units if needed
+    if (t.MinsPerHour != nMinsPerHour)
+    {
+        t.Millisecond = t.Millisecond * nMinsPerHour / t.MinsPerHour;
+        t.Second      = t.Second      * nMinsPerHour / t.MinsPerHour;
+        t.Minute      = t.Minute      * nMinsPerHour / t.MinsPerHour;
+        t.MinsPerHour = nMinsPerHour;
+    }
+
+    // A mix of negative and positive units means we need to consolidate and
+    // re-normalize.
+    if (GetAnyTimeUnitPositive(t) && GetAnyTimeUnitNegative(t))
+    {
+        struct Time d = NewDuration(t.MinsPerHour);
+        d.Millisecond = (t.Minute * 60 + t.Second) * 1000 + t.Millisecond;
+        d.Hour = ((t.Year * 12 + t.Month) * 28 + t.Day) * 24 + t.Hour;
+
+        // If that didn't fix it, borrow a unit
+        if ((d.Millisecond >= 0) != (d.Hour >= 0))
+        {
+            d.Millisecond += sign(d.Hour) * 1000 * 60 * d.MinsPerHour;
+            d.Hour -= sign(d.Hour);
+        }
+
+        t = NormalizeTime(d);
+    }
+
+    // Convert back to a calendar Time if needed.
+    if (nType)
+    {
+        if (GetAnyTimeUnitNegative(t))
+            return TIME_INVALID;
+
+        return DurationToTime(t);
+    }
+
+    return t;
+}
+
+int GetIsTimeValid(struct Time t, int bNormalize = TRUE)
+{
+    if (bNormalize)
+        t = NormalizeTime(t);
+    return t != TIME_INVALID;
+}
+
+struct Time GetDuration(int nYears = 0, int nMonths = 0, int nDays = 0, int nHours = 0, int nMinutes = 0, int nSeconds = 0, int nMilliseconds = 0, int nMinsPerHour = 0)
+{
+    struct Time t = NewDuration(nMinsPerHour);
+    t.Year        = nYears;
+    t.Month       = nMonths;
+    t.Day         = nDays;
+    t.Hour        = nHours;
+    t.Minute      = nMinutes;
+    t.Second      = nSeconds;
+    t.Millisecond = nMilliseconds;
+    return NormalizeTime(t);
+}
+
+struct Time GetTime(int nYear = 0, int nMonth = 1, int nDay = 1, int nHour = 0, int nMinute = 0, int nSecond = 0, int nMillisecond = 0, int nMinsPerHour = 0)
+{
+    struct Time t = NewTime(nMinsPerHour);
+    t.Year        = nYear;
+    t.Month       = nMonth;
+    t.Day         = nDay;
+    t.Hour        = nHour;
+    t.Minute      = nMinute;
+    t.Second      = nSecond;
+    t.Millisecond = nMillisecond;
+    return NormalizeTime(t);
+}
+
+struct Time TimeToGameTime(struct Time t)
+{
+    return NormalizeTime(t, 60);
+}
+
+struct Time GameTimeToTime(struct Time t)
+{
+    return NormalizeTime(t, HoursToMinutes());
+}
+
+struct Time AddTime(struct Time a, struct Time b)
+{
+    // Convert everything to a duration to ensure even comparison
+    int nType = a.Type;
+    a = NormalizeTime(TimeToDuration(a));
+    b = NormalizeTime(TimeToDuration(b), a.MinsPerHour);
+
+    a.Year        += b.Year;
+    a.Month       += b.Month;
+    a.Day         += b.Day;
+    a.Hour        += b.Hour;
+    a.Minute      += b.Minute;
+    a.Second      += b.Second;
+    a.Millisecond += b.Millisecond;
+
+    // Convert back to calendar time if needed
+    if (nType)
+        a = DurationToTime(a);
+
+    return NormalizeTime(a);
+}
+
+struct Time SubtractTime(struct Time a, struct Time b)
+{
+    // Convert everything to a duration to ensure even comparison
+    int nType = a.Type;
+    a = NormalizeTime(TimeToDuration(a));
+    b = NormalizeTime(TimeToDuration(b), a.MinsPerHour);
+
+    a.Year        -= b.Year;
+    a.Month       -= b.Month;
+    a.Day         -= b.Day;
+    a.Hour        -= b.Hour;
+    a.Minute      -= b.Minute;
+    a.Second      -= b.Second;
+    a.Millisecond -= b.Millisecond;
+
+    // Convert back to calendar time if needed
+    if (nType)
+        a = DurationToTime(a);
+
+    return NormalizeTime(a);
+}
+
+struct Time GetCurrentTime()
+{
+    struct Time t = NewTime();
+    t.Year        = GetCalendarYear();
+    t.Month       = GetCalendarMonth();
+    t.Day         = GetCalendarDay();
+    t.Hour        = GetTimeHour();
+    t.Minute      = GetTimeMinute();
+    t.Second      = GetTimeSecond();
+    t.Millisecond = GetTimeMillisecond();
+    return t;
+}
+
+struct Time GetCurrentGameTime()
+{
+    return TimeToGameTime(GetCurrentTime());
+}
+
+void SetCurrentTime(struct Time t)
+{
+    t = NormalizeTime(t, HoursToMinutes());
+    struct Time tCurrent = GetCurrentTime();
+    if (GetIsTimeAfter(t, tCurrent))
+    {
+        SetTime(t.Hour, t.Minute, t.Second, t.Millisecond);
+        SetCalendar(t.Year, t.Month, t.Day);
+    }
+    else
+    {
+        CriticalError("Cannot set time to " + TimeToString(t, FALSE) + " " +
+                      "because it is after " + TimeToString(tCurrent));
+    }
+}
+
+void AdvanceCurrentTime(struct Time t)
+{
+    int nSign = GetTimeSign(t);
+    if (nSign > 0)
+    {
+        t = AddTime(GetCurrentTime(), t);
+        SetTime(t.Hour, t.Minute, t.Second, t.Millisecond);
+        SetCalendar(t.Year, t.Month, t.Day);
+    }
+    else if (nSign < 0)
+        CriticalError("Cannot advance time by a negative amount");
+}
+
+struct Time GetPrecisionTime(struct Time t, int nUnit)
+{
+    while (nUnit < TIME_UNIT_MILLISECOND)
+    {
+        switch (++nUnit)
+        {
+            case TIME_UNIT_YEAR:        t.Year        = 0;           break;
+            case TIME_UNIT_MONTH:       t.Month       = 0  + t.Type; break;
+            case TIME_UNIT_DAY:         t.Day         = 0  + t.Type; break;
+            case TIME_UNIT_HOUR:        t.Hour        = 0;           break;
+            case TIME_UNIT_MINUTE:      t.Minute      = 0;           break;
+            case TIME_UNIT_SECOND:      t.Second      = 0;           break;
+            case TIME_UNIT_MILLISECOND: t.Millisecond = 0;           break;
+        }
+    }
+
+    return t;
+}
+
+struct Time GetDurationBetween(struct Time tStart, struct Time tEnd)
+{
+    // Convert to duration before passing to ensure we get a duration back
+    return SubtractTime(TimeToDuration(tEnd), tStart);
+}
+
+struct Time GetDurationSince(struct Time tSince)
+{
+    return GetDurationBetween(tSince, GetCurrentTime());
+}
+
+struct Time GetDurationUntil(struct Time tUntil)
+{
+    return GetDurationBetween(tUntil, GetCurrentTime());
+}
+
+int CompareTime(struct Time a, struct Time b)
+{
+    return GetTimeSign(GetDurationBetween(b, a));
+}
+
+int GetIsTimeAfter(struct Time a, struct Time b)
+{
+    return CompareTime(a, b) > 0;
+}
+
+int GetIsTimeBefore(struct Time a, struct Time b)
+{
+    return CompareTime(a, b) < 0;
+}
+
+int GetIsTimeEqual(struct Time a, struct Time b)
+{
+    return !CompareTime(a, b);
+}
+
+// ----- Float Conversion ------------------------------------------------------
 
 float Years(int nYears)
 {
@@ -520,329 +969,64 @@ float Milliseconds(int nMilliseconds)
     return nMilliseconds / 1000.0;
 }
 
-int HoursToMinutes(int nHours = 1)
+float DurationToFloat(struct Time t)
 {
-    return FloatToInt(HoursToSeconds(nHours)) / 60;
+    t = NormalizeTime(TimeToDuration(t), HoursToMinutes());
+    return Years(t.Year) + Months(t.Month) + Days(t.Day) + Hours(t.Hour) +
+        Minutes(t.Minute) + Seconds(t.Second) + Milliseconds(t.Millisecond);
 }
 
-// ----- Times -----------------------------------------------------------------
-
-struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0)
+struct Time FloatToDuration(float fDur)
 {
-    struct Time tInvalid;
-
-    // If the conversion factor was not set, we assume it's using the module's
-    if (t.MinsPerHour <= 0)
-        t.MinsPerHour = HoursToMinutes();
-
-    // If this is > 0, we will adjust the time's conversion factor to match the
-    // requested value. Otherwise, assume we're using the same conversion factor
-    // and just prettifying units.
-    nMinsPerHour = nMinsPerHour > 0 ? clamp(nMinsPerHour, 1, 60) : t.MinsPerHour;
-
-    // Convert time units if needed
-    if (t.MinsPerHour != nMinsPerHour)
-    {
-        // Everything less than 1 hour is converted to milliseconds, then the
-        // milliseconds are converted to the new time.
-        t.Millisecond += (t.Second * 1000) + (t.Minute * 60000);
-        t.Millisecond = t.Millisecond * nMinsPerHour / t.MinsPerHour;
-        t.Second = 0;
-        t.Minute = 0;
-        t.MinsPerHour = nMinsPerHour;
-    }
-
-    // Normalize each unit. Units bigger than the bounds are added to the next
-    // highest unit. Units smaller than the bound borrow from the next largest
-    // unit.
-    int nFactor;
-    if (t.Millisecond >= (nFactor = 1000))
-    {
-        t.Second += t.Millisecond / nFactor;
-        t.Millisecond %= nFactor;
-    }
-    else if (t.Millisecond < 0)
-    {
-        t.Second += t.Millisecond / nFactor - 1;
-        t.Millisecond = nFactor + (t.Millisecond % nFactor);
-    }
-
-    if (t.Second >= (nFactor = 60))
-    {
-        t.Minute += t.Second / nFactor;
-        t.Second %= nFactor;
-    }
-    else if (t.Second < 0)
-    {
-        t.Minute += t.Second / nFactor - 1;
-        t.Second = nFactor + (t.Second % nFactor);
-    }
-
-    if (t.Minute >= (nFactor = t.MinsPerHour))
-    {
-        t.Hour += t.Minute / nFactor;
-        t.Minute %= nFactor;
-    }
-    else if (t.Minute < 0)
-    {
-        t.Hour += t.Minute / nFactor - 1;
-        t.Minute = nFactor + (t.Minute % nFactor);
-    }
-
-    if (t.Hour >= (nFactor = 24))
-    {
-        t.Day += t.Hour / nFactor;
-        t.Hour %= nFactor;
-    }
-    else if (t.Hour < 0)
-    {
-        t.Day += t.Hour / nFactor - 1;
-        t.Hour = nFactor + (t.Hour % nFactor);
-    }
-
-    if (t.Day > (nFactor = 28))
-    {
-        t.Month += t.Day / nFactor;
-        t.Day %= nFactor;
-    }
-    else if (t.Day < 1)
-    {
-        t.Month += t.Day / nFactor - 1;
-        t.Day = nFactor + (t.Day % nFactor);
-    }
-
-    if (t.Month > (nFactor = 12))
-    {
-        t.Year += t.Month / nFactor;
-        t.Month %= nFactor;
-    }
-    else if (t.Month < 1)
-    {
-        t.Year += t.Month / nFactor - 1;
-        t.Month = nFactor + (t.Month % nFactor);
-    }
-
-    // Everything should be positive, so if the year is negative, we borrowed
-    // more time than was available, making this a negative time. In this case
-    // we return "0000-00-00 00:00:00:000".
-    if (t.Year < 0 || t.Year > 32000)
-        return tInvalid;
+    struct Time t = NewDuration(HoursToMinutes());
+    t.Millisecond = FloatToInt(frac(fDur) * 1000);
+    t.Second      = FloatToInt(fmod(fDur, 60.0));
+    t.Minute      = FloatToInt(fDur / 60) % t.MinsPerHour;
+    int nHours    = FloatToInt(fDur / HoursToSeconds(1));
+    t.Hour        = nHours % 24;
+    t.Day         = (nHours / 24) % 28;
+    t.Month       = (nHours / 24 / 28) % 12;
+    t.Year        = (nHours / 24 / 28 / 12);
     return t;
-}
-
-int GetIsTimeValid(struct Time t, int bNormalize = TRUE)
-{
-    struct Time tInvalid;
-    if (bNormalize)
-        t = NormalizeTime(t);
-    return t != tInvalid;
-}
-
-struct Time GetTime(int nYear = 0, int nMonth = 1, int nDay = 1, int nHour = 0, int nMinute = 0, int nSecond = 0, int nMillisecond = 0, int nMinsPerHour = 0)
-{
-    struct Time t;
-    t.Year        = nYear;
-    t.Month       = nMonth;
-    t.Day         = nDay;
-    t.Hour        = nHour;
-    t.Minute      = nMinute;
-    t.Second      = nSecond;
-    t.Millisecond = nMillisecond;
-    t.MinsPerHour = nMinsPerHour <= 0 ? HoursToMinutes() : clamp(nMinsPerHour, 1, 60);
-    return NormalizeTime(t);
-}
-
-struct Time TimeToGameTime(struct Time t)
-{
-    return NormalizeTime(t, 60);
-}
-
-struct Time GameTimeToTime(struct Time t)
-{
-    return NormalizeTime(t, HoursToMinutes());
-}
-
-struct Time GetCurrentTime()
-{
-    struct Time t;
-    t.Year        = GetCalendarYear();
-    t.Month       = GetCalendarMonth();
-    t.Day         = GetCalendarDay();
-    t.Hour        = GetTimeHour();
-    t.Minute      = GetTimeMinute();
-    t.Second      = GetTimeSecond();
-    t.Millisecond = GetTimeMillisecond();
-    t.MinsPerHour = HoursToMinutes();
-    return t;
-}
-
-struct Time GetCurrentGameTime()
-{
-    return TimeToGameTime(GetCurrentTime());
-}
-
-void SetCurrentTime(struct Time t)
-{
-    t = NormalizeTime(t, HoursToMinutes());
-    struct Time tCurrent = GetCurrentTime();
-    if (GetIsTimeAfter(t, tCurrent))
-    {
-        SetTime(t.Hour, t.Minute, t.Second, t.Millisecond);
-        SetCalendar(t.Year, t.Month, t.Day);
-    }
-    else
-    {
-        CriticalError("Cannot set time to " + TimeToString(t, FALSE) + " " +
-                      "because it is after " + TimeToString(tCurrent));
-    }
-}
-
-void AdvanceCurrentTime(float fSeconds)
-{
-    if (fSeconds > 0.0)
-    {
-        struct Time t = IncreaseTime(GetCurrentTime(), fSeconds);
-        SetTime(t.Hour, t.Minute, t.Second, t.Millisecond);
-        SetCalendar(t.Year, t.Month, t.Day);
-    }
-    else if (fSeconds < 0.0)
-    {
-        CriticalError("Cannot advance time by a negative amount (" +
-                      FloatToString(fSeconds, 0, 3) + " seconds)");
-    }
-}
-
-struct Time GetPrecisionTime(struct Time t, int nUnit)
-{
-    while (nUnit < TIME_UNIT_MILLISECOND)
-    {
-        switch (++nUnit)
-        {
-            case TIME_UNIT_YEAR:        t.Year        = 0; break;
-            case TIME_UNIT_MONTH:       t.Month       = 1; break;
-            case TIME_UNIT_DAY:         t.Day         = 1; break;
-            case TIME_UNIT_HOUR:        t.Hour        = 0; break;
-            case TIME_UNIT_MINUTE:      t.Minute      = 0; break;
-            case TIME_UNIT_SECOND:      t.Second      = 0; break;
-            case TIME_UNIT_MILLISECOND: t.Millisecond = 0; break;
-        }
-    }
-
-    return t;
-}
-
-// ----- Durations -------------------------------------------------------------
-
-float GetDuration(struct Time a, struct Time b, int bNormalize = TRUE)
-{
-    // Durations always use real seconds, so we normalize time to the game clock
-    if (bNormalize)
-    {
-        a = NormalizeTime(a, HoursToMinutes());
-        b = NormalizeTime(b, HoursToMinutes());
-    }
-
-    float f;
-    f += Years       (b.Year        - a.Year);
-    f += Months      (b.Month       - a.Month);
-    f += Days        (b.Day         - a.Day);
-    f += Hours       (b.Hour        - a.Hour);
-    f += Minutes     (b.Minute      - a.Minute);
-    f += Seconds     (b.Second      - a.Second);
-    f += Milliseconds(b.Millisecond - a.Millisecond);
-    return f;
-}
-
-float GetDurationSince(struct Time tSince, int bNormalize = TRUE)
-{
-    if (bNormalize)
-        tSince = NormalizeTime(tSince, HoursToMinutes());
-    return GetDuration(tSince, GetCurrentTime(), FALSE);
-}
-
-float GetDurationUntil(struct Time tUntil, int bNormalize = TRUE)
-{
-    if (bNormalize)
-        tUntil = NormalizeTime(tUntil, HoursToMinutes());
-    return GetDuration(tUntil, GetCurrentTime(), FALSE);
-}
-
-int GetIsTimeAfter(struct Time a, struct Time b, int bNormalize = TRUE)
-{
-    return GetIsTimeValid(b) && GetDuration(a, b, bNormalize) < 0.0;
-}
-
-int GetIsTimeBefore(struct Time a, struct Time b, int bNormalize = TRUE)
-{
-    return GetIsTimeValid(a) && GetDuration(a, b, bNormalize) > 0.0;
-}
-
-int GetIsTimeEqual(struct Time a, struct Time b, int bNormalize = TRUE)
-{
-    if (bNormalize)
-    {
-        a = NormalizeTime(a, a.MinsPerHour);
-        b = NormalizeTime(b, a.MinsPerHour);
-    }
-    return a == b;
-}
-
-struct Time IncreaseTime(struct Time t, float fAdd)
-{
-    // Durations are always in real seconds, so we need to ensure our time is
-    // using the same conversion factor.
-    int nMinsPerHour = HoursToMinutes();
-
-    t.Millisecond += FloatToInt(frac(fAdd) * 1000) * t.MinsPerHour / nMinsPerHour;
-    t.Second      += FloatToInt(fmod(fAdd, 60.0)) * t.MinsPerHour / nMinsPerHour;
-    t.Minute      += FloatToInt(fAdd / 60.0) % HoursToMinutes() * t.MinsPerHour / nMinsPerHour;
-    t.Hour        += FloatToInt(fAdd / HoursToSeconds(1));
-    return NormalizeTime(t);
-}
-
-struct Time DecreaseTime(struct Time t, float fSub)
-{
-    return IncreaseTime(t, fSub * -1);
 }
 
 // ----- Json Conversion -------------------------------------------------------
 
-json TimeToJson(struct Time t, int bNormalize = TRUE)
+json TimeToJson(struct Time t)
 {
-    if (bNormalize)
-        t = NormalizeTime(t);
-
     json j = JsonObject();
-    j = JsonObjectSet(j, "Year",        JsonInt(t.Year));
-    j = JsonObjectSet(j, "Month",       JsonInt(t.Month));
-    j = JsonObjectSet(j, "Day",         JsonInt(t.Day));
-    j = JsonObjectSet(j, "Hour",        JsonInt(t.Hour));
-    j = JsonObjectSet(j, "Minute",      JsonInt(t.Minute));
-    j = JsonObjectSet(j, "Second",      JsonInt(t.Second));
-    j = JsonObjectSet(j, "Millisecond", JsonInt(t.Millisecond));
-    j = JsonObjectSet(j, "MinsPerHour", JsonInt(t.MinsPerHour));
+    j = JsonObjectSet(j, TIME_TYPE, JsonInt(t.Type));
+    j = JsonObjectSet(j, TIME_YEAR,        JsonInt(t.Year));
+    j = JsonObjectSet(j, TIME_MONTH,       JsonInt(t.Month));
+    j = JsonObjectSet(j, TIME_DAY,         JsonInt(t.Day));
+    j = JsonObjectSet(j, TIME_HOUR,        JsonInt(t.Hour));
+    j = JsonObjectSet(j, TIME_MINUTE,      JsonInt(t.Minute));
+    j = JsonObjectSet(j, TIME_SECOND,      JsonInt(t.Second));
+    j = JsonObjectSet(j, TIME_MILLISECOND, JsonInt(t.Millisecond));
+    j = JsonObjectSet(j, TIME_MINSPERHOUR, JsonInt(t.MinsPerHour));
     return j;
 }
 
-struct Time JsonToTime(json j, int bNormalize = TRUE)
+struct Time JsonToTime(json j)
 {
-    struct Time t;
     if (JsonGetType(j) != JSON_TYPE_OBJECT)
-        return t;
+        return TIME_INVALID;
 
-    t.Year        = JsonGetInt(JsonObjectGet(j, "Year"));
-    t.Month       = JsonGetInt(JsonObjectGet(j, "Month"));
-    t.Day         = JsonGetInt(JsonObjectGet(j, "Day"));
-    t.Hour        = JsonGetInt(JsonObjectGet(j, "Hour"));
-    t.Minute      = JsonGetInt(JsonObjectGet(j, "Minute"));
-    t.Second      = JsonGetInt(JsonObjectGet(j, "Second"));
-    t.Millisecond = JsonGetInt(JsonObjectGet(j, "Millisecond"));
-    t.MinsPerHour = JsonGetInt(JsonObjectGet(j, "MinsPerHour"));
-
-    if (bNormalize)
-        t = NormalizeTime(t);
+    struct Time t;
+    t.Type        = JsonGetInt(JsonObjectGet(j, TIME_TYPE));
+    t.Year        = JsonGetInt(JsonObjectGet(j, TIME_YEAR));
+    t.Month       = JsonGetInt(JsonObjectGet(j, TIME_MONTH));
+    t.Day         = JsonGetInt(JsonObjectGet(j, TIME_DAY));
+    t.Hour        = JsonGetInt(JsonObjectGet(j, TIME_HOUR));
+    t.Minute      = JsonGetInt(JsonObjectGet(j, TIME_MINUTE));
+    t.Second      = JsonGetInt(JsonObjectGet(j, TIME_SECOND));
+    t.Millisecond = JsonGetInt(JsonObjectGet(j, TIME_MILLISECOND));
+    t.MinsPerHour = JsonGetInt(JsonObjectGet(j, TIME_MINSPERHOUR));
     return t;
 }
+
+// ----- Local Variables -------------------------------------------------------
+
 
 struct Time GetLocalTime(object oObject, string sVarName)
 {
@@ -867,24 +1051,33 @@ string TimeToString(struct Time t, int bNormalize = TRUE)
         t = NormalizeTime(t);
 
     json j = JsonArray();
-    j = JsonArrayInsert(j, JsonInt(t.Year));
-    j = JsonArrayInsert(j, JsonInt(t.Month));
-    j = JsonArrayInsert(j, JsonInt(t.Day));
-    j = JsonArrayInsert(j, JsonInt(t.Hour));
-    j = JsonArrayInsert(j, JsonInt(t.Minute));
-    j = JsonArrayInsert(j, JsonInt(t.Second));
-    j = JsonArrayInsert(j, JsonInt(t.Millisecond));
-    return FormatValues(j, "%04d-%02d-%02d %02d:%02d:%02d:%03d");
+    j = JsonArrayInsert(j, JsonString(t.Type || GetTimeSign(t) >= 0 ? "" : "-"));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Year)));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Month)));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Day)));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Hour)));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Minute)));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Second)));
+    j = JsonArrayInsert(j, JsonInt(abs(t.Millisecond)));
+    return FormatValues(j, "%s%04d-%02d-%02d %02d:%02d:%02d:%03d");
 }
 
-struct Time StringToTime(string sTime, int nMinsPerHour = 0)
+struct Time _StringToTime(string sTime, struct Time t)
 {
-    struct Time t, tInvalid;
-    t.MinsPerHour = nMinsPerHour;
+    if (sTime == "")
+        return TIME_INVALID;
 
     string sDelims = "-- :::";
     int nUnit = TIME_UNIT_YEAR;
     int nPos, nLength = GetStringLength(sTime);
+    int nSign = 1;
+
+    // Strip off an initial "-"
+    if (GetChar(sTime, 0) == "-")
+    {
+        nSign = -1;
+        nPos++;
+    }
 
     while (nPos < nLength)
     {
@@ -893,9 +1086,10 @@ struct Time StringToTime(string sTime, int nMinsPerHour = 0)
             sToken += sChar;
 
         if (GetStringLength(sToken) < 1)
-            return tInvalid;
+            return TIME_INVALID;
 
-        int nToken = StringToInt(sToken);
+        // If the first character was a -, all subsequent values are negative
+        int nToken = StringToInt(sToken) * nSign;
         switch (nUnit)
         {
             case TIME_UNIT_YEAR:        t.Year        = nToken; break;
@@ -906,12 +1100,12 @@ struct Time StringToTime(string sTime, int nMinsPerHour = 0)
             case TIME_UNIT_SECOND:      t.Second      = nToken; break;
             case TIME_UNIT_MILLISECOND: t.Millisecond = nToken; break;
             default:
-                return tInvalid;
+                return TIME_INVALID;
         }
 
         // Check if we encountered a delimiter with no characters following.
         if (nPos == nLength && sChar != "")
-            return tInvalid;
+            return TIME_INVALID;
 
         // If we run out of characters before we've parsed all the units, we can
         // return the partial time. However, if we run into an unexpected
@@ -920,14 +1114,19 @@ struct Time StringToTime(string sTime, int nMinsPerHour = 0)
         {
             if (sChar == "")
                 return t;
-            return tInvalid;
+            return TIME_INVALID;
         }
     }
 
     return t;
 }
 
-string DurationToString(float fDur)
+struct Time StringToTime(string sTime, int nMinsPerHour = 0)
 {
-    return FormatFloat(fDur, "%.3f");
+    return _StringToTime(sTime, NewTime(nMinsPerHour));
+}
+
+struct Time StringToDuration(string sTime, int nMinsPerHour = 0)
+{
+    return _StringToTime(sTime, NewDuration(nMinsPerHour));
 }

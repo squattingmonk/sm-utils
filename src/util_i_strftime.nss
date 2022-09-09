@@ -527,42 +527,48 @@ string GetEraString(json jEra, json jLocale, string sKey);
 ///     "", will use the default locale.
 string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "");
 
-/// @brief Format a Time into a string.
-/// @param t The Time to format.
+/// @brief Format a calendar Time into a string.
+/// @param t A calendar Time to format. If not a calendar Time, will be
+///     converted into one.
 /// @param sFormat A string containing format codes to control the output. The
 ///     default value is equivalent to "%H:%M:%S".
 /// @param sLocale The name of the locale to use when formatting the time. If
 ///     "", will use the default locale.
-/// @note This function differs only from FormatDateTime() in the default value
-///     of sFormat. Character codes that apply to dates are still valid.
+/// @note This function differs only from FormatTime() in the default value of
+///     sFormat. Character codes that apply to calendar Times are still valid.
 /// @note See the documentation at the top of this file for the list of possible
 ///     format codes.
 string FormatTime(struct Time t, string sFormat = "%X", string sLocale = "");
 
-/// @brief Format a Time into a string.
-/// @param t The Time to format.
+/// @brief Format a calendar Time into a string.
+/// @param t A calendar Time to format. If not a calendar Time, will be
+///     converted into one.
 /// @param sFormat A string containing format codes to control the output. The
 ///     default value is equivalent to "%Y-%m-%d".
 /// @param sLocale The name of the locale to use when formatting the date. If
 ///     "", will use the default locale.
-/// @note This function differs only from FormatDateTime() in the default value
-///     of sFormat. Character codes that apply to times are still valid.
+/// @note This function differs only from FormatTime() in the default value of
+///     sFormat. Character codes that apply to calendar Times are still valid.
 /// @note See the documentation at the top of this file for the list of possible
 ///     format codes.
 string FormatDate(struct Time t, string sFormat = "%x", string sLocale = "");
 
-/// @brief Format a Time into a string.
-/// @param t The Time to format.
+/// @brief Format a calendar Time into a string.
+/// @param t A calendar Time to format. If not a calendar Time, will be
+///     converted into one.
 /// @param sFormat A string containing format codes to control the output. The
 ///     default value is equivalent to "%Y-%m-%d %H:%M:%S:%f".
 /// @param sLocale The name of the locale to use when formatting the Time. If
 ///     "", will use the default locale.
+/// @note This function differs only from FormatTime() in the default value of
+///     sFormat. Character codes that apply to calendar Times are still valid.
 /// @note See the documentation at the top of this file for the list of possible
 ///     format codes.
 string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "");
 
-/// @brief Format a duration into a string.
-/// @param fDur A duration in seconds. May be negative.
+/// @brief Format a duration Time into a string.
+/// @param t The duration Time to format. If not a duration Time, will be
+///     converted into one.
 /// @param sFormat A string containing format codes to control the output. The
 ///     default value is equivalent to ISO 8601 format preceded by the sign of
 ///     fDur (+ or -).
@@ -570,7 +576,7 @@ string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
 ///     If "", will use the default locale.
 /// @note See the documentation at the top of this file for the list of possible
 ///     format codes.
-string FormatDuration(float fDur, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "");
+string FormatDuration(struct Time t, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "");
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
@@ -699,23 +705,29 @@ json AddEra(json jLocale, json jEra)
 
 json GetEra(json jLocale, struct Time t)
 {
+    if (t.Type == TIME_TYPE_DURATION)
+        return JsonNull();
+
     json  jEras = JsonObjectGet(jLocale, LOCALE_ERAS);
-    json  jEra; // The closest era to the time
-    float fEra; // The interval between the start of the closest era t
+    json  jEra; // The closest era to the Time
+    struct Time tEra; // The start Time of jEra
     int i, nLength = JsonGetLength(jEras);
 
     for (i = 0; i < nLength; i++)
     {
         json jCmp = JsonArrayGet(jEras, i);
         struct Time tCmp = JsonToTime(JsonObjectGet(jCmp, ERA_START));
-
-        float fCmp = GetDuration(tCmp, t);
-        if (fCmp == 0.0)
-            return jCmp;
-        if (fCmp > 0.0 && (fEra <= 0.0 || fCmp < fEra))
+        switch (CompareTime(t, tCmp))
         {
-            fEra = fCmp;
-            jEra = jCmp;
+            case 0: return jCmp;
+            case 1:
+            {
+                if (CompareTime(tCmp, tEra) >= 0)
+                {
+                    tEra = tCmp;
+                    jEra = jCmp;
+                }
+            }
         }
     }
 
@@ -760,11 +772,8 @@ string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "")
     return IntToString(n) + GetListItem(sSuffixes, nIndex);
 }
 
-// Private function for FormatTime() and FormatDuration(). To reduce code
-// duplication, we convert everything to a Time when formatting. If we are
-// actually trying to format a duration, we disable some format codes that only
-// make sense in the context of a time.
-string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, int bDur = FALSE)
+// Private function for Format*() that does not convert the Time type
+string _FormatTime(struct Time t, string sFormat, string sLocale)
 {
     int  nOffset, nPos;
     json jValues = JsonArray();
@@ -808,9 +817,9 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
         int nPadding = 2; // Most numeric formats use this
 
         // We offset where we start looking for format codes based on whether
-        // this is a Time or Duration. Durations cannot use time codes that only
-        // make sense in the context of a Time.
-        int nFormat = FindSubString(TIME_FORMAT_CHARS, sChar, bDur ? DURATION_FORMAT_OFFSET : 0);
+        // this is a calendar Time or duration Time. Durations cannot use time
+        // codes that only make sense in the context of a calendar Time.
+        int nFormat = FindSubString(TIME_FORMAT_CHARS, sChar, t.Type ? 0 : DURATION_FORMAT_OFFSET);
         switch (nFormat)
         {
             case -1:
@@ -841,9 +850,8 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
                 nValue = t.Hour > 12 ? t.Hour % 12 : t.Hour;
                 nValue = nValue ? nValue : 12;
                 break;
-
             case TIME_FORMAT_SIGN: // %+
-                sValue = nDur < 0 ? "-" : nDur > 0 ? "+" : "";
+                sValue = GetTimeSign(t) < 0 ? "-" : "+";
                 bAllowEmpty = TRUE;
                 break;
             case TIME_FORMAT_MONTH: // %m
@@ -1014,37 +1022,20 @@ string _FormatTime(struct Time t, string sFormat, string sLocale, int nDur = 0, 
 
 string FormatTime(struct Time t, string sFormat = "%X", string sLocale = "")
 {
-    return _FormatTime(t, sFormat, sLocale);
+    return _FormatTime(DurationToTime(t), sFormat, sLocale);
 }
 
 string FormatDate(struct Time t, string sFormat = "%x", string sLocale = "")
 {
-    return FormatTime(t, sFormat, sLocale);
+    return _FormatTime(DurationToTime(t), sFormat, sLocale);
 }
 
 string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
 {
-    return FormatTime(t, sFormat, sLocale);
+    return _FormatTime(DurationToTime(t), sFormat, sLocale);
 }
 
-// Private function. Converts a duration in seconds to a time. This time will
-// not be valid if fDur is < 0 and will not yield an expected number of days or
-// months, so it is really only used internally as a convenience.
-struct Time _DurationToTime(float fDur)
+string FormatDuration(struct Time t, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "")
 {
-    struct Time t;
-    int nHours    = FloatToInt(fDur / HoursToSeconds(1));
-    t.Millisecond = FloatToInt(frac(fDur) * 1000);
-    t.Second      = FloatToInt(fmod(fDur, 60.0));
-    t.Minute      = FloatToInt(fDur / 60.0) % HoursToMinutes();
-    t.Hour        = nHours % 24;
-    t.Day         = nHours / 24 % 28;
-    t.Month       = nHours / 24 / 28 % 12;
-    t.Year        = nHours / 24 / 28 / 12;
-    return t;
-}
-
-string FormatDuration(float fDur, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "")
-{
-    return _FormatTime(_DurationToTime(fabs(fDur)), sFormat, sLocale, fsign(fDur), TRUE);
+    return _FormatTime(TimeToDuration(t), sFormat, sLocale);
 }
