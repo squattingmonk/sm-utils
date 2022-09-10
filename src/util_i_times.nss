@@ -203,7 +203,7 @@
 /// struct Time c = TimeToGameTime(b);
 ///
 /// Assert(!GetIsTimeEqual(a, b));
-/// Assert(GetTimeIsEqual(b, c));
+/// Assert(GetIsTimeEqual(b, c));
 ///
 /// // To check for exactly equal:
 /// Assert(b != c);

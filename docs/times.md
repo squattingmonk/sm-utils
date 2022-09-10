@@ -153,7 +153,7 @@ struct Time tGame = GetCurrentGameTime();
 ```
 
 ### Setting the Current Time
-@note You can only set the time forward in NWN.
+**Note:** You can only set the time forward in NWN.
 
 ```nwscript
 struct Time t = StringToTime("2022-08-25 13:00:00:000");
@@ -244,7 +244,7 @@ struct Time b = StringToTime("1372-06-01 13:01:00:000");
 struct Time c = TimeToGameTime(b);
 
 Assert(!GetIsTimeEqual(a, b));
-Assert(GetTimeIsEqual(b, c));
+Assert(GetIsTimeEqual(b, c));
 
 // To check for exactly equal:
 Assert(b != c);
