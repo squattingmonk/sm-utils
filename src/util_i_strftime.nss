@@ -103,8 +103,6 @@
 ///         (The `%EY` conversion specification corresponds to era key
 ///         `ERA_FORMAT`; with the default era settings, this is equivalent to
 ///         `%Ey %EC`.)
-/// - `%+`: A literal `+` if the duration is positive or `-` if it is negative.
-///         Only valid using `FormatDuration()`.
 /// - `%%`: A literal `%` character.
 ///
 /// ## Modifier Characters
@@ -133,6 +131,8 @@
 /// - `0`: Pad a numeric result string with zeroes even if the conversion
 ///        specifier character uses space-padding by default.
 /// - `^`: Convert alphabetic characters in the result string to uppercase.
+/// - `+`: Display a `-` before numeric values if the Time is negative, or a `+`
+///        if the Time is positive or 0.
 ///
 /// An optional decimal width specifier may follow the (possibly absent) flag.
 /// If the natural size of the field is smaller than this width, the result
@@ -299,17 +299,19 @@
 // -----------------------------------------------------------------------------
 
 // These are the characters used as flags in time format codes.
-const string TIME_FLAG_CHARS = "EO^-_0123456789";
+const string TIME_FLAG_CHARS = "EO^,+-_0123456789";
 
 const int TIME_FLAG_ERA       = 0x01; ///< `E`: use era-based formatting
 const int TIME_FLAG_ORDINAL   = 0x02; ///< `O`: use ordinal numbers
 const int TIME_FLAG_UPPERCASE = 0x04; ///< `^`: use uppercase letters
-const int TIME_FLAG_NO_PAD    = 0x08; ///< `-`: do not pad numbers
-const int TIME_FLAG_SPACE_PAD = 0x10; ///< `_`: pad numbers with spaces
-const int TIME_FLAG_ZERO_PAD  = 0x20; ///< `0`: pad numbers with zeros
+const int TIME_FLAG_COMMAS    = 0x08; ///< `,`: add comma separators
+const int TIME_FLAG_SIGN      = 0x10; ///< `+`: prefix with sign character
+const int TIME_FLAG_NO_PAD    = 0x20; ///< `-`: do not pad numbers
+const int TIME_FLAG_SPACE_PAD = 0x40; ///< `_`: pad numbers with spaces
+const int TIME_FLAG_ZERO_PAD  = 0x80; ///< `0`: pad numbers with zeros
 
 // These are the characters allowed in time format codes.
-const string TIME_FORMAT_CHARS = "aAbBpPIljwu+CyYmdeHkMSfDFRTcxXr%";
+const string TIME_FORMAT_CHARS = "aAbBpPIljwuCyYmdeHkMSfDFRTcxXr%";
 
 // Begin time-only constants. It is an error to use these with a duration.
 const int TIME_FORMAT_NAME_OF_DAY_ABBR   =  0; ///< `%a`: Mon..Sun
@@ -323,31 +325,30 @@ const int TIME_FORMAT_HOUR_12_SPACE_PAD  =  7; ///< `%l`: alias for %_I
 const int TIME_FORMAT_DAY_OF_YEAR        =  8; ///< `%j`: 001..336
 const int TIME_FORMAT_DAY_OF_WEEK_0_6    =  9; ///< `%w`: weekdays 0..6
 const int TIME_FORMAT_DAY_OF_WEEK_1_7    = 10; ///< `%u`: weekdays 1..7
-const int TIME_FORMAT_SIGN               = 11; ///< `%+`: "+" if duration positive, "-" if negative
-const int TIME_FORMAT_YEAR_CENTURY       = 12; ///< `%C`: 0..320
-const int TIME_FORMAT_YEAR_SHORT         = 13; ///< `%y`: 00..99
-const int TIME_FORMAT_YEAR_LONG          = 14; ///< `%Y`: 0..320000
-const int TIME_FORMAT_MONTH              = 15; ///< `%m`: 01..12
-const int TIME_FORMAT_DAY                = 16; ///< `%d`: 01..28
-const int TIME_FORMAT_DAY_SPACE_PAD      = 17; ///< `%e`: alias for %_d
-const int TIME_FORMAT_HOUR_24            = 18; ///< `%H`: 00..23
-const int TIME_FORMAT_HOUR_24_SPACE_PAD  = 19; ///< `%k`: alias for %_H
-const int TIME_FORMAT_MINUTE             = 20; ///< `%M`: 00..59 (depending on conversion factor)
-const int TIME_FORMAT_SECOND             = 21; ///< `%S`: 00..59
-const int TIME_FORMAT_MILLISECOND        = 22; ///< `%f`: 000...999
-const int TIME_FORMAT_DATE_US            = 23; ///< `%D`: 06/01/72
-const int TIME_FORMAT_DATE_ISO           = 24; ///< `%F`: 1372-06-01
-const int TIME_FORMAT_TIME_US            = 25; ///< `%R`: 13:00
-const int TIME_FORMAT_TIME_ISO           = 26; ///< `%T`: 13:00:00
-const int TIME_FORMAT_LOCALE_DATETIME    = 27; ///< `%c`: locale-specific date and time
-const int TIME_FORMAT_LOCALE_DATE        = 28; ///< `%x`: locale-specific date
-const int TIME_FORMAT_LOCALE_TIME        = 29; ///< `%X`: locale-specific time
-const int TIME_FORMAT_LOCALE_TIME_AMPM   = 30; ///< `%r`: locale-specific AM/PM time
-const int TIME_FORMAT_PERCENT            = 31; ///< `%%`: %
+const int TIME_FORMAT_YEAR_CENTURY       = 11; ///< `%C`: 0..320
+const int TIME_FORMAT_YEAR_SHORT         = 12; ///< `%y`: 00..99
+const int TIME_FORMAT_YEAR_LONG          = 13; ///< `%Y`: 0..320000
+const int TIME_FORMAT_MONTH              = 14; ///< `%m`: 01..12
+const int TIME_FORMAT_DAY                = 15; ///< `%d`: 01..28
+const int TIME_FORMAT_DAY_SPACE_PAD      = 16; ///< `%e`: alias for %_d
+const int TIME_FORMAT_HOUR_24            = 17; ///< `%H`: 00..23
+const int TIME_FORMAT_HOUR_24_SPACE_PAD  = 18; ///< `%k`: alias for %_H
+const int TIME_FORMAT_MINUTE             = 19; ///< `%M`: 00..59 (depending on conversion factor)
+const int TIME_FORMAT_SECOND             = 20; ///< `%S`: 00..59
+const int TIME_FORMAT_MILLISECOND        = 21; ///< `%f`: 000...999
+const int TIME_FORMAT_DATE_US            = 22; ///< `%D`: 06/01/72
+const int TIME_FORMAT_DATE_ISO           = 23; ///< `%F`: 1372-06-01
+const int TIME_FORMAT_TIME_US            = 24; ///< `%R`: 13:00
+const int TIME_FORMAT_TIME_ISO           = 25; ///< `%T`: 13:00:00
+const int TIME_FORMAT_LOCALE_DATETIME    = 26; ///< `%c`: locale-specific date and time
+const int TIME_FORMAT_LOCALE_DATE        = 27; ///< `%x`: locale-specific date
+const int TIME_FORMAT_LOCALE_TIME        = 28; ///< `%X`: locale-specific time
+const int TIME_FORMAT_LOCALE_TIME_AMPM   = 29; ///< `%r`: locale-specific AM/PM time
+const int TIME_FORMAT_PERCENT            = 30; ///< `%%`: %
 
 // Time format codes with an index less than this number are not valid for
 // durations.
-const int DURATION_FORMAT_OFFSET = TIME_FORMAT_SIGN;
+const int DURATION_FORMAT_OFFSET = TIME_FORMAT_YEAR_CENTURY;
 
 // ----- VarNames --------------------------------------------------------------
 
@@ -585,7 +586,7 @@ string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
 ///     If "", will use the default locale.
 /// @note See the documentation at the top of this file for the list of possible
 ///     format codes.
-string FormatDuration(struct Time t, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "");
+string FormatDuration(struct Time t, string sFormat = "%+Y-%m-%d %H:%M:%S:%f", string sLocale = "");
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
@@ -784,6 +785,7 @@ string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "")
 string strftime(struct Time t, string sFormat, string sLocale)
 {
     int  nOffset, nPos;
+    int  nSign   = GetTimeSign(t);
     json jValues = JsonArray();
     json jLocale = GetLocale(sLocale);
     json jEra    = GetEra(jLocale, t);
@@ -857,10 +859,6 @@ string strftime(struct Time t, string sFormat, string sLocale)
             case TIME_FORMAT_HOUR_12: // %I
                 nValue = t.Hour > 12 ? t.Hour % 12 : t.Hour;
                 nValue = nValue ? nValue : 12;
-                break;
-            case TIME_FORMAT_SIGN: // %+
-                sValue = GetTimeSign(t) < 0 ? "-" : "+";
-                bAllowEmpty = TRUE;
                 break;
             case TIME_FORMAT_MONTH: // %m
                 nValue = t.Month;
@@ -1016,8 +1014,11 @@ string strftime(struct Time t, string sFormat, string sLocale)
         }
         else
         {
-            jValues = JsonArrayInsert(jValues, JsonInt(nValue));
-            sFormat = ReplaceSubString(sFormat, "%" + sPadding + "d", nOffset, nPos + 1);
+            if (nFlags & TIME_FLAG_SIGN)
+                sValue = nSign < 0 ? "-" : "+";
+
+            jValues = JsonArrayInsert(jValues, JsonInt(abs(nValue)));
+            sFormat = ReplaceSubString(sFormat, sValue + "%" + sPadding + "d", nOffset, nPos + 1);
         }
 
         // Continue parsing from the end of the format string
@@ -1043,7 +1044,7 @@ string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
     return strftime(DurationToTime(t), sFormat, sLocale);
 }
 
-string FormatDuration(struct Time t, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "")
+string FormatDuration(struct Time t, string sFormat = "%+Y-%m-%d %H:%M:%S:%f", string sLocale = "")
 {
     return strftime(TimeToDuration(t), sFormat, sLocale);
 }

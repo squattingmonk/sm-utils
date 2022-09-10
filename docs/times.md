@@ -376,8 +376,6 @@ parameter of `FormatTime()` (`sLocale`).
         (The `%EY` conversion specification corresponds to era key
         `ERA_FORMAT`; with the default era settings, this is equivalent to
         `%Ey %EC`.)
-- `%+`: A literal `+` if the duration is positive or `-` if it is negative.
-        Only valid using `FormatDuration()`.
 - `%%`: A literal `%` character.
 
 ### Modifier Characters
@@ -407,6 +405,8 @@ The following flag characters are permitted:
 - `0`: Pad a numeric result string with zeroes even if the conversion
        specifier character uses space-padding by default.
 - `^`: Convert alphabetic characters in the result string to uppercase.
+- `+`: Display a `-` before numeric values if the Time is negative, or a `+` if
+       the Time is positive or 0.
 
 An optional decimal width specifier may follow the (possibly absent) flag. If
 the natural size of the field is smaller than this width, the result string is
