@@ -32,10 +32,10 @@
 ///   you can also change the minutes per hour setting. This is how the
 ///   functions in this file convert between Time and Game Time.
 ///
-/// **Note**: For brevity, some functions have a `*Time` variant and a
-/// `*Duration` variant. In these cases, the `*Time` variant refers to a
+/// **Note**: For brevity, some functions have a `Time` variant and a
+/// `Duration` variant. In these cases, the `Time` variant refers to a
 /// calendar Time (e.g., `StringToTime()` converts to a calendar Time while
-/// `StringToDuration()` refers to a duration Time). If no `*Duration` variant
+/// `StringToDuration()` refers to a duration Time). If no `Duration` variant
 /// of the function is present, the function may refer to a calendar Time *or* a
 /// duration Time (e.g., `TimeToString()` accepts both types).
 /// ----------------------------------------------------------------------------

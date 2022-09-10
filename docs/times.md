@@ -43,25 +43,39 @@ following scripts:
 
 ## Concepts
 
-- **Duration**: a float value representing an *amount of time* in seconds. A
-  duration can be easily passed to many game functions that expect a time, such
+- **Time**: a struct value that may represent either a *calendar time* or a
+  *duration*. A Time has a field for years, months, day, hours, minutes,
+  seconds, and milliseconds. A Time also has a field to set the minutes per hour
+  (defaults to the module setting, which defaults to 2).
+- **Calendar Time**: A Time representing a particular *moment in time* as
+  measured using the game calendar and clock. In a calendar Time, the month and
+  day count from 1, while all other units count from 0 (including years, since
+  NWN allows year 0). A calendar Time must always be positive.
+- **Duration Time**: A Time representing an *amount of time*. All units in a
+  duration Time count from 0. A duration Time may be negative, representing
+  going back in time. This can be useful for calculations. A duration Time can
+  be converted to seconds to pass it to game functions that expect a time, such
   as `DelayCommand()`, `PlayAnimation()`, etc.
-- **Time**: a struct value representing a particular *moment in time* as
-  measured using the game calendar and clock. A Time has a field for the year,
-  month, day, hour, minute, second, and millisecond. Note that the month and day
-  count from 1, while all other units count from 0 (including years, since NWN
-  allows year 0). A Time also has a field to set the minutes-per-hour (defaults
-  to the module setting, which defaults to 2).
-- **Game Time**: a Time with a minutes-per-hour setting of 60. This allows you
-  to convert the time shown by the game clock into a time that matches how the
-  characters in the game would perceive it. For example, with the default
-  minutes-per-hour setting of 2, the Time "13:01" would correspond to a Game
-  Time of "13:30".
+- **Game Time**: a Time (either calendar Time or duration Time) with a minutes
+  per hour setting of 60. This allows you to convert the time shown by the game
+  clock into a time that matches how the characters in the game would perceive
+  it. For example, with the default minutes per hour setting of 2, the Time
+  "13:01" would correspond to a Game Time of "13:30".
 - **Normalizing Times**: You can normalize a Time to ensure none of its units
   are overflowing their bounds. For example, a Time with a Minute field of 0 and
   Second field of 90 would be normalized to a Minute of 1 and a Second of 30.
-  When normalizing a Time, you can also change the minutes-per-hour setting.
-  This is how the functions in this file convert between Time and Game Time.
+  Normalizing a Time also causes all non-zero units to take the same sign
+  (either positive or negative), so a Time with a Minute of 1 and a Second of
+  -30 would normalize to a Second of 30. When normalizing a Time, you can also
+  change the minutes per hour setting. This is how the functions in this file
+  convert between Time and Game Time.
+
+**Note**: For brevity, some functions have a `Time` variant and a `Duration`
+variant. In these cases, the `Time` variant refers to a calendar Time (e.g.,
+`StringToTime()` converts to a calendar Time while `StringToDuration()` refers
+to a duration Time). If no `Duration` variant of the function is present, the
+function may refer to a calendar Time *or* a duration Time (e.g.,
+`TimeToString()` accepts both types).
 
 ## Usage
 
@@ -69,32 +83,46 @@ The scripts in this section only require `util_i_times.nss`.
 
 ### Creating a Time
 
-You can create a Time using `GetTime()`:
+You can create a calendar Time using `GetTime()` and a duration Time with
+`GetDuration()`:
 ```nwscript
 struct Time t = GetTime(1372, 6, 1, 13);
+struct Time d = GetDuration(1372, 5, 0, 13);
 ```
 
-You could also parse an ISO 8601 time string into a Time:
+You could also parse an ISO 8601 time string into a calendar Time or duration
+Time:
 ```nwscript
-struct Time t = StringToTime("1372-06-01 13:00:00:000");
+struct Time tTime = StringToTime("1372-06-01 13:00:00:000");
+struct Time tDur = StringToDuration("1372-05-00 13:00:00:000");
+
+// Negative durations are allowed:
+struct Time tNeg = StringToDuration("-1372-05-00 13:00:00:000");
+
+// Missing units are assumed to be their lowest bound:
+struct Time a = StringToTime("1372-06-01 00:00:00:000");
+struct Time b = StringToTime("1372-06-01");
+struct Time c = StringToTime("1372-06");
+Assert(a == b);
+Assert(b == c);
 ```
 
-You can also create a Time manually by declaring a Time struct and setting
+You can also create a Time manually by declaring a new Time struct and setting
 the fields independently:
-
 ```nwscript
 struct Time t;
-t.Year = 1372;
+t.Type  = TIME_TYPE_CALENDAR;
+t.Year  = 1372;
 t.Month = 6;
-t.Day = 1;
-t.Hour = 13;
+t.Day   = 1;
+t.Hour  = 13;
 // ...
 ```
 
 When not using the `GetTime()` function, it's a good idea to normalize the
 resultant Time to distribute the field values correctly:
 ```nwscript
-struct Time t;
+struct Time t = NewTime();
 t.Second = 90;
 
 t = NormalizeTime(t);
@@ -119,40 +147,39 @@ Assert(tTime == tBack);
 ```
 
 ### Getting the Current Time
-
 ```nwscript
 struct Time tTime = GetCurrentTime();
 struct Time tGame = GetCurrentGameTime();
 ```
 
 ### Setting the Current Time
-
-Note: You can only set the time forward in NWN.
+@note You can only set the time forward in NWN.
 
 ```nwscript
 struct Time t = StringToTime("2022-08-25 13:00:00:000");
 SetCurrentTime(t);
 ```
 
-Alternatively, you can advance Time by a duration:
+Alternatively, you can advance the current Time by a duration Time:
 ```nwscript
-AdvanceCurrentTime(120.0);
+AdvanceCurrentTime(FloatToDuration(120.0));
 ```
 
 ### Dropping units from a Time
-
-You can reduce the precision of a time:
+You can reduce the precision of a Time. Units smaller than the precision limit
+will be at their lower bound:
 ```nwscript
 struct Time a = GetTime(1372, 6, 1, 13);
 struct Time b = GetTime(1372, 6, 1);
 struct Time c = GetPrecisionTime(a, TIME_UNIT_DAY);
+struct Time d = GetPrecisionTime(a, TIME_UNIT_MONTH);
 Assert(a != b);
 Assert(b == c);
+Assert(b == d);
 ```
 
 ### Saving a Time
-
-The easiest way to save a time and get it later is to use the `SetLocalTime()`
+The easiest way to save a Time and get it later is to use the `SetLocalTime()`
 and `GetLocalTime()` functions. These functions convert a Time into json and
 save it as a local variable.
 
@@ -168,12 +195,12 @@ struct Time tServerStart = GetLocalTime(GetModule(), "ServerStart");
 
 If you want to store a Time in a database, you can convert it into json or into
 a string before passing it to a query. The json method is preferable for
-persistent storage, since it is guaranteed to be correct if the module's
-minutes-per-hour setting changes after the value is stored:
+persistent storage, since it is guaranteed to be correct if the module's minutes
+per hour setting changes after the value is stored:
 ```nwscript
 struct Time tTime = GetCurrentTime();
 json jTime = TimeToJson(tTime);
-string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
+string sSql = "INSERT INTO data (varname, value) VALUES ('ServerTime', @time);";
 sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
 SqlBindJson(q, "@time", jTime);
 SqlStep(q);
@@ -195,22 +222,13 @@ equal to another.
 ```nwscript
 struct Time tTime = GetCurrentTime();
 string sTime = TimeToString();
-string sSql = "INSERT INTO data (varname, value) VALUES ("ServerTime", @time);";
+string sSql = "INSERT INTO data (varname, value) VALUES ('ServerTime', @time);";
 sqlquery q = SqlPrepareQueryCampaign("mydb", sSql);
 SqlBindString(q, "@time", sTime);
 SqlStep(q);
 ```
 
 ### Comparing Times
-
-To check the amount of time between two Times:
-```nwscript
-struct Time a = StringToTime("1372-06-01 13:00:00:000");
-struct Time b = StringToTime("1372-06-01 13:01:30:500");
-float fDur = GetDuration(a, b);
-Assert(fDur == 90.5);
-```
-
 To check if one time is before or after another:
 ```nwscript
 struct Time a = StringToTime("1372-06-01 13:00:00:000");
@@ -227,22 +245,33 @@ struct Time c = TimeToGameTime(b);
 
 Assert(!GetIsTimeEqual(a, b));
 Assert(GetTimeIsEqual(b, c));
+
+// To check for exactly equal:
 Assert(b != c);
+```
+
+To check the amount of time between two Times:
+```nwscript
+struct Time a = StringToTime("1372-06-01 13:00:00:000");
+struct Time b = StringToTime("1372-06-01 13:01:30:500");
+struct Time tDur = GetDurationBetween(a, b);
+Assert(DurationToFloat(tDur) == 90.5);
 ```
 
 To check if a duration has passed since a Time:
 ```nwscript
 int CheckForMinRestTime(object oPC, float fMinTime)
 {
-    struct Time tLast = GetLocalTime(oPC, "LastRest");
-    return GetDurationSince(tSince) >= fMinTime;
+    struct Time tSince = GetDurationSince(GetLocalTime(oPC, "LastRest"));
+    return DurationToFloat(tSince) >= fMinTime;
 }
 ```
 
 To calculate the duration until a Time is reached:
 ```nwscript
 struct Time tMidnight = GetTime(GetCalendarYear(), GetCalendarMonth(), GetCalendarDay() + 1);
-float fDurToMidnight = GetDurationUntil(tMidnight);
+struct Time tDurToMidnight = GetDurationUntil(tMidnight);
+float fDurToMidnight = DurationToFloat(tDurToMidnight);
 ```
 
 ## Formatting
