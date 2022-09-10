@@ -527,6 +527,15 @@ string GetEraString(json jEra, json jLocale, string sKey);
 ///     "", will use the default locale.
 string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "");
 
+/// @brief Format a Time into a string.
+/// @param t A calendar or duration Time to format. No conversion is performed.
+/// @param sFormat A string containing format codes to control the output.
+/// @param sLocale The name of the locale to use when formatting the time. If
+///     "", will use the default locale.
+/// @note See the documentation at the top of this file for the list of possible
+///     format codes.
+string strftime(struct Time t, string sFormat, string sLocale = "");
+
 /// @brief Format a calendar Time into a string.
 /// @param t A calendar Time to format. If not a calendar Time, will be
 ///     converted into one.
@@ -571,7 +580,7 @@ string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
 ///     converted into one.
 /// @param sFormat A string containing format codes to control the output. The
 ///     default value is equivalent to ISO 8601 format preceded by the sign of
-///     fDur (+ or -).
+///     t (`-` if negative, `+` otherwise).
 /// @param sLocale The name of the locale to use when formatting the duration.
 ///     If "", will use the default locale.
 /// @note See the documentation at the top of this file for the list of possible
@@ -772,8 +781,7 @@ string IntToOrdinalString(int n, string sSuffixes = "", string sLocale = "")
     return IntToString(n) + GetListItem(sSuffixes, nIndex);
 }
 
-// Private function for Format*() that does not convert the Time type
-string _FormatTime(struct Time t, string sFormat, string sLocale)
+string strftime(struct Time t, string sFormat, string sLocale)
 {
     int  nOffset, nPos;
     json jValues = JsonArray();
@@ -1022,20 +1030,20 @@ string _FormatTime(struct Time t, string sFormat, string sLocale)
 
 string FormatTime(struct Time t, string sFormat = "%X", string sLocale = "")
 {
-    return _FormatTime(DurationToTime(t), sFormat, sLocale);
+    return strftime(DurationToTime(t), sFormat, sLocale);
 }
 
 string FormatDate(struct Time t, string sFormat = "%x", string sLocale = "")
 {
-    return _FormatTime(DurationToTime(t), sFormat, sLocale);
+    return strftime(DurationToTime(t), sFormat, sLocale);
 }
 
 string FormatDateTime(struct Time t, string sFormat = "%c", string sLocale = "")
 {
-    return _FormatTime(DurationToTime(t), sFormat, sLocale);
+    return strftime(DurationToTime(t), sFormat, sLocale);
 }
 
 string FormatDuration(struct Time t, string sFormat = "%+%Y-%m-%d %H:%M:%S:%f", string sLocale = "")
 {
-    return _FormatTime(TimeToDuration(t), sFormat, sLocale);
+    return strftime(TimeToDuration(t), sFormat, sLocale);
 }
