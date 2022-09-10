@@ -7,7 +7,7 @@
 ///
 /// # Formatting
 ///
-/// You can format a Time using the `FormatTime()` function. This function takes
+/// You can format a Time using the `strftime()` function. This function takes
 /// a Time as the first parameter (`t`) and a *format specification string*
 /// (`sFormat`) as the second parameter. The format specification string may
 /// contain special character sequences called *conversion specifications*, each
@@ -19,7 +19,13 @@
 /// `sFormat` to the returned value. However, the characters of conversion
 /// specifications are replaced as shown in the list below. Some sequences may
 /// have their output customized using a *locale*, which can be passed using the
-/// third parameter of `FormatTime()` (`sLocale`).
+/// third parameter of `strftime()` (`sLocale`).
+///
+/// Several aliases for `strftime()` exist. `FormatTime()`, `FormatDate()`, and
+/// `FormatDateTime()` each take a calendar Time and will default to formatting
+/// to a locale-specific representation of the time, date, or date and time
+/// respectively. `FormatDuration()` takes a duration Time and defaults to
+/// showing an ISO 8601 formatted datetime with a sign character before it.
 ///
 /// ## Conversion Specifiers
 /// - `%a`: The abbreviated name of the weekday according to the current locale.
