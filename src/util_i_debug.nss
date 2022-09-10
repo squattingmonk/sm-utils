@@ -256,12 +256,9 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJ
             case DEBUG_LEVEL_WARNING:  sPrefix += "[Warning] ";        break;
         }
 
-        if (nLevel > DEBUG_LEVEL_NONE && nLevel <= DEBUG_LEVEL_EVENT_TRIGGER)
-        {
-            if (!PublishDebugEvent(sPrefix, UnColorString(sMessage), nLevel, oTarget))
-                return;
-        }
-        
+        if (!HandleDebug(sPrefix, sMessage, nLevel, oTarget))
+            return;
+
         sMessage = sPrefix + sMessage;
         int nLogging = GetLocalInt(GetModule(), DEBUG_LOG);
 
