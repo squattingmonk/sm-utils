@@ -407,6 +407,7 @@ The following flag characters are permitted:
 - `^`: Convert alphabetic characters in the result string to uppercase.
 - `+`: Display a `-` before numeric values if the Time is negative, or a `+` if
        the Time is positive or 0.
+- `,`: Add comma separators for long numeric values.
 
 An optional decimal width specifier may follow the (possibly absent) flag. If
 the natural size of the field is smaller than this width, the result string is
