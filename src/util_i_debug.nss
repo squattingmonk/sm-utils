@@ -7,8 +7,6 @@
 // This file holds utility functions for generating debug messages.
 // -----------------------------------------------------------------------------
 
-#include "util_i_color"
-
 // -----------------------------------------------------------------------------
 //                                   Constants
 // -----------------------------------------------------------------------------
@@ -33,6 +31,9 @@ const int DEBUG_LOG_FILE = 0x1;
 const int DEBUG_LOG_DM   = 0x2;
 const int DEBUG_LOG_PC   = 0x4;
 const int DEBUG_LOG_ALL  = 0xf;
+
+#include "util_i_color"
+#include "util_c_debug"
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -254,6 +255,9 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJ
             case DEBUG_LEVEL_ERROR:    sPrefix += "[Error] ";          break;
             case DEBUG_LEVEL_WARNING:  sPrefix += "[Warning] ";        break;
         }
+
+        if (!HandleDebug(sPrefix, sMessage, nLevel, oTarget))
+            return;
 
         sMessage = sPrefix + sMessage;
         int nLogging = GetLocalInt(GetModule(), DEBUG_LOG);
