@@ -302,8 +302,8 @@ struct Time TIME_INVALID;
 // -----------------------------------------------------------------------------
 
 /// @brief Convert hours to minutes.
-/// @param nHours The number of hours to convert
-/// @note The return value varies depending on the module's time settings
+/// @param nHours The number of hours to convert.
+/// @note The return value varies depending on the module's time settings.
 int HoursToMinutes(int nHours = 1);
 
 // ----- Times -----------------------------------------------------------------
@@ -346,7 +346,7 @@ struct Time DurationToTime(struct Time d);
 ///     highest unit (e.g., 1500 msec -> 1 sec, 500 msec). If `nMinsPerHour`
 ///     does not match `t.MinsPerHour`, the minutes, seconds, and milliseconds
 ///     will be recalculated to match the new setting.
-/// @param t The Time to normalize
+/// @param t The Time to normalize.
 /// @param nMinsPerHour The number of minutes per hour to normalize with. If 0,
 ///     will use `t.MinsPerHour`.
 /// @note If `t` is a duration Time, all non-zero units will be either positive
@@ -357,8 +357,8 @@ struct Time DurationToTime(struct Time d);
 struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0);
 
 /// @brief Check if any unit in a normalized time is outside its range.
-/// @param t The Time to validate
-/// @param bNormalize Whether to normalize the time before checking You should
+/// @param t The Time to validate.
+/// @param bNormalize Whether to normalize the time before checking. You should
 ///     only set this to FALSE if you know `t` is already normalized and want to
 ///     save cycles.
 /// @returns TRUE if valid, FALSE otherwise.
@@ -366,53 +366,53 @@ int GetIsTimeValid(struct Time t, int bNormalize = TRUE);
 
 /// @brief Create a duration Time, representing an amount of time.
 /// @note All units count from 0. Negative numbers are allowed.
-/// @param nYear The number of years
-/// @param nMonth The number of months
-/// @param nDay The number of days
-/// @param nHour The number of hours
-/// @param nMinute The number of minutes
-/// @param nSecond The number of seconds
-/// @param nMillisecond The number of milliseconds
+/// @param nYear The number of years (0..32000).
+/// @param nMonth The number of month (0..11).
+/// @param nDay The number of day (0..27).
+/// @param nHour The number of hours (0..23).
+/// @param nMinute The number of minutes (0..nMinsPerHour).
+/// @param nSecond The number of seconds (0..59).
+/// @param nMillisecond The number of milliseconds (0..999).
 /// @param nMinsPerHour The number of minutes per hour (1..60). If 0, will use
 ///     the module's default setting.
 /// @returns A normalized duration Time.
 struct Time GetDuration(int nYears = 0, int nMonths = 0, int nDays = 0, int nHours = 0, int nMinutes = 0, int nSeconds = 0, int nMilliseconds = 0, int nMinsPerHour = 0);
 
 /// @brief Create a calendar Time, representing a moment in time.
-/// @param nYear The year (0..32000)
-/// @param nMonth The month of the year (1..12)
-/// @param nDay The day of the month (1..28)
-/// @param nHour The hour (0..23)
-/// @param nMinute The minute (0..nMinsPerHour)
-/// @param nSecond The second (0..59)
-/// @param nMillisecond The millisecond (0..999)
+/// @param nYear The year (0..32000).
+/// @param nMonth The month of the year (1..12).
+/// @param nDay The day of the month (1..28).
+/// @param nHour The hour (0..23).
+/// @param nMinute The minute (0..nMinsPerHour).
+/// @param nSecond The second (0..59).
+/// @param nMillisecond The millisecond (0..999).
 /// @param nMinsPerHour The number of minutes per hour (1..60). If 0, will use
 ///     the module's default setting.
 /// @returns A normalized calendar Time.
 struct Time GetTime(int nYear = 0, int nMonth = 1, int nDay = 1, int nHour = 0, int nMinute = 0, int nSecond = 0, int nMillisecond = 0, int nMinsPerHour = 0);
 
 /// @brief Convert a Time to an in-game time (i.e., 60 minutes per hour).
-/// @param t The Time to convert
+/// @param t The Time to convert.
 /// @note Alias for NormalizeTime(t, 60).
 struct Time TimeToGameTime(struct Time t);
 
 /// @brief Convert an in-game time (i.e., 60 minutes per hour) to a Time.
-/// @param t The Time to convert
+/// @param t The Time to convert.
 /// @note Alias for NormalizeTime(t, HoursToMinutes()).
 struct Time GameTimeToTime(struct Time t);
 
 /// @brief Add a Time to another.
-/// @param a The Time to modify
-/// @param b The Time to add
-/// @returns A Time of the same type an minutes per hour as `a`.
+/// @param a The Time to modify.
+/// @param b The Time to add.
+/// @returns A Time of the same type and minutes per hour as `a`.
 /// @note You can safely mix calendar or duration Times, as well as Times with
 ///     different minutes per hour settings.
-struct Time AddTime(struct Time t, struct Time t);
+struct Time AddTime(struct Time a, struct Time b);
 
 /// @brief Subtract a Time from another.
-/// @param a The Time to modify
-/// @param b The Time to subtract
-/// @returns A Time of the same type an minutes per hour as `a`.
+/// @param a The Time to modify.
+/// @param b The Time to subtract.
+/// @returns A Time of the same type and minutes per hour as `a`.
 /// @note You can safely mix calendar or duration Times, as well as Times with
 ///     different minutes per hour settings.
 struct Time SubtractTime(struct Time a, struct Time b);
@@ -436,14 +436,14 @@ void SetCurrentTime(struct Time t);
 void AdvanceCurrentTime(struct Time d);
 
 /// @brief Drop smaller units from a Time.
-/// @param t The Time to modify
+/// @param t The Time to modify.
 /// @param nUnit A TIME_UNIT_* constant representing the maximum precision.
 ///     Units more precise than this are set to their lowest value.
 struct Time GetPrecisionTime(struct Time t, int nUnit);
 
 /// @brief Get the duration of the interval between two Times.
-/// @param a The calendar Time at the start of interval
-/// @param b The calendar Time at the end of the interval
+/// @param a The calendar Time at the start of interval.
+/// @param b The calendar Time at the end of the interval.
 /// @returns A normalized duration Time. The duration will be negative if a is
 ///     after b and positive if b is after a. If the times are equivalent, the
 ///     duration will equal 0.
@@ -464,27 +464,27 @@ struct Time GetDurationSince(struct Time tSince);
 struct Time GetDurationUntil(struct Time tUntil);
 
 /// @brief Compare two Times and find which is later.
-/// @param a The Time to check
-/// @param b The Time to check against
+/// @param a The Time to check.
+/// @param b The Time to check against.
 /// @returns 0 if a == b, -1 if a < b, and 1 if a > b.
 int CompareTime(struct Time a, struct Time b);
 
 /// @brief Check whether a Time is after another Time.
-/// @param a The Time to check
-/// @param b The Time to check against
+/// @param a The Time to check.
+/// @param b The Time to check against.
 /// @returns TRUE if a is after b, FALSE otherwise
 int GetIsTimeAfter(struct Time a, struct Time b);
 
 /// @brief Check whether a Time is before another Time.
-/// @param a The Time to check
-/// @param b The Time to check against
+/// @param a The Time to check.
+/// @param b The Time to check against.
 /// @returns TRUE if a is before b, FALSE otherwise
 int GetIsTimeBefore(struct Time a, struct Time b);
 
 /// @brief Check whether a Time is equal to another Time.
-/// @param a The Time to check
-/// @param b The Time to check against
-/// @returns TRUE if a is equivalent to b, FALSE otherwise
+/// @param a The Time to check.
+/// @param b The Time to check against.
+/// @returns TRUE if a is equivalent to b, FALSE otherwise.
 /// @note This checks if the normalized Times represent equal moments in time.
 ///     If you want to instead check if two Time structs are exactly equal, use
 ///     `a == b`.
@@ -493,31 +493,31 @@ int GetIsTimeEqual(struct Time a, struct Time b);
 // ----- Float Conversion ------------------------------------------------------
 
 /// @brief Convert years to seconds.
-/// @param nYears The number of years to convert
+/// @param nYears The number of years to convert.
 float Years(int nYears);
 
 /// @brief Convert months to seconds.
-/// @param nMonths The number of months to convert
+/// @param nMonths The number of months to convert.
 float Months(int nMonths);
 
 /// @brief Convert days to seconds.
-/// @param nDays The number of days to convert
+/// @param nDays The number of days to convert.
 float Days(int nDays);
 
 /// @brief Convert hours to seconds.
-/// @param nHours The number of hours to convert
+/// @param nHours The number of hours to convert.
 float Hours(int nHours);
 
 /// @brief Convert minutes to seconds.
-/// @param nMinutes The number of minutes to convert
+/// @param nMinutes The number of minutes to convert.
 float Minutes(int nMinutes);
 
 /// @brief Convert seconds to seconds.
-/// @param nSeconds The number of seconds to convert
+/// @param nSeconds The number of seconds to convert.
 float Seconds(int nSeconds);
 
 /// @brief Convert milliseconds to seconds.
-/// @param nYears The number of milliseconds to convert
+/// @param nYears The number of milliseconds to convert.
 float Milliseconds(int nMilliseconds);
 
 /// @brief Convert a duration Time to a float.
@@ -537,34 +537,34 @@ struct Time FloatToDuration(float fDur);
 // ----- Json Conversion -------------------------------------------------------
 
 /// @brief Convert a Time into a json object.
-/// @details The json object will be have a key for each field of the Time
-///     struct. Since this includes the minutes per hour setting, this object is
-///     safe to be stored in a database if it is possible the module's minutes
-///     per hour setting will change. The object can be converted back using
+/// @details The json object will have a key for each field of the Time struct.
+///     Since this includes the minutes per hour setting, this object is safe to
+///     be stored in a database if it is possible the module's minutes per hour
+///     setting will change. The object can be converted back using
 ///     JsonToTime().
 /// @param t The Time to convert
 json TimeToJson(struct Time t);
 
 /// @brief Convert a json object into a Time.
-/// @param j The json object to convert
+/// @param j The json object to convert.
 struct Time JsonToTime(json j);
 
 // ----- Local Variables -------------------------------------------------------
 
 /// @brief Return a Time from a local variable.
-/// @param oObject The object to get the local variable from
-/// @param sVarName The varname for the local variable
+/// @param oObject The object to get the local variable from.
+/// @param sVarName The varname for the local variable.
 struct Time GetLocalTime(object oObject, string sVarName);
 
 /// @brief Store a Time as a local variable.
-/// @param oObject The object to store the local variable on
-/// @param sVarName The varname for the local variable
-/// @param tValue The Time to store
+/// @param oObject The object to store the local variable on.
+/// @param sVarName The varname for the local variable.
+/// @param tValue The Time to store.
 void SetLocalTime(object oObject, string sVarName, struct Time tValue);
 
 /// @brief Delete a Time from a local variable.
-/// @param oObject The object to delete the local variable from
-/// @param sVarName The varname for the local variable
+/// @param oObject The object to delete the local variable from.
+/// @param sVarName The varname for the local variable.
 void DeleteLocalTime(object oObject, string sVarName);
 
 // ----- String Conversions ----------------------------------------------------
@@ -860,7 +860,7 @@ void SetCurrentTime(struct Time t)
     else
     {
         CriticalError("Cannot set time to " + TimeToString(t, FALSE) + " " +
-                      "because it is after " + TimeToString(tCurrent));
+                      "because it is before " + TimeToString(tCurrent));
     }
 }
 
@@ -995,7 +995,7 @@ struct Time FloatToDuration(float fDur)
 json TimeToJson(struct Time t)
 {
     json j = JsonObject();
-    j = JsonObjectSet(j, TIME_TYPE, JsonInt(t.Type));
+    j = JsonObjectSet(j, TIME_TYPE,        JsonInt(t.Type));
     j = JsonObjectSet(j, TIME_YEAR,        JsonInt(t.Year));
     j = JsonObjectSet(j, TIME_MONTH,       JsonInt(t.Month));
     j = JsonObjectSet(j, TIME_DAY,         JsonInt(t.Day));
@@ -1026,7 +1026,6 @@ struct Time JsonToTime(json j)
 }
 
 // ----- Local Variables -------------------------------------------------------
-
 
 struct Time GetLocalTime(object oObject, string sVarName)
 {
