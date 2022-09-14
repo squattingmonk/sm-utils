@@ -339,7 +339,7 @@ struct Time TimeToDuration(struct Time t);
 
 /// @brief Convert a duration Time into a calendar Time.
 /// @note This is safe to call on a calendar Time.
-struct Time DurationToTime(struct Time t);
+struct Time DurationToTime(struct Time d);
 
 /// @brief Distribute units in a Time, optionally converting minutes per hour.
 /// @details Units that overflow their range have the excess added to the next
@@ -432,8 +432,8 @@ struct Time GetCurrentGameTime();
 void SetCurrentTime(struct Time t);
 
 /// @brief Set the current calendar date and clock time forwards.
-/// @param t A duration Time by which to advance the time. Must be positive.
-void AdvanceCurrentTime(struct Time t);
+/// @param d A duration Time by which to advance the time. Must be positive.
+void AdvanceCurrentTime(struct Time d);
 
 /// @brief Drop smaller units from a Time.
 /// @param t The Time to modify
@@ -521,12 +521,12 @@ float Seconds(int nSeconds);
 float Milliseconds(int nMilliseconds);
 
 /// @brief Convert a duration Time to a float.
-/// @param t The duration Time to convert.
+/// @param d The duration Time to convert.
 /// @returns A float representing the number of seconds in `t`. Always has a
 ///     minutes per hour setting equal to the module's.
 /// @note Use this function to pass a Time to a function like DelayCommand().
 /// @note Long durations may lose precision when converting. Use with caution.
-float DurationToFloat(struct Time t);
+float DurationToFloat(struct Time d);
 
 /// @brief Convert a float to a duration Time.
 /// @param fDur A float representing a number of seconds.
@@ -641,12 +641,12 @@ struct Time TimeToDuration(struct Time t)
     return t;
 }
 
-struct Time DurationToTime(struct Time t)
+struct Time DurationToTime(struct Time d)
 {
-    t.Day   += (1 - t.Type);
-    t.Month += (1 - t.Type);
-    t.Type   = TIME_TYPE_CALENDAR;
-    return t;
+    d.Day   += (1 - d.Type);
+    d.Month += (1 - d.Type);
+    d.Type   = TIME_TYPE_CALENDAR;
+    return d;
 }
 
 struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0)
@@ -752,15 +752,15 @@ int GetIsTimeValid(struct Time t, int bNormalize = TRUE)
 
 struct Time GetDuration(int nYears = 0, int nMonths = 0, int nDays = 0, int nHours = 0, int nMinutes = 0, int nSeconds = 0, int nMilliseconds = 0, int nMinsPerHour = 0)
 {
-    struct Time t = NewDuration(nMinsPerHour);
-    t.Year        = nYears;
-    t.Month       = nMonths;
-    t.Day         = nDays;
-    t.Hour        = nHours;
-    t.Minute      = nMinutes;
-    t.Second      = nSeconds;
-    t.Millisecond = nMilliseconds;
-    return NormalizeTime(t);
+    struct Time d = NewDuration(nMinsPerHour);
+    d.Year        = nYears;
+    d.Month       = nMonths;
+    d.Day         = nDays;
+    d.Hour        = nHours;
+    d.Minute      = nMinutes;
+    d.Second      = nSeconds;
+    d.Millisecond = nMilliseconds;
+    return NormalizeTime(d);
 }
 
 struct Time GetTime(int nYear = 0, int nMonth = 1, int nDay = 1, int nHour = 0, int nMinute = 0, int nSecond = 0, int nMillisecond = 0, int nMinsPerHour = 0)
@@ -864,14 +864,14 @@ void SetCurrentTime(struct Time t)
     }
 }
 
-void AdvanceCurrentTime(struct Time t)
+void AdvanceCurrentTime(struct Time d)
 {
-    int nSign = GetTimeSign(t);
+    int nSign = GetTimeSign(d);
     if (nSign > 0)
     {
-        t = AddTime(GetCurrentTime(), t);
-        SetTime(t.Hour, t.Minute, t.Second, t.Millisecond);
-        SetCalendar(t.Year, t.Month, t.Day);
+        d = AddTime(GetCurrentTime(), d);
+        SetTime(d.Hour, d.Minute, d.Second, d.Millisecond);
+        SetCalendar(d.Year, d.Month, d.Day);
     }
     else if (nSign < 0)
         CriticalError("Cannot advance time by a negative amount");
@@ -969,11 +969,11 @@ float Milliseconds(int nMilliseconds)
     return nMilliseconds / 1000.0;
 }
 
-float DurationToFloat(struct Time t)
+float DurationToFloat(struct Time d)
 {
-    t = NormalizeTime(TimeToDuration(t), HoursToMinutes());
-    return Years(t.Year) + Months(t.Month) + Days(t.Day) + Hours(t.Hour) +
-        Minutes(t.Minute) + Seconds(t.Second) + Milliseconds(t.Millisecond);
+    d = NormalizeTime(TimeToDuration(d), HoursToMinutes());
+    return Years(d.Year) + Months(d.Month) + Days(d.Day) + Hours(d.Hour) +
+        Minutes(d.Minute) + Seconds(d.Second) + Milliseconds(d.Millisecond);
 }
 
 struct Time FloatToDuration(float fDur)
