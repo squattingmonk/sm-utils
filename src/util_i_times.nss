@@ -660,8 +660,23 @@ struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0)
     if (t.MinsPerHour <= 0)
         t.MinsPerHour = HoursToMinutes();
 
-    // We try to distribute units before converting to avoid integer overflow if
-    // the user passed an absurdly large number somewhere.
+    // If this is > 0, we will adjust the time's conversion factor to match the
+    // requested value. Otherwise, assume we're using the same conversion factor
+    // and just prettifying units.
+    nMinsPerHour = nMinsPerHour > 0 ? clamp(nMinsPerHour, 1, 60) : t.MinsPerHour;
+
+    if (t.MinsPerHour != nMinsPerHour)
+    {
+        // Convert everything to milliseconds so we don't lose precision when
+        // converting to a smaller mins-per-hour.
+        t.Millisecond += (t.Minute * 60 + t.Second) * 1000;
+        t.Millisecond = t.Millisecond * nMinsPerHour / t.MinsPerHour;
+        t.Second = 0;
+        t.Minute = 0;
+        t.MinsPerHour = nMinsPerHour;
+    }
+
+    // Distribute units.
     int nFactor;
     if (abs(t.Millisecond) >= (nFactor = 1000))
     {
@@ -697,20 +712,6 @@ struct Time NormalizeTime(struct Time t, int nMinsPerHour = 0)
     {
         t.Year += t.Month / nFactor;
         t.Month %= nFactor;
-    }
-
-    // If this is > 0, we will adjust the time's conversion factor to match the
-    // requested value. Otherwise, assume we're using the same conversion factor
-    // and just prettifying units.
-    nMinsPerHour = nMinsPerHour > 0 ? clamp(nMinsPerHour, 1, 60) : t.MinsPerHour;
-
-    // Convert units if needed
-    if (t.MinsPerHour != nMinsPerHour)
-    {
-        t.Millisecond = t.Millisecond * nMinsPerHour / t.MinsPerHour;
-        t.Second      = t.Second      * nMinsPerHour / t.MinsPerHour;
-        t.Minute      = t.Minute      * nMinsPerHour / t.MinsPerHour;
-        t.MinsPerHour = nMinsPerHour;
     }
 
     // A mix of negative and positive units means we need to consolidate and
