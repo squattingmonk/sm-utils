@@ -190,6 +190,11 @@ void LoadLibrary(string sLibrary, int bForce = FALSE);
 /// @param bForce If TRUE, will re-load the library if it was already loaded.
 void LoadLibraries(string sLibraries, int bForce = FALSE);
 
+/// @brief Load all scripts matching the given pattern.
+/// @param sPattern A pattern matching the rules for TestStringAgainstPattern().
+/// @param bForce If TRUE, will-reload the library if it was already loaded.
+void LoadLibrariesByPattern(string sPattern, int bForce = FALSE);
+
 /// @brief Load all scripts with a given prefix as script libraries.
 /// @param sPrefix A prefix for the desired script libraries.
 /// @param bForce If TRUE, will re-load the library if it was already loaded.
@@ -335,31 +340,39 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
         LoadLibrary(GetListItem(sLibraries, i), bForce);
 }
 
+// Private function for LoadLibrariesByPattern(). Adds all scripts of nResType
+// to a json array and returns it.
+json _GetLibrariesByPattern(json jArray, string sPattern, int nResType)
+{
+    int i;
+    string sScript;
+    while ((sScript = ResManFindPrefix("", nResType, ++i)) != "")
+    {
+        if (TestStringAgainstPattern(sPattern, sScript))
+            jArray = JsonArrayInsert(jArray, JsonString(sScript));
+    }
+
+    return jArray;
+}
+
+void LoadLibrariesByPattern(string sPattern, int bForce = FALSE)
+{
+    if (sPattern == "")
+        return;
+
+    Debug("Finding libraries matching \"" + sPattern + "\"");
+    json jLibraries = _GetLibrariesByPattern(JsonArray(), sPattern, RESTYPE_NCS);
+    jLibraries = _GetLibrariesByPattern(jLibraries, sPattern, RESTYPE_NSS);
+    jLibraries = JsonArrayTransform(jLibraries, JSON_ARRAY_UNIQUE);
+    LoadLibraries(JsonToList(jLibraries), bForce);
+}
+
 void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
 {
     if (sPrefix == "")
         return;
 
-    Debug("Attempting to " + (bForce ? "force " : "") + "load libraries " +
-        "prefixed with " + sPrefix);
-
-    int i = 1;
-    string sLibrary = ResManFindPrefix(sPrefix, RESTYPE_NSS, i++);
-    while (sLibrary != "")
-    {
-        LoadLibrary(sLibrary, bForce);
-        sLibrary = ResManFindPrefix(sPrefix, RESTYPE_NSS, i++);
-    }
-
-    // In case NSS files have been stripped
-    i = 1;
-    sLibrary = ResManFindPrefix(sPrefix, RESTYPE_NCS, i++);
-    while (sLibrary != "")
-    {
-        if (!GetIsLibraryLoaded(sLibrary))
-            LoadLibrary(sLibrary, bForce);
-        sLibrary = ResManFindPrefix(sPrefix, RESTYPE_NCS, i++);
-    }
+    LoadLibrariesByPattern(sPrefix + "**", bForce);
 }
 
 int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
