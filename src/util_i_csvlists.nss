@@ -115,6 +115,16 @@ string RemoveLocalListItem(object oObject, string sListName, string sListItem);
 // already there.
 string MergeLocalList(object oObject, string sListName, string sListToMerge, int bAddUnique = FALSE);
 
+/// @brief Converts a comma-separated value list to a JSON array
+/// @param sList Source CSV list
+/// @returns JSON array representation of CSV list
+json ListToJson(string sList);
+
+/// @brief Converts a JSON array to a comma-separate value list
+/// @param jArray JSON array list
+/// @returns CSV list of JSON array values
+string JsonToList(json jArray);
+
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -278,5 +288,42 @@ string MergeLocalList(object oObject, string sListName, string sListToMerge, int
     string sList = GetLocalString(oObject, sListName);
     sList = MergeLists(sList, sListToMerge, bAddUnique);
     SetLocalString(oObject, sListName, sList);
+    return sList;
+}
+
+json ListToJson(string sList)
+{
+    json jRet = JsonArray();
+    if (sList == "")
+        return jRet;
+
+    string sItem;
+    int nStart, nEnd;
+
+    do
+    {
+        nEnd = FindSubString(sList, ",", nStart);
+        sItem = TrimString(GetStringSlice(sList, nStart, nEnd));
+        jRet = JsonArrayInsert(jRet, JsonString(sItem));
+        nStart = nEnd + 1;
+    } while (nEnd != -1);
+
+    return jRet;
+}
+
+string JsonToList(json jArray)
+{
+    if (JsonGetType(jArray) != JSON_TYPE_ARRAY)
+        return "";
+
+    string sList;
+    int i, nCount = JsonGetLength(jArray);
+    for (i; i < nCount; i++)
+    {
+        if (i > 0)
+            sList += ", ";
+        sList += JsonGetString(JsonArrayGet(jArray, i));
+    }
+
     return sList;
 }

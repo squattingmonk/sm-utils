@@ -51,16 +51,6 @@ json SplitList(object oTarget, string sList, string sListName = "", int bAddUniq
 /// @returns Joined CSV list of local variable list
 string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING);
 
-/// @brief Converts a comma-separated value list to a JSON array
-/// @param sList Source CSV list
-/// @returns JSON array representation of CSV list
-json ListToJson(string sList);
-
-/// @brief Converts a JSON array to a comma-separate value list
-/// @param jArray JSON array list
-/// @returns CSV list of JSON array values
-string JsonToList(json jArray);
-
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -118,43 +108,6 @@ string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, i
     {
         sList = JsonDump(jList);
         sList = GetStringSlice(sList, 1, GetStringLength(sList) - 2);
-    }
-
-    return sList;
-}
-
-json ListToJson(string sList)
-{
-    json jRet = JsonArray();
-    if (sList == "")
-        return jRet;
-
-    string sItem;
-    int nStart, nEnd;
-
-    do
-    {
-        nEnd = FindSubString(sList, ",", nStart);
-        sItem = TrimString(GetStringSlice(sList, nStart, nEnd));
-        jRet = JsonArrayInsert(jRet, JsonString(sItem));
-        nStart = nEnd + 1;
-    } while (nEnd != -1);
-
-    return jRet;
-}
-
-string JsonToList(json jArray)
-{
-    if (JsonGetType(jArray) != JSON_TYPE_ARRAY)
-        return "";
-
-    string sList;
-    int i, nCount = JsonGetLength(jArray);
-    for (i; i < nCount; i++)
-    {
-        if (i > 0)
-            sList += ", ";
-        sList += JsonGetString(JsonArrayGet(jArray, i));
     }
 
     return sList;
