@@ -198,7 +198,7 @@ void LoadLibrariesByPattern(string sPattern, int bForce = FALSE);
 /// @brief Load all scripts with a given prefix as script libraries.
 /// @param sPrefix A prefix for the desired script libraries.
 /// @param bForce If TRUE, will re-load the library if it was already loaded.
-void LoadPrefixLibraries(string sPrefix, int bForce = FALSE);
+void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE);
 
 /// @brief Execute a registered library script.
 /// @param sScript The unique name of the library script.
@@ -341,7 +341,7 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
 }
 
 // Private function for LoadLibrariesByPattern(). Adds all scripts of nResType
-// to a json array and returns it.
+// matching a pattern to a json array and returns it.
 json _GetLibrariesByPattern(json jArray, string sPattern, int nResType)
 {
     int i;
@@ -367,12 +367,34 @@ void LoadLibrariesByPattern(string sPattern, int bForce = FALSE)
     LoadLibraries(JsonToList(jLibraries), bForce);
 }
 
-void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
+// Private function for LoadPrefixLibraries(). Adds all scripts of nResType
+// matching a prefix to a json array and returns it.
+json _GetLibrariesByPrefix(json jArray, string sPrefix, int nResType)
+{
+    int i;
+    string sScript;
+    while ((sScript = ResManFindPrefix(sPrefix, nResType, ++i)) != "")
+        jArray = JsonArrayInsert(jArray, JsonString(sScript));
+
+    return jArray;
+}
+
+void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE)
 {
     if (sPrefix == "")
         return;
 
-    LoadLibrariesByPattern(sPrefix + "**", bForce);
+    Debug("Finding libraries with prefix \"" + sPrefix + "\"");
+    json jLibraries = _GetLibrariesByPrefix(JsonArray(), sPrefix, RESTYPE_NCS);
+    jLibraries = _GetLibrariesByPrefix(jLibraries, sPrefix, RESTYPE_NSS);
+    jLibraries = JsonArrayTransform(jLibraries, JSON_ARRAY_UNIQUE);
+    LoadLibraries(JsonToList(jLibraries), bForce);
+}
+
+// Alias kept for backwards compatibility.
+void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
+{
+    LoadLibrariesByPrefix(sPrefix, bForce);
 }
 
 int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
