@@ -573,19 +573,27 @@ void DeleteLocalTime(object oObject, string sVarName);
 /// @param t The Time to convert.
 /// @param bNormalize Whether to normalize the Time before converting.
 /// @returns An ISO 8601 formatted datetime, e.g., "1372-06-01 13:00:00:000".
-/// @note If `t` is a duration Time, the returned value will be preceded by a
-///     sign character ("-" if any unit in `t` is negative, "+" otherwise).
+/// @note If `t` is a duration Time and is negative, the returned value will be
+///     preceded by a `-` character.
 string TimeToString(struct Time t, int bNormalize = TRUE);
 
-/// @brief Convert an ISO 8601 formatted datetime string into a Time.
+/// @brief Convert an ISO 8601 formatted datetime string into a calendar Time.
 /// @param sTime The string to convert.
 /// @param nMinsPerHour The number of minutes per hour expected in the Time. If
 ///     0, will use the module setting.
 /// @note The returned Time is not normalized.
-/// @note If the first character in `sTime` is a sign character (i.e., "+" or
-///     "-"), the returned Time will be a duration. Otherwise, it will be a
-///     calendar Time.
+/// @note If the first character in `sTime` is a `-`, all values will be treated
+///     as negative. This will make the returned Time invalid when normalized.
 struct Time StringToTime(string sTime, int nMinsPerHour = 0);
+
+/// @brief Convert an ISO 8601 formatted datetime string into a duration Time.
+/// @param sTime The string to convert.
+/// @param nMinsPerHour The number of minutes per hour expected in the Time. If
+///     0, will use the module setting.
+/// @note The returned Time is not normalized.
+/// @note If the first character in `sTime` is a `-`, all values will be treated
+///     as negative.
+struct Time StringToDuration(string sTime, int nMinsPerHour = 0);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
