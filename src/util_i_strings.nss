@@ -156,12 +156,6 @@ string FormatInt(int n, string sFormat);
 //   FormatString("foo", "%-5sbar"); // "foo  bar"
 string FormatString(string s, string sFormat);
 
-/// @brief Return whether a string is a pattern.
-/// @param sString The string to test.
-/// @return TRUE if the string contains any of the pattern matchers expected by
-///     TestStringAgainstPattern(); FALSE otherwise.
-int GetIsPattern(string sString);
-
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -349,14 +343,4 @@ string FormatString(string s, string sFormat)
     for (i = 0; i < nCount; i++)
         jArray = JsonArrayInsert(jArray, JsonString(s));
     return FormatValues(jArray, sFormat);
-}
-
-int GetIsPattern(string sString)
-{
-    return (HasSubString(sString, "**") ||
-            HasSubString(sString, "*w") ||
-            HasSubString(sString, "*n") ||
-            HasSubString(sString, "*p") ||
-            HasSubString(sString, "*a") ||
-            HasSubString(sString, "|"));
 }

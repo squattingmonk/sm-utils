@@ -131,6 +131,7 @@
 #include "util_i_csvlists"
 #include "util_i_sqlite"
 #include "util_i_nss"
+#include "util_i_matching"
 
 // -----------------------------------------------------------------------------
 //                                   Constants
@@ -190,14 +191,26 @@ void LoadLibrary(string sLibrary, int bForce = FALSE);
 /// @param bForce If TRUE, will re-load the library if it was already loaded.
 void LoadLibraries(string sLibraries, int bForce = FALSE);
 
+/// @brief Return a json array of script names with a prefix.
+/// @param sPrefix The prefix matching the scripts to find.
+/// @returns A sorted json array of script names, minus the extensions.
+/// @note The search includes both nss and ncs files, with duplicates removed.
+json GetScriptsByPrefix(string sPrefix);
+
 /// @brief Load all scripts matching the given pattern.
-/// @param sPattern A pattern matching the rules for TestStringAgainstPattern().
+/// @param sPattern A CSV list of glob patterns to match with. Supported syntax:
+///     - `*`: match zero or more characters
+///     - `?`: match a single character
+///     - `[abc]`: match any of a, b, or c
+///     - `[a-z]`: match any character from a-z
+///     - other text is matched literally
 /// @param bForce If TRUE, will-reload the library if it was already loaded.
 void LoadLibrariesByPattern(string sPattern, int bForce = FALSE);
 
 /// @brief Load all scripts with a given prefix as script libraries.
 /// @param sPrefix A prefix for the desired script libraries.
 /// @param bForce If TRUE, will re-load the library if it was already loaded.
+/// @see GetMatchesPattern() for the rules on glob syntax.
 void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE);
 
 /// @brief Execute a registered library script.
@@ -340,36 +353,9 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
         LoadLibrary(GetListItem(sLibraries, i), bForce);
 }
 
-// Private function for LoadLibrariesByPattern(). Adds all scripts of nResType
-// matching a pattern to a json array and returns it.
-json _GetLibrariesByPattern(json jArray, string sPattern, int nResType)
-{
-    int i;
-    string sScript;
-    while ((sScript = ResManFindPrefix("", nResType, ++i)) != "")
-    {
-        if (TestStringAgainstPattern(sPattern, sScript))
-            jArray = JsonArrayInsert(jArray, JsonString(sScript));
-    }
-
-    return jArray;
-}
-
-void LoadLibrariesByPattern(string sPattern, int bForce = FALSE)
-{
-    if (sPattern == "")
-        return;
-
-    Debug("Finding libraries matching \"" + sPattern + "\"");
-    json jLibraries = _GetLibrariesByPattern(JsonArray(), sPattern, RESTYPE_NCS);
-    jLibraries = _GetLibrariesByPattern(jLibraries, sPattern, RESTYPE_NSS);
-    jLibraries = JsonArrayTransform(jLibraries, JSON_ARRAY_UNIQUE);
-    LoadLibraries(JsonToList(jLibraries), bForce);
-}
-
-// Private function for LoadPrefixLibraries(). Adds all scripts of nResType
+// Private function for GetScriptsByPrefix*(). Adds all scripts of nResType
 // matching a prefix to a json array and returns it.
-json _GetLibrariesByPrefix(json jArray, string sPrefix, int nResType)
+json _GetScriptsByPrefix(json jArray, string sPrefix, int nResType)
 {
     int i;
     string sScript;
@@ -379,15 +365,30 @@ json _GetLibrariesByPrefix(json jArray, string sPrefix, int nResType)
     return jArray;
 }
 
-void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE)
+json GetScriptsByPrefix(string sPrefix)
 {
-    if (sPrefix == "")
+    json jScripts = _GetScriptsByPrefix(JsonArray(), sPrefix, RESTYPE_NCS);
+         jScripts = _GetScriptsByPrefix(jScripts,    sPrefix, RESTYPE_NSS);
+         jScripts = JsonArrayTransform(jScripts, JSON_ARRAY_UNIQUE);
+         jScripts = JsonArrayTransform(jScripts, JSON_ARRAY_SORT_ASCENDING);
+    return jScripts;
+}
+
+void LoadLibrariesByPattern(string sPatterns, int bForce = FALSE)
+{
+    if (sPatterns == "")
         return;
 
+    Debug("Finding libraries matching \"" + sPatterns + "\"");
+    json jPatterns  = ListToJson(sPatterns);
+    json jLibraries = FilterByPatterns(GetScriptsByPrefix(""), jPatterns, TRUE);
+    LoadLibraries(JsonToList(jLibraries), bForce);
+}
+
+void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE)
+{
     Debug("Finding libraries with prefix \"" + sPrefix + "\"");
-    json jLibraries = _GetLibrariesByPrefix(JsonArray(), sPrefix, RESTYPE_NCS);
-    jLibraries = _GetLibrariesByPrefix(jLibraries, sPrefix, RESTYPE_NSS);
-    jLibraries = JsonArrayTransform(jLibraries, JSON_ARRAY_UNIQUE);
+    json jLibraries = GetScriptsByPrefix(sPrefix);
     LoadLibraries(JsonToList(jLibraries), bForce);
 }
 
