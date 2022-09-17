@@ -43,6 +43,10 @@ This package contains the following resources:
 | `util_i_strings.nss`   | String manipulation utilities                |
 | `util_i_color.nss`     | RGB, HSV, and hex color utilities            |
 | `util_i_constants.nss` | Constant value retrieval functions           |
+| `util_i_times.nss`     | Time, date, and duration functions           |
+| `util_i_strftime.nss`  | Formatting functions for dates and times     |
+| `util_c_strftime.nss`  | Configuration file for `util_i_strftime.nss` |
+
 
 Note: `sm-utils` relies on script extensions added by
 [nwnsc](https://github.com/nwneetools/nwnsc). This prevents error messages when
@@ -58,6 +62,7 @@ meant to be included in other scripts that implement its functions.
   - [Datapoints](docs/datapoints.md)
   - [Lists](docs/lists.md)
   - [Libraries](docs/libraries.md)
+  - [Times](docs/times.md)
 
 ## Acknowledgements
 - `util_i_libraries.nss` adapted from
