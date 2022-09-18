@@ -160,21 +160,11 @@ string FormatString(string s, string sFormat);
 //                           Function Implementations
 // -----------------------------------------------------------------------------
 
+#include "util_i_debug"
+
 int GetSubStringCount(string sString, string sSubString)
 {
-    if (sString == "" || sSubString == "")
-        return 0;
-
-    int nLength = GetStringLength(sSubString);
-    int nCount, nPos = FindSubString(sString, sSubString);
-
-    while (nPos != -1)
-    {
-        nCount++;
-        nPos = FindSubString(sString, sSubString, nPos + nLength);
-    }
-
-    return nCount;
+    return JsonGetLength(RegExpIterate(sSubString, sString));
 }
 
 int FindSubStringN(string sString, string sSubString, int nNth = 0)
@@ -225,24 +215,12 @@ int HasSubString(string sString, string sSubString, int nStart = 0)
 
 int GetAnyCharsInSet(string sString, string sSet)
 {
-    int i, nLength = GetStringLength(sString);
-    for (i = 0; i < nLength; i++)
-    {
-        if (HasSubString(sSet, GetChar(sString, i)))
-            return TRUE;
-    }
-    return FALSE;
+    return JsonGetLength(RegExpIterate("[" + sSet + "]", sString));
 }
 
 int GetAllCharsInSet(string sString, string sSet)
 {
-    int i, nLength = GetStringLength(sString);
-    for (i = 0; i < nLength; i++)
-    {
-        if (!HasSubString(sSet, GetChar(sString, i)))
-            return FALSE;
-    }
-    return TRUE;
+    return JsonGetLength(RegExpIterate("[^" + sSet + "]", sString)) == 0;
 }
 
 int GetIsUpperCase(string sString)
