@@ -330,11 +330,7 @@ int DeleteTargetingHookTargetByIndex(object oPC, string sVarName, int nIndex);
 
 sqlquery _PrepareTargetingQuery(string s)
 {
-    //sqlquery q = SqlPrepareQueryObject(GetModule(), s);
-    
-    sqlquery q = SqlPrepareQueryCampaign("TARGETING_DATABASE", s);
-
-    return q;
+    return SqlPrepareQueryObject(GetModule(), s);
 }
 
 string _GetTargetingHookFieldData(int nHookID, string sField)
