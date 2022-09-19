@@ -647,10 +647,8 @@ int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_
 {
     _CreateTargetingDataTables();
 
-    string s =  "INSERT INTO targeting_hooks (sUUID, sVarName, nObjectType, nUses, sScript) " +
-                "VALUES (@sUUID, @sVarName, @nObjectType, @nUses, @sScript) " +
-                "ON CONFLICT (sUUID, sVarName) DO UPDATE " +
-                    "SET nObjectType = @nObjectType, nUses = @nUses, sScript = @sScript;";
+    string s =  "REPLACE INTO targeting_hooks (sUUID, sVarName, nObjectType, nUses, sScript) " +
+                "VALUES (@sUUID, @sVarName, @nObjectType, @nUses, @sScript);";
     
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
