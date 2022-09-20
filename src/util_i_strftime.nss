@@ -846,7 +846,7 @@ string strftime(struct Time t, string sFormat, string sLocale)
                                   HexColorString(sError, COLOR_RED) +
                                   GetStringSlice(sFormat, nPos + 1);
                 Error("Illegal time format \"" + sError + "\": " + sColored);
-                sFormat = ReplaceSubString(sFormat, "%" + sError, nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, "%" + sError, nOffset, nPos);
                 continue;
             }
 
@@ -944,7 +944,7 @@ string strftime(struct Time t, string sFormat, string sLocale)
                     sValue = GetEraString(jEra, jLocale, ERA_YEAR_FORMAT);
                     if (sValue != "")
                     {
-                        sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
+                        sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos);
                         continue;
                     }
                 }
@@ -957,41 +957,41 @@ string strftime(struct Time t, string sFormat, string sLocale)
             // parsed code with the substitution and re-parse from the same
             // offset.
             case TIME_FORMAT_DATE_US: // %D
-                sFormat = ReplaceSubString(sFormat, "%m/%d/%y", nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, "%m/%d/%y", nOffset, nPos);
                 continue;
             case TIME_FORMAT_DATE_ISO: // %F
-                sFormat = ReplaceSubString(sFormat, "%Y-%m-%d", nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, "%Y-%m-%d", nOffset, nPos);
                 continue;
             case TIME_FORMAT_TIME_US: // %R
-                sFormat = ReplaceSubString(sFormat, "%H:%M", nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, "%H:%M", nOffset, nPos);
                 continue;
             case TIME_FORMAT_TIME_ISO: // %T
-                sFormat = ReplaceSubString(sFormat, "%H:%M:%S", nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, "%H:%M:%S", nOffset, nPos);
                 continue;
             case TIME_FORMAT_LOCALE_DATETIME: // %c, %Ec
                 if (nFlags & TIME_FLAG_ERA)
                     sValue = GetEraString(jEra, jLocale, ERA_DATETIME_FORMAT);
                 else
                     sValue = GetLocaleString(jLocale, LOCALE_DATETIME_FORMAT, DEFAULT_DATETIME_FORMAT);
-                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos);
                 continue;
             case TIME_FORMAT_LOCALE_DATE: // %x, %Ex
                 if (nFlags & TIME_FLAG_ERA)
                     sValue = GetEraString(jEra, jLocale, ERA_DATE_FORMAT);
                 else
                     sValue = GetLocaleString(jLocale, LOCALE_DATE_FORMAT, DEFAULT_DATE_FORMAT);
-                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos);
                 continue;
             case TIME_FORMAT_LOCALE_TIME: // %c, %Ec
                 if (nFlags & TIME_FLAG_ERA)
                     sValue = GetEraString(jEra, jLocale, ERA_TIME_FORMAT);
                 else
                     sValue = GetLocaleString(jLocale, LOCALE_TIME_FORMAT, DEFAULT_TIME_FORMAT);
-                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos);
                 continue;
             case TIME_FORMAT_LOCALE_TIME_AMPM: // %r
                 sValue = GetLocaleString(jLocale, LOCALE_AMPM_FORMAT, DEFAULT_AMPM_FORMAT);
-                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos + 1);
+                sFormat = ReplaceSubString(sFormat, sValue, nOffset, nPos);
                 continue;
         }
 
@@ -1017,7 +1017,7 @@ string strftime(struct Time t, string sFormat, string sLocale)
             if (nFlags & TIME_FLAG_UPPERCASE)
                 sValue = GetStringUpperCase(sValue);
             jValues = JsonArrayInsert(jValues, JsonString(sValue));
-            sFormat = ReplaceSubString(sFormat, "%" + sPadding + "s", nOffset, nPos + 1);
+            sFormat = ReplaceSubString(sFormat, "%" + sPadding + "s", nOffset, nPos);
         }
         else
         {
@@ -1028,7 +1028,7 @@ string strftime(struct Time t, string sFormat, string sLocale)
                 sPadding = "," + sPadding;
 
             jValues = JsonArrayInsert(jValues, JsonInt(abs(nValue)));
-            sFormat = ReplaceSubString(sFormat, sValue + "%" + sPadding + "d", nOffset, nPos + 1);
+            sFormat = ReplaceSubString(sFormat, sValue + "%" + sPadding + "d", nOffset, nPos);
         }
 
         // Continue parsing from the end of the format string
