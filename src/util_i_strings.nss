@@ -1,18 +1,17 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_strings.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-// -----------------------------------------------------------------------------
-// This file holds utility functions for manipulating strings.
+/// ----------------------------------------------------------------------------
+/// @file   util_i_strings.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @brief  Functions for formatting times
+/// ----------------------------------------------------------------------------
+/// @details This file holds utility functions for manipulating strings.
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //                                   Constants
 // -----------------------------------------------------------------------------
 
-const string CHARSET_NUMERIC = "0123456789";
-const string CHARSET_ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const string CHARSET_NUMERIC     = "0123456789";
+const string CHARSET_ALPHA       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const string CHARSET_ALPHA_LOWER = "abcdefghijklmnopqrstuvwxyz";
 const string CHARSET_ALPHA_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -47,6 +46,11 @@ string GetStringSlice(string sString, int nStart, int nEnd = -1);
 // ---< util_i_strings >---
 // Replaces the characters in sString from index nStart to nEnd with sSub.
 string ReplaceSubString(string sString, string sSub, int nStart, int nEnd);
+
+// ---< SubstituteSubString >---
+// ---< util_i_strings >---
+// Substitutes the characters in sString with sSub in place of sToken.
+string SubstituteSubString(string sString, string sToken, string sSub);
 
 // ---< HasSubString >---
 // ---< util_i_strings >---
@@ -156,6 +160,22 @@ string FormatInt(int n, string sFormat);
 //   FormatString("foo", "%-5sbar"); // "foo  bar"
 string FormatString(string s, string sFormat);
 
+// ---< SubstituteString >---
+// ---< util_i_strings >---
+// Performs a string substitution against designated tokens in s using
+// values from jArray.  String s should have tokens which contain a
+// designator, default `$`, with a number, denoting the position of the
+// associated value in jArray.  jArray can contain any combination
+// of strings, floats, decimals and booleans.
+//
+// Assumes jArray = ["Today", 34, 2.5299999999, true];
+//
+// Examples:
+//   SubstituteString("$1, I ran $2 miles."); // "Today, I ran 34 miles."
+//   SubstituteString("The circle's radius is $3."); // "The circles radius is 2.53."
+//   SubstituteString("The applicant answered: $4"); // "The applicant answered: true"
+string SubstituteString(string s, json jArray, string sDesignator = "$");
+
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -215,7 +235,16 @@ string ReplaceSubString(string sString, string sSub, int nStart, int nEnd)
         return sString;
 
     return GetSubString(sString, 0, nStart) + sSub +
-           GetSubString(sString, nEnd, nLength - nEnd);
+           GetSubString(sString, nEnd + 1, nLength - nEnd);
+}
+
+string SubstituteSubString(string sString, string sToken, string sSub)
+{
+    int nPos;
+    if ((nPos = FindSubString(sString, sToken)) == -1)
+        return sString;
+
+    return ReplaceSubString(sString, sSub, nPos, nPos + GetStringLength(sToken) - 1);
 }
 
 int HasSubString(string sString, string sSubString, int nStart = 0)
@@ -343,4 +372,26 @@ string FormatString(string s, string sFormat)
     for (i = 0; i < nCount; i++)
         jArray = JsonArrayInsert(jArray, JsonString(s));
     return FormatValues(jArray, sFormat);
+}
+
+string SubstituteString(string s, json jArray, string sDesignator = "$")
+{
+    if (JsonGetType(jArray) != JSON_TYPE_ARRAY)
+        return s;
+
+    int n; for (n; n < JsonGetLength(jArray); n++)
+    {
+        string sValue;
+        json jValue = JsonArrayGet(jArray, n);
+        int nType = JsonGetType(jValue);
+        if      (nType == JSON_TYPE_STRING)  sValue = JsonGetString(jValue);
+        else if (nType == JSON_TYPE_INTEGER) sValue = IntToString(JsonGetInt(jValue));
+        else if (nType == JSON_TYPE_FLOAT)   sValue = FormatFloat(JsonGetFloat(jValue), "%!f");
+        else if (nType == JSON_TYPE_BOOL)    sValue = JsonGetInt(jValue) == 1 ? "true" : "false";
+        else continue;
+
+        s = SubstituteSubString(s, sDesignator + IntToString(n + 1), sValue);
+    }
+
+    return s;
 }
