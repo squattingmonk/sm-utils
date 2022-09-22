@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 //                          Targeting Mode Script Handler
 // -----------------------------------------------------------------------------
-// You may alter the contents of this function, but do not alters its signature.
+// You may alter the contents of this function, but do not alter its signature.
 // -----------------------------------------------------------------------------
 
 /// @brief Custom handler to run scripts associated with targeting hooks.

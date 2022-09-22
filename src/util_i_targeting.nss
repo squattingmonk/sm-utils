@@ -6,24 +6,25 @@
 /// @details
 /*
 This system is designed to take advantage of NWN:EE's ability to forcibly enter
-Targeting Mode for any given PC.  It is designed to add a single-use, multi-use,
-or unlimited-use hook to the specified PC.  Once the PC has satisfied the conditions
-of the hook, or manually exited targeting mode, the targeted objects/locations
-will be saved and a specified script will be run.
+Targeting Mode for any given PC. It is designed to add a single-use, multi-use,
+or unlimited-use hook to the specified PC. Once the PC has satisfied the
+conditions of the hook, or manually exited targeting mode, the targeted
+objects/locations will be saved and a specified script will be run.
 
-Setup:
+## Setup
 
-1.  You must attach a targeting event script to the module.  For example, in your
+1.  You must attach a targeting event script to the module. For example, in your
 module load script, you can add this line:
 
     SetEventScript(GetModule(), EVENT_SCRIPT_MODULE_ON_PLAYER_TARGET, "module_opt");
 
 where "module_opt" is the script that will handle all forced targeting.
 
-2.  The chosen script ("module_opt") must contain reference to the util_i_targeting
-function SatisfyTargetingHook().  An example of this follows.
+2.  The chosen script ("module_opt") must contain reference to the
+util_i_targeting function SatisfyTargetingHook(). An example of this follows.
 
-#include util_i_targeting
+```nwscript
+#include "util_i_targeting"
 
 void main()
 {
@@ -34,86 +35,99 @@ void main()
         // This PC was marked as a targeter, do something here.
     }
 }
+```
 
-Alternately, if you want the assigned targeting hook scripts to handle everything, you
-can just let the system know a targeting event happened:
+Alternately, if you want the assigned targeting hook scripts to handle
+everything, you can just let the system know a targeting event happened:
 
+```nwscript
 void main()
 {
     object oPC = GetLastPlayerToSelectTarget();
     SatisfyTargetingHook(oPC);
 }
+```
 
 If oPC didn't have a targeting hook specified, nothing happens.
 
-Usage:
+## Usage
 
 The design of this system centers around a module-wide list of "Targeting Hooks"
 that are accessed by util_i_targeting when a player targets any object or
-manually exits targeting mode.  These hooks are stored in the module's organic
-sqlite database.  All targeting hook information is volatile and will be reset
+manually exits targeting mode. These hooks are stored in the module's organic
+sqlite database. All targeting hook information is volatile and will be reset
 when the server/module is reset.
 
-This is the prototype for the AddTargetingHook() function:
+This is the prototype for the `AddTargetingHook()` function:
 
+```nwscript
 int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL, string sScript = "", int nUses = 1);
+```
 
-oPC is the PC object that will be associated with this hook.  This PC will be the
-    player that will be entered into Targeting Mode.  Additionally, the results of
-    his targeting will be saved to the PC object.
-sVarName is the variable name to save the results of targeting to.  This allows
-    for targeting hooks to be added that can be saved to different variables for
-    several purposes.
-nObjectType is the limiting variable for the types of objects the PC can target
-    when they are in targeting mode forced by this hook.  It is an optional
-    parameter and can be bitmasked with any visible OBJECT_TYPE_* constant.
-sScript is the resref of the script that will run once the targeting conditions
-    have been satisfied.  For example, if you create a multi-use targeting hook,
-    this script will run after all uses have been exhausted.  This script will
-    also run if the player manually exits targeting mode without selecting a
-    target.  Optional.  A script-run is not always desirable.  The targeted object
-    may be required for later use, so a script entry is not a requirement.
-nUses is the number of times this target hook can be used before it is deleted.
-    This is designed to allow multiple targets to be selected and saved to the
-    same variable name sVarName.  Multi-selection could be useful for DMs in
-    defining DM Experience members, even from different parties, or selecting
-    multiple NPCs to accomplish a specific action.  Optional, defaulted to 1.
+- `oPC` is the PC object that will be associated with this hook. This PC will be
+  the player that will be entered into Targeting Mode. Additionally, the results
+  of his targeting will be saved to the PC object.
+- `sVarName` is the variable name to save the results of targeting to. This
+  allows for targeting hooks to be added that can be saved to different
+  variables for several purposes.
+- `nObjectType` is the limiting variable for the types of objects the PC can
+  target when they are in targeting mode forced by this hook. It is an optional
+  parameter and can be bitmasked with any visible `OBJECT_TYPE_*` constant.
+- `sScript` is the resref of the script that will run once the targeting
+  conditions have been satisfied. For example, if you create a multi-use
+  targeting hook, this script will run after all uses have been exhausted. This
+  script will also run if the player manually exits targeting mode without
+  selecting a target. Optional. A script-run is not always desirable. The
+  targeted object may be required for later use, so a script entry is not a
+  requirement.
+- `nUses` is the number of times this target hook can be used before it is
+  deleted. This is designed to allow multiple targets to be selected and saved
+  to the same variable name sVarName. Multi-selection could be useful for DMs in
+  defining DM Experience members, even from different parties, or selecting
+  multiple NPCs to accomplish a specific action. Optional, defaulted to 1.
 
-    Note:  Targeting mode uses specified by nUses will be decremented every time
-        a player selects a target.  Uses will also be decremented when a user
-        manually exits targeting mode.  Manually exiting targeting mode will
-        delete the targeting hook, but any selected targets before exiting
-        targeting mode will be saved to the specified variable.
+  Note: Targeting mode uses specified by `nUses` will be decremented every time
+  a player selects a target. Uses will also be decremented when a user manually
+  exits targeting mode. Manually exiting targeting mode will delete the
+  targeting hook, but any selected targets before exiting targeting mode will be
+  saved to the specified variable.
 
 To add a single-use targeting hook that enters the PC into targeting mode, allows
-    for the selection of a single placeable | creature, then runs the script
-    "temp_target" upon exiting target mode or selecting a single target:
+for the selection of a single placeable | creature, then runs the script
+"temp_target" upon exiting target mode or selecting a single target:
 
-    int nObjectType = OBJECT_TYPE_PLACEABLE | OBJECT_TYPE_CREATURE;
-    AddTargetingHook(oPC, "spell_target", nObjectType, "temp_target");
+```nwscript
+int nObjectType = OBJECT_TYPE_PLACEABLE | OBJECT_TYPE_CREATURE;
+AddTargetingHook(oPC, "spell_target", nObjectType, "temp_target");
+```
 
 To add a multi-use targeting hook that enters the PC into targeting mode, allows
-    for the selection of a specified number of placeables | creatures, then runs
-    the script "DM_Party" upon exiting targeting mode or selecting the
-    specified number of targets:
+for the selection of a specified number of placeables | creatures, then runs the
+script "DM_Party" upon exiting targeting mode or selecting the specified number
+of targets:
 
-    int nObjectType = OBJECT_TYPE_PLACEABLE | OBJECT_TYPE_CREATURE;
-    AddTargetingHook(oPC, "DM_Party", nObjectType, "DM_Party", 3);
+```nwscript
+int nObjectType = OBJECT_TYPE_PLACEABLE | OBJECT_TYPE_CREATURE;
+AddTargetingHook(oPC, "DM_Party", nObjectType, "DM_Party", 3);
+```
 
-    Note:  In this case, the player can select up to three targets to save to
-        the "DM_Party" variable.
+> Note: In this case, the player can select up to three targets to save to the
+  "DM_Party" variable.
 
-To add an unlmited-use targeting hook that enters the PC into targeting mode, allows
-    for the selection of an unspecified number of creatures, then runs
-    the script "temp_target" upon exiting targeting mode or selection of an invalid
-    target:
+To add an unlmited-use targeting hook that enters the PC into targeting mode,
+allows for the selection of an unspecified number of creatures, then runs the
+script "temp_target" upon exiting targeting mode or selection of an invalid
+target:
 
-    int nObjectType = OBJECT_TYPE_CREATURE;
-    AddTargetingHook(oPC, "NPC_Townspeople", nObjectType, "temp_target", -1);
+```nwscript
+int nObjectType = OBJECT_TYPE_CREATURE;
+AddTargetingHook(oPC, "NPC_Townspeople", nObjectType, "temp_target", -1);
+```
 
-Here is an example "temp_target" post-targeting script that will access each of the
-    targets saved to the specified variable and send their data to the chat log:
+Here is an example "temp_target" post-targeting script that will access each of
+the targets saved to the specified variable and send their data to the chat log:
 
+```nwscript
 #include "util_i_targeting"
 
 void main()
@@ -128,33 +142,39 @@ void main()
         vector vTarget = GetTargetingHookPosition(oPC, "NPC_Townspeople", n);
     }
 }
+```
 
-Note: Target objects and positions saved to the variables are persistent while the server
-is running, but are not persistent (though they can be made so).  If you wish to overwrite
-a set of target data with a variable you've already used, ensure you first delete the
-current target data with the function DeleteTargetingHookTargets();
+Note: Target objects and positions saved to the variables are persistent while
+the server is running, but are not persistent (though they can be made so). If
+you wish to overwrite a set of target data with a variable you've already used,
+ensure you first delete the current target data with the function
+`DeleteTargetingHookTargets();`.
 */
 
 #include "util_c_targeting"
 #include "util_i_debug"
 #include "util_i_varlists"
 
+// -----------------------------------------------------------------------------
+//                                   Constants
+// -----------------------------------------------------------------------------
+
 // VarList names for the global targeting hook lists
 const string TARGET_HOOK_ID = "TARGET_HOOK_ID";
 const string TARGET_HOOK_BEHAVIOR = "TARGET_HOOK_BEHAVIOR";
 
 // List Behaviors
-const int TARGET_BEHAVIOR_ADD = 1;
+const int TARGET_BEHAVIOR_ADD    = 1;
 const int TARGET_BEHAVIOR_DELETE = 2;
 
 // Targeting Hook Data Structure
 struct TargetingHook
 {
-    int nHookID;
+    int    nHookID;
+    int    nObjectType;
+    int    nUses;
     object oPC;
     string sVarName;
-    int nObjectType;
-    int nUses;
     string sScript;
 };
 
@@ -180,7 +200,7 @@ struct TargetingHook GetTargetingHookDataByVarName(object oPC, string sVarName);
 /// @brief Retrieve a list of targets.
 /// @param oPC The PC object associated with the target list.
 /// @param sVarName The VarName associated with the target list.
-/// @param nIndex The index of the target to retrieve from the list.  If omitted,
+/// @param nIndex The index of the target to retrieve from the list. If omitted,
 ///     the entire target list will be returned.
 /// @returns A prepared sqlquery containing the target list associated with
 ///     oPC's sVarName.
@@ -207,7 +227,7 @@ void DeleteTargetingHook(int nHookID);
 /// @brief Force the PC object associated with targeting hook nHookID to enter
 ///     targeting mode using properties set by AddTargetingHook().
 /// @param nHookID The targeting hook's ID.
-/// @param nBehavior The behavior desired from the targeting session.  Must be
+/// @param nBehavior The behavior desired from the targeting session. Must be
 ///     a TARGET_BEHAVIOR_* constant.
 void EnterTargetingModeByHookID(int nHookID, int nBehavior = TARGET_BEHAVIOR_ADD);
 
@@ -215,7 +235,7 @@ void EnterTargetingModeByHookID(int nHookID, int nBehavior = TARGET_BEHAVIOR_ADD
 ///     targeting mode using properties set by AddTargetingHook().
 /// @param oPC The PC object associated with the target list.
 /// @param sVarName The VarName associated with the target list.
-/// @param nBehavior The behavior desired from the targeting session.  Must be
+/// @param nBehavior The behavior desired from the targeting session. Must be
 ///     a TARGET_BEHAVIOR_* constant.
 void EnterTargetingModeByVarName(object oPC, string sVarName, int nBehavior = TARGET_BEHAVIOR_ADD);
 
@@ -255,14 +275,14 @@ string GetTargetingHookScript(int nHookID);
 /// @param sScript The script that will be run when this target hook is
 ///     satisfied.
 /// @param nUses The number of times this targeting hook is allowed to be used
-///     before it is automatically deleted.  Omitting this value will yield an
+///     before it is automatically deleted. Omitting this value will yield an
 ///     infinite number of uses.
 /// @returns A unique ID associated with the new targeting hook.
-int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL, 
+int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL,
         string sScript = "", int nUses = 1);
 
 /// @brief Save target data to the PC object as an object and location variable
-///     defined by sVarName in AddTargetingHook().  Decrements remaining targeting
+///     defined by sVarName in AddTargetingHook(). Decrements remaining targeting
 ///     hook uses and, if required, deletes the targeting hook.
 /// @param oPC The PC object associated with the target list.
 /// @returns TRUE if OpC has a current targeting hook, FALSE otherwise.
@@ -303,7 +323,7 @@ int CountTargetingHookTargets(object oPC, string sVarName);
 /// @brief Delete a targeting hook target.
 /// @param oPC The PC object associated with the target list.
 /// @param sVarName The VarName associated with the target list.
-/// @param nIndex The index at which to delete the target data.  If omitted,
+/// @param nIndex The index at which to delete the target data. If omitted,
 ///     the first target on the list will be deleted.
 /// @returns The number of targets remaining on oPC's sVarName target list
 ///     after deletion.
@@ -318,7 +338,7 @@ int GetTargetingHookIndex(object oPC, string sVarName, object oTarget);
 /// @brief Delete target list target data by internal index.
 /// @param oPC The PC object associated with the target list.
 /// @param sVarName The VarName associated with the target list.
-/// @param nIndex The internal index of the target data to be deleted.  This
+/// @param nIndex The internal index of the target data to be deleted. This
 ///     index can be retrieved from GetTargetingHookIndex().
 /// @returns The number of targets remaining on oPC's sVarName target list
 ///     after deletion.
@@ -394,7 +414,7 @@ int _GetLastTargetingHookID()
     string s = "SELECT seq FROM sqlite_sequence WHERE name = @name;";
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@name", "targeting_hooks");
-    
+
     return SqlStep(q) ? SqlGetInt(q, 0) : 0;
 }
 
@@ -412,7 +432,7 @@ string _GetTargetData(object oPC, string sVarName, string sField, int nIndex = 1
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName = @sVarName " +
                 "LIMIT 1 OFFSET " + IntToString(nIndex) + ";";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -424,24 +444,24 @@ void _DeleteTargetingHookData(int nHookID)
 {
     string s =  "DELETE FROM targeting_hooks " +
                 "WHERE nHookID = @nHookID;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindInt(q, "@nHookID", nHookID);
     SqlStep(q);
 }
 
-// Reduces the number of targeting hooks remaining.  When the remaining number is
+// Reduces the number of targeting hooks remaining. When the remaining number is
 // 0, the hook is automatically deleted.
 int _DecrementTargetingHookUses(object oPC, int nHookID, int nBehavior)
 {
     int nUses = GetTargetingHookUses(nHookID);
-    
+
     if (--nUses == 0)
     {
         if (IsDebugging(DEBUG_LEVEL_DEBUG))
             Debug("Decrementing target hook uses for ID " + HexColorString(IntToString(nHookID), COLOR_CYAN) +
                 "\n  Uses remaining -> " + (nUses ? HexColorString(IntToString(nUses), COLOR_CYAN) : HexColorString(IntToString(nUses), COLOR_RED_LIGHT)) + "\n");
-        
+
         DeleteTargetingHook(nHookID);
     }
     else
@@ -449,11 +469,11 @@ int _DecrementTargetingHookUses(object oPC, int nHookID, int nBehavior)
         string s =  "UPDATE targeting_hooks " +
                     "SET nUses = nUses - 1 " +
                     "WHERE nHookID = @nHookID;";
-        
+
         sqlquery q = _PrepareTargetingQuery(s);
         SqlBindInt(q, "@nHookID", nHookID);
         SqlStep(q);
-        
+
         _EnterTargetingMode(oPC, GetTargetingHookObjectType(nHookID), nHookID, nBehavior);
     }
 
@@ -474,7 +494,7 @@ string ObjectTypeToString(int nObjectType)
 
     if (nObjectType & OBJECT_TYPE_ITEM)
         sResult += (sResult == "" ? "" : ", ") + "Items";
-    
+
     if (nObjectType & OBJECT_TYPE_TRIGGER)
         sResult += (sResult == "" ? "" : ", ") + "Triggers";
 
@@ -507,7 +527,7 @@ struct TargetingHook GetTargetingHookDataByHookID(int nHookID)
     string s =  "SELECT sUUID, sVarName, nObjectType, nUses, sScript " +
                 "FROM targeting_hooks " +
                 "WHERE nHookID = @nHookID;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindInt(q, "@nHookID", nHookID);
 
@@ -522,7 +542,7 @@ struct TargetingHook GetTargetingHookDataByHookID(int nHookID)
         th.nUses = SqlGetInt(q, 3);
         th.sScript = SqlGetString(q, 4);
     }
-    else 
+    else
         Warning("Targeting data for target hook " + IntToString(nHookID) + " not found");
 
     return th;
@@ -541,7 +561,7 @@ sqlquery GetTargetList(object oPC, string sVarName, int nIndex = -1)
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName = @sVarName" +
                     (nIndex == -1 ? ";" : "LIMIT 1 OFFSET " + IntToString(nIndex)) + ";";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -553,7 +573,7 @@ int AddTargetToTargetList(object oPC, string sVarName, object oTarget, object oA
 {
     string s =  "INSERT INTO targeting_targets (sUUID, sVarName, sTargetObject, sTargetArea, vTargetLocation) " +
                 "VALUES (@sUUID, @sVarName, @sTargetObject, @sTargetArea, @vTargetLocation);";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -570,7 +590,7 @@ void DeleteTargetList(object oPC, string sVarName)
     string s =  "DELETE FROM targeting_targets " +
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName = @sVarName;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -596,7 +616,7 @@ void EnterTargetingModeByHookID(int nHookID, int nBehavior = TARGET_BEHAVIOR_ADD
 void EnterTargetingModeByVarName(object oPC, string sVarName, int nBehavior = TARGET_BEHAVIOR_ADD)
 {
     struct TargetingHook th = GetTargetingHookDataByVarName(oPC, sVarName);
-    
+
     if (th == TARGETING_HOOK_INVALID)
     {
         Warning("EnterTargetingModeByVarName::Unable to retrieve valid targeting data for " +
@@ -614,7 +634,7 @@ int GetTargetingHookID(object oPC, string sVarName)
                 "FROM targeting_hooks " +
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName =@sVarName;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -642,14 +662,14 @@ string GetTargetingHookScript(int nHookID)
     return _GetTargetingHookFieldData(nHookID, "sScript");
 }
 
-int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL, 
+int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL,
         string sScript = "", int nUses = 1)
 {
     _CreateTargetingDataTables();
 
     string s =  "REPLACE INTO targeting_hooks (sUUID, sVarName, nObjectType, nUses, sScript) " +
                 "VALUES (@sUUID, @sVarName, @nObjectType, @nUses, @sScript);";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -663,10 +683,10 @@ int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_
         Debug("Adding targeting hook ID " + HexColorString(IntToString(_GetLastTargetingHookID()), COLOR_CYAN) +
             "\n  sVarName -> " + HexColorString(sVarName, COLOR_CYAN) +
             "\n  nObjectType -> " + HexColorString(ObjectTypeToString(nObjectType), COLOR_CYAN) +
-            "\n  sScript -> " + (sScript == "" ? HexColorString("[None]", COLOR_RED_LIGHT) : 
+            "\n  sScript -> " + (sScript == "" ? HexColorString("[None]", COLOR_RED_LIGHT) :
                 HexColorString(sScript, COLOR_CYAN)) +
-            "\n  nUses -> " + (nUses == -1 ? HexColorString("Unlimited", COLOR_CYAN) : 
-                (nUses > 0 ? HexColorString(IntToString(nUses), COLOR_CYAN) : 
+            "\n  nUses -> " + (nUses == -1 ? HexColorString("Unlimited", COLOR_CYAN) :
+                (nUses > 0 ? HexColorString(IntToString(nUses), COLOR_CYAN) :
                 HexColorString(IntToString(nUses), COLOR_RED_LIGHT))) + "\n");
     }
 
@@ -676,7 +696,7 @@ int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_
 void DeleteTargetingHook(int nHookID)
 {
     struct TargetingHook th = GetTargetingHookDataByHookID(nHookID);
-    
+
     if (th == TARGETING_HOOK_INVALID)
     {
         Warning("DeleteTargetingHook::Unable to retrieve valid targeting data for " +
@@ -697,7 +717,7 @@ void DeleteTargetingHook(int nHookID)
         RunTargetingHookScript(th.sScript, th.oPC);
     }
     else
-        Debug("No post-targeting script specified");    
+        Debug("No post-targeting script specified");
 }
 
 int SatisfyTargetingHook(object oPC)
@@ -766,7 +786,7 @@ int SatisfyTargetingHook(object oPC)
                 else
                 {
                     DeleteTargetingHookTargetByIndex(oPC, sVarName, nIndex);
-                    
+
                     if (IsDebugging(DEBUG_LEVEL_DEBUG))
                         Debug("  > " + HexColorString("Target " + (GetIsPC(oTarget) ? GetName(oTarget) : GetTag(oTarget)) + " removed from " +
                             "list [" + th.sVarName + "]", COLOR_GREEN_LIGHT));
@@ -792,7 +812,7 @@ int DeleteTargetingHookTargetByIndex(object oPC, string sVarName, int nIndex)
 {
     string s  = "DELETE FROM targeting_targets " +
                 "WHERE nTargetID = @nTargetID;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindInt(q, "@nTargetID", nIndex);
     SqlStep(q);
@@ -807,7 +827,7 @@ int GetTargetingHookIndex(object oPC, string sVarName, object oTarget)
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName = @sVarName " +
                     "AND sTargetObject = @sTargetObject;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -850,7 +870,7 @@ int CountTargetingHookTargets(object oPC, string sVarName)
                 "FROM targeting_targets " +
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName = @sVarName;";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
@@ -864,11 +884,11 @@ int DeleteTargetingHookTarget(object oPC, string sVarName, int nIndex = 1)
                 "WHERE sUUID = @sUUID " +
                     "AND sVarName = @sVarName " +
                 "LIMIT 1 OFFSET " + IntToString(nIndex) + ";";
-    
+
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
     SqlBindString(q, "@sVarName", sVarName);
     SqlStep(q);
-    
+
     return CountTargetingHookTargets(oPC, sVarName);
 }
