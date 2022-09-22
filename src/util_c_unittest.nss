@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
 /// @file   util_c_unittest.nss
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Configuration file for util_n_timers.nss.
+/// @brief  Configuration file for util_i_unittest.nss.
 /// ----------------------------------------------------------------------------
 
 #include "util_i_debug"
@@ -10,21 +10,21 @@
 //                        Unit Test Configuration Settings
 // -----------------------------------------------------------------------------
 
-// Set this value to the color the test title text will be colored to.  The value
+// Set this value to the color the test title text will be colored to. The value
 //  can be a value from util_c_color or any other hex value representing a
 //  color.
 // Example Output:  Test My Variable Test
 //                  ^^^^ This portion of the text will be affected
 const int UNITTEST_TITLE_COLOR = COLOR_CYAN;
 
-// Set this value to the color the test name text will be colored to.  The value
+// Set this value to the color the test name text will be colored to. The value
 //  can be a value from util_c_color or any other hex value representing a
 //  color.
 // Example Output:  Test My Variable Test | PASS
 //                       ^^^^^^^^^^^^^^^^ This portion of the text will be affected
 const int UNITTEST_NAME_COLOR = COLOR_ORANGE_LIGHT;
 
-// Set this value to the color the test parameter text will be colored to.  The
+// Set this value to the color the test parameter text will be colored to. The
 //  value can be a value from util_c_color or any other hex value representing a
 //  color.
 // Example Output:    Input: my_input
@@ -33,7 +33,7 @@ const int UNITTEST_NAME_COLOR = COLOR_ORANGE_LIGHT;
 //                 ^^^^^^^^^ This portion of the text will be affected
 const int UNITTEST_PARAMETER_COLOR = COLOR_WHITE;
 
-// Set this value to the color the test parameter text will be colored to.  The
+// Set this value to the color the test parameter text will be colored to. The
 //  value can be a value from util_c_color or any other hex value representing a
 //  color.
 // Example Output:    Input: my_input
@@ -41,7 +41,7 @@ const int UNITTEST_PARAMETER_COLOR = COLOR_WHITE;
 //                           ^^^^^^^^^^^^ This portion of the text will be affected
 const int UNITTEST_PARAMETER_INPUT = COLOR_GREEN_SEA;
 
-// Set this value to the color the test parameter text will be colored to.  The
+// Set this value to the color the test parameter text will be colored to. The
 //  value can be a value from util_c_color or any other hex value representing a
 //  color.
 // Example Output: Received: my_output
@@ -53,17 +53,15 @@ const int UNITTEST_PARAMETER_RECEIVED = COLOR_PINK;
 const string UNITTEST_FAILURE_SCRIPT = "";
 
 // -----------------------------------------------------------------------------
-//                       Helper Constants and Functions
+//                        Helper Constants and Functions
 // -----------------------------------------------------------------------------
 // If you need custom constants, functions, or #includes, you may add them here.
-// Since this file is included by util_i_debug.nss, you do not need to #include
-// it to use its constants.
+// Since this file is included by util_i_unittest.nss, you do not need to
+// #include it to use its constants.
 // -----------------------------------------------------------------------------
 
-
-
 // -----------------------------------------------------------------------------
-//                        Unit Test Output Handler
+//                           Unit Test Output Handler
 // -----------------------------------------------------------------------------
 // You may alter the contents of this function, but do not alters its signature.
 // -----------------------------------------------------------------------------
@@ -82,7 +80,7 @@ void HandleUnitTestOutput(string sOutput)
 }
 
 // -----------------------------------------------------------------------------
-//                   Unit Test Failure Reporting Handler
+//                      Unit Test Failure Reporting Handler
 // -----------------------------------------------------------------------------
 // You may alter the contents of this function, but do not alters its signature.
 // -----------------------------------------------------------------------------
@@ -92,7 +90,7 @@ void HandleUnitTestOutput(string sOutput)
 void HandleUnitTestFailure(string sOutput)
 {
     // This handler can be used to report unit test failures to module systems
-    //  or take specific action based on a failure.  This function will
+    //  or take specific action based on a failure. This function will
     //  generally not be used in a test environment, but may be useful for
     //  reporting failures in a production environment if unit tests are run
     //  during module startup.

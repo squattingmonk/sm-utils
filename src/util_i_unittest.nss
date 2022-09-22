@@ -22,15 +22,15 @@
 
     // Conduct the assertions to display the results
     // Using a group assertion will provide for collapsed results to
-    //  prevent spamming the chat window.  The AssertGroup() function
+    //  prevent spamming the chat window. The AssertGroup() function
     //  returns the result of the assertion, so it can be used to
-    //  allow/prevent the display of expanded results.  If display
+    //  allow/prevent the display of expanded results. If display
     //  of the individual assertions is desired, remove the not (!) or
     //  use DescribeGroupTest() to add a title without an assertion result.
     if (!AssertGroup("[Set|Get|Delete]PlayerInt", a == b && c == 0))
     {
         // If the Group Assertion fails, the individual assertions that
-        //  make up the group assertion can be displayed.  Like AssertGroup(),
+        //  make up the group assertion can be displayed. Like AssertGroup(),
         //  Assert() returns the result of the assertion, so it can be used
         //  to prevent displaying passing results when only failing results
         //  are of interest
@@ -45,8 +45,7 @@
     } ResetIndent();
     */
     // Note:  Use of ResetIndent() or another indentation function, such as
-    //  Outdent() may be required if moving to another group assertion.  If
-    //  
+    //  Outdent() may be required if moving to another group assertion.
 
 
 #include "util_c_unittest"
@@ -88,8 +87,8 @@ void DescribeTestSuite(string sDescription);
 /// @brief Provide a test group description.
 /// @param sDescription The description to display.
 /// @note Test groups are used to minimize unit test output if all tests
-///     within a group pass.  This function only provides a header for the
-///     test group.  To provide a test group description combined with
+///     within a group pass. This function only provides a header for the
+///     test group. To provide a test group description combined with
 ///     test group ouput, use AssertGroup().
 void DescribeTestGroup(string sDescription);
 
@@ -184,25 +183,25 @@ void DescribeTestParameters(string sInput, string sExpected, string sReceived)
 {
     if (sInput != "")
     {
-        sInput = _GetIndent() + HexColorString("     Input: ", UNITTEST_PARAMETER_COLOR) + 
+        sInput = _GetIndent() + HexColorString("     Input: ", UNITTEST_PARAMETER_COLOR) +
             HexColorString(sInput, UNITTEST_PARAMETER_INPUT);
-        
+
         HandleUnitTestOutput(sInput);
     }
 
     if (sExpected != "")
     {
-        sExpected = _GetIndent() + HexColorString("Expected: ", UNITTEST_PARAMETER_COLOR) + 
+        sExpected = _GetIndent() + HexColorString("Expected: ", UNITTEST_PARAMETER_COLOR) +
             HexColorString(sExpected, UNITTEST_PARAMETER_INPUT);
-        
+
         HandleUnitTestOutput(sExpected);
     }
 
     if (sReceived != "")
     {
-        sReceived = _GetIndent() + HexColorString("Received: ", UNITTEST_PARAMETER_COLOR) + 
+        sReceived = _GetIndent() + HexColorString("Received: ", UNITTEST_PARAMETER_COLOR) +
             HexColorString(sReceived, UNITTEST_PARAMETER_RECEIVED);
-        
+
         HandleUnitTestOutput(sReceived);
     }
 }
@@ -213,7 +212,7 @@ int Assert(string sTest, int bAssertion)
         HexColorString(sTest, UNITTEST_NAME_COLOR);
 
     HandleUnitTestOutput(_GetIndent() + sTest + TEST_DELIMITER + (bAssertion ? TEST_PASS : TEST_FAIL));
-    
+
     if (!bAssertion)
         HandleUnitTestFailure(sTest);
 
