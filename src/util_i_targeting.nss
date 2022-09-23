@@ -688,7 +688,7 @@ string GetTargetingHookScript(int nHookID)
 int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL,
         string sScript = "", int nUses = 1)
 {
-    _CreateTargetingDataTables();
+    CreateTargetingDataTables();
 
     string s =  "REPLACE INTO targeting_hooks (sUUID, sVarName, nObjectType, nUses, sScript) " +
                 "VALUES (@sUUID, @sVarName, @nObjectType, @nUses, @sScript);";
@@ -757,21 +757,18 @@ int SatisfyTargetingHook(object oPC)
                                             FloatToString(vTarget.z, 3, 1) + ")", COLOR_CYAN)) + "\n");
     }
 
-    if (!GetIsObjectValid(oTarget) && vTarget == Vector())
-    {
-        Warning(HexColorString("Targeted object or position is invalid, no data saved\n", COLOR_RED_LIGHT));
-        bValid = FALSE;
-    }
-    else
+    if (GetIsObjectValid(oTarget))
     {
         if (nBehavior == TARGET_BEHAVIOR_ADD)
         {
             if (IsDebugging(DEBUG_LEVEL_DEBUG))
             {
+                object oArea = GetArea(oTarget);
+
                 Debug(HexColorString("Saving targeted object and position to list [" + th.sVarName + "]:", COLOR_CYAN) +
                         "\n  Tag -> " + HexColorString(GetTag(oTarget), COLOR_CYAN) +
-                        "\n  Location -> " + HexColorString(JsonDump(LocationToJson(Location(GetArea(oTarget), vTarget, 0.0))), COLOR_CYAN) +
-                        "\n  Area -> " + HexColorString(GetTag(GetArea(oTarget)), COLOR_CYAN) + "\n");
+                        "\n  Location -> " + HexColorString(JsonDump(LocationToJson(Location(oArea, vTarget, 0.0))), COLOR_CYAN) +
+                        "\n  Area -> " + HexColorString((GetIsObjectValid(oArea) ? GetTag(oArea) : "AREA_INVALID"), COLOR_CYAN) + "\n");
             }
 
             AddTargetToTargetList(oPC, sVarName, oTarget, GetArea(oPC), vTarget);
@@ -798,6 +795,8 @@ int SatisfyTargetingHook(object oPC)
             }
         }
     }
+    else
+        bValid = FALSE;
 
     if (!bValid)
         _ExitTargetingMode(nHookID);
