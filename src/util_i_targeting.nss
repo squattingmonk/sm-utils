@@ -176,6 +176,8 @@ struct TargetingHook
     object oPC;
     string sVarName;
     string sScript;
+    int    nValidCursor;
+    int    nInvalidCursor;
 };
 
 struct TargetingHook TARGETING_HOOK_INVALID;
@@ -281,9 +283,11 @@ string GetTargetingHookScript(int nHookID);
 /// @param nUses The number of times this targeting hook is allowed to be used
 ///     before it is automatically deleted. Omitting this value will yield an
 ///     infinite number of uses.
+/// @param nValidCursor A MOUSECURSOR_* cursor indicating a valid target.
+/// @param nInvalidCursor A MOUSECURSOR_* cursor indicating an invalid target.
 /// @returns A unique ID associated with the new targeting hook.
-int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL,
-        string sScript = "", int nUses = 1);
+int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL, string sScript = "",
+                     int nUses = 1, int nValidCursor = MOUSECURSOR_MAGIC, int nInvalidCursor = MOUSECURSOR_NOMAGIC);
 
 /// @brief Save target data to the PC object as an object and location variable
 ///     defined by sVarName in AddTargetingHook(). Decrements remaining targeting
@@ -377,13 +381,6 @@ int _GetLastTargetingHookID()
     return SqlStep(q) ? SqlGetInt(q, 0) : 0;
 }
 
-void _EnterTargetingMode(object oPC, int nObjectType, int nHookID, int nBehavior)
-{
-    SetLocalInt(oPC, TARGET_HOOK_ID, nHookID);
-    SetLocalInt(oPC, TARGET_HOOK_BEHAVIOR, nBehavior);
-    EnterTargetingMode(oPC, nObjectType, MOUSECURSOR_MAGIC, MOUSECURSOR_NOMAGIC);
-}
-
 string _GetTargetData(object oPC, string sVarName, string sField, int nIndex = 1)
 {
     string s =  "SELECT " + sField + " " +
@@ -397,6 +394,13 @@ string _GetTargetData(object oPC, string sVarName, string sField, int nIndex = 1
     SqlBindString(q, "@sVarName", sVarName);
 
     return SqlStep(q) ? SqlGetString(q, 0) : "";
+}
+
+void _EnterTargetingMode(struct TargetingHook th, int nBehavior)
+{
+    SetLocalInt(th.oPC, TARGET_HOOK_ID, th.nHookID);
+    SetLocalInt(th.oPC, TARGET_HOOK_BEHAVIOR, nBehavior);
+    EnterTargetingMode(th.oPC, th.nObjectType, th.nValidCursor, th.nInvalidCursor);
 }
 
 void _DeleteTargetingHookData(int nHookID)
@@ -430,17 +434,17 @@ void _ExitTargetingMode(int nHookID)
 
 // Reduces the number of targeting hooks remaining. When the remaining number is
 // 0, the hook is automatically deleted.
-int _DecrementTargetingHookUses(object oPC, int nHookID, int nBehavior)
+int _DecrementTargetingHookUses(struct TargetingHook th, int nBehavior)
 {
-    int nUses = GetTargetingHookUses(nHookID);
+    int nUses = GetTargetingHookUses(th.nHookID);
 
     if (--nUses == 0)
     {
         if (IsDebugging(DEBUG_LEVEL_DEBUG))
-            Debug("Decrementing target hook uses for ID " + HexColorString(IntToString(nHookID), COLOR_CYAN) +
+            Debug("Decrementing target hook uses for ID " + HexColorString(IntToString(th.nHookID), COLOR_CYAN) +
                 "\n  Uses remaining -> " + (nUses ? HexColorString(IntToString(nUses), COLOR_CYAN) : HexColorString(IntToString(nUses), COLOR_RED_LIGHT)) + "\n");
 
-        _ExitTargetingMode(nHookID);
+        _ExitTargetingMode(th.nHookID);
     }
     else
     {
@@ -449,10 +453,10 @@ int _DecrementTargetingHookUses(object oPC, int nHookID, int nBehavior)
                     "WHERE nHookID = @nHookID;";
 
         sqlquery q = _PrepareTargetingQuery(s);
-        SqlBindInt(q, "@nHookID", nHookID);
+        SqlBindInt(q, "@nHookID", th.nHookID);
         SqlStep(q);
 
-        _EnterTargetingMode(oPC, GetTargetingHookObjectType(nHookID), nHookID, nBehavior);
+        _EnterTargetingMode(th, nBehavior);
     }
 
     return nUses;
@@ -527,6 +531,8 @@ void CreateTargetingDataTables(int bReset = FALSE)
         "nObjectType INTEGER, " +
         "nUses INTEGER default '1', " +
         "sScript TEXT, " +
+        "nValidCursor INTEGER, " +
+        "nInvalidCursor INTEGER, " +
         "UNIQUE (sUUID, sVarName));";
 
     string sTargets = "CREATE TABLE IF NOT EXISTS targeting_targets (" +
@@ -547,7 +553,7 @@ void CreateTargetingDataTables(int bReset = FALSE)
 
 struct TargetingHook GetTargetingHookDataByHookID(int nHookID)
 {
-    string s =  "SELECT sUUID, sVarName, nObjectType, nUses, sScript " +
+    string s =  "SELECT sUUID, sVarName, nObjectType, nUses, sScript, nValidCursor, nInvalidCursor " +
                 "FROM targeting_hooks " +
                 "WHERE nHookID = @nHookID;";
 
@@ -564,6 +570,8 @@ struct TargetingHook GetTargetingHookDataByHookID(int nHookID)
         th.nObjectType = SqlGetInt(q, 2);
         th.nUses = SqlGetInt(q, 3);
         th.sScript = SqlGetString(q, 4);
+        th.nValidCursor = SqlGetInt(q, 5);
+        th.nInvalidCursor = SqlGetInt(q, 6);
     }
     else
         Warning("Targeting data for target hook " + IntToString(nHookID) + " not found");
@@ -633,7 +641,7 @@ void EnterTargetingModeByHookID(int nHookID, int nBehavior = TARGET_BEHAVIOR_ADD
     }
 
     if (GetIsObjectValid(th.oPC))
-        _EnterTargetingMode(th.oPC, th.nObjectType, nHookID, nBehavior);
+        _EnterTargetingMode(th, nBehavior);
 }
 
 void EnterTargetingModeByVarName(object oPC, string sVarName, int nBehavior = TARGET_BEHAVIOR_ADD)
@@ -648,7 +656,7 @@ void EnterTargetingModeByVarName(object oPC, string sVarName, int nBehavior = TA
     }
 
     if (GetIsObjectValid(th.oPC))
-        _EnterTargetingMode(th.oPC, th.nObjectType, th.nHookID, nBehavior);
+        _EnterTargetingMode(th, nBehavior);
 }
 
 int GetTargetingHookID(object oPC, string sVarName)
@@ -685,13 +693,13 @@ string GetTargetingHookScript(int nHookID)
     return _GetTargetingHookFieldData(nHookID, "sScript");
 }
 
-int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL,
-        string sScript = "", int nUses = 1)
+int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_ALL, string sScript = "",
+                     int nUses = 1, int nValidCursor = MOUSECURSOR_MAGIC, int nInvalidCursor = MOUSECURSOR_NOMAGIC)
 {
     CreateTargetingDataTables();
 
-    string s =  "REPLACE INTO targeting_hooks (sUUID, sVarName, nObjectType, nUses, sScript) " +
-                "VALUES (@sUUID, @sVarName, @nObjectType, @nUses, @sScript);";
+    string s =  "REPLACE INTO targeting_hooks (sUUID, sVarName, nObjectType, nUses, sScript, nValidCursor, nInvalidCursor) " +
+                "VALUES (@sUUID, @sVarName, @nObjectType, @nUses, @sScript, @nValidCursor, @nInvalidCursor);";
 
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));
@@ -699,6 +707,8 @@ int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_
     SqlBindInt   (q, "@nObjectType", nObjectType);
     SqlBindInt   (q, "@nUses", nUses);
     SqlBindString(q, "@sScript", sScript);
+    SqlBindInt   (q, "@nValidCursor", nValidCursor);
+    SqlBindInt   (q, "@nInvalidCursor", nInvalidCursor);
     SqlStep(q);
 
     if (IsDebugging(DEBUG_LEVEL_DEBUG))
@@ -710,7 +720,9 @@ int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_
                 HexColorString(sScript, COLOR_CYAN)) +
             "\n  nUses -> " + (nUses == -1 ? HexColorString("Unlimited", COLOR_CYAN) :
                 (nUses > 0 ? HexColorString(IntToString(nUses), COLOR_CYAN) :
-                HexColorString(IntToString(nUses), COLOR_RED_LIGHT))) + "\n");
+                HexColorString(IntToString(nUses), COLOR_RED_LIGHT))) + 
+            "\n  nValidCursor -> " + IntToString(nValidCursor) +
+            "\n  nInvalidCursor -> " + IntToString(nInvalidCursor) + "\n");
     }
 
     return _GetLastTargetingHookID();
@@ -803,9 +815,9 @@ int SatisfyTargetingHook(object oPC)
     else
     {
         if (th.nUses == -1)
-            _EnterTargetingMode(oPC, th.nObjectType, nHookID, nBehavior);
+            _EnterTargetingMode(th, nBehavior);
         else
-            _DecrementTargetingHookUses(oPC, nHookID, nBehavior);
+            _DecrementTargetingHookUses(th, nBehavior);
     }
 
     return TRUE;
