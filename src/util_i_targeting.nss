@@ -281,8 +281,8 @@ string GetTargetingHookScript(int nHookID);
 /// @param sScript The script that will be run when this target hook is
 ///     satisfied.
 /// @param nUses The number of times this targeting hook is allowed to be used
-///     before it is automatically deleted. Omitting this value will yield an
-///     infinite number of uses.
+///     before it is automatically deleted. Omitting this value will yield a
+///     single use hook.  Use -1 for an infinite-use hook.
 /// @param nValidCursor A MOUSECURSOR_* cursor indicating a valid target.
 /// @param nInvalidCursor A MOUSECURSOR_* cursor indicating an invalid target.
 /// @returns A unique ID associated with the new targeting hook.
