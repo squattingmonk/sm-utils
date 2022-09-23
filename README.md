@@ -42,10 +42,13 @@ This package contains the following resources:
 | `util_i_math.nss`      | Common math utilities                         |
 | `util_i_strings.nss`   | String manipulation utilities                 |
 | `util_i_color.nss`     | RGB, HSV, and hex color utilities             |
+| `util_c_color.nss`     | Configuration file for `util_i_color.nss`     |
 | `util_i_constants.nss` | Constant value retrieval functions            |
 | `util_i_times.nss`     | Time, date, and duration functions            |
 | `util_i_strftime.nss`  | Formatting functions for dates and times      |
 | `util_c_strftime.nss`  | Configuration file for `util_i_strftime.nss`  |
+| `util_i_unittest.nss`  | Functions for testing other scripts           |
+| `util_c_unittest.nss`  | Configuration file for `util_i_unittest.nss`  |
 | `util_i_targeting.nss` | Functions for hooking OnPlayerTarget          |
 | `util_c_targeting.nss` | Configuration file for `util_i_targeting.nss` |
 
@@ -67,5 +70,6 @@ meant to be included in other scripts that implement its functions.
   - [Times](docs/times.md)
 
 ## Acknowledgements
+- Thanks to tinygiant98 for his continued contributions and testing.
 - `util_i_libraries.nss` adapted from
   [MemeticAI](https://sourceforge.net/projects/memeticai/).
