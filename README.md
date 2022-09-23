@@ -51,6 +51,7 @@ This package contains the following resources:
 | `util_c_unittest.nss`  | Configuration file for `util_i_unittest.nss`  |
 | `util_i_targeting.nss` | Functions for hooking OnPlayerTarget          |
 | `util_c_targeting.nss` | Configuration file for `util_i_targeting.nss` |
+| `util_i_timers.nss`    | Functions for running scripts on an interval  |
 
 
 Note: `sm-utils` relies on script extensions added by
@@ -68,6 +69,7 @@ meant to be included in other scripts that implement its functions.
   - [Lists](docs/lists.md)
   - [Libraries](docs/libraries.md)
   - [Times](docs/times.md)
+  - [Timers](docs/timers.md)
 
 ## Acknowledgements
 - Thanks to tinygiant98 for his continued contributions and testing.
