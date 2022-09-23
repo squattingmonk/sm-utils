@@ -184,6 +184,10 @@ struct TargetingHook TARGETING_HOOK_INVALID;
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
+/// @brief Creates targeting hook data tables in the module's sqlite database.
+/// @param bReset If TRUE, attempts to drop the tables before creation.
+void CreateTargetingDataTables(int bReset = FALSE);
+
 /// @brief Retrieve targeting hook data.
 /// @param nHookID The targeting hook's ID.
 /// @returns A TargetingHook containing all targeting hook data associated with
@@ -364,51 +368,6 @@ string _GetTargetingHookFieldData(int nHookID, string sField)
     return SqlStep(q) ? SqlGetString(q, 0) : "";
 }
 
-void _CreateTargetingDataTables(int bReset = FALSE)
-{
-    object oModule = GetModule();
-
-    if (bReset)
-    {
-        string sDropHooks = "DROP TABLE IF EXISTS targeting_hooks;";
-        string sDropTargets = "DROP TABLE IF EXISTS targeting_targets;";
-
-        sqlquery q;
-        q = _PrepareTargetingQuery(sDropHooks);   SqlStep(q);
-        q = _PrepareTargetingQuery(sDropTargets); SqlStep(q);
-
-        DeleteLocalInt(oModule, "TARGETING_INITIALIZED");
-        Warning(HexColorString("Targeting database tables have been dropped", COLOR_RED_LIGHT));
-    }
-
-    if (GetLocalInt(oModule, "TARGETING_INITIALIZED"))
-        return;
-
-    string sData = "CREATE TABLE IF NOT EXISTS targeting_hooks (" +
-        "nHookID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        "sUUID TEXT, " +
-        "sVarName TEXT, " +
-        "nObjectType INTEGER, " +
-        "nUses INTEGER default '1', " +
-        "sScript TEXT, " +
-        "UNIQUE (sUUID, sVarName));";
-
-    string sTargets = "CREATE TABLE IF NOT EXISTS targeting_targets (" +
-        "nTargetID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        "sUUID TEXT, " +
-        "sVarName TEXT, " +
-        "sTargetObject TEXT, " +
-        "sTargetArea TEXT, " +
-        "vTargetLocation TEXT);";
-
-    sqlquery q;
-    q = _PrepareTargetingQuery(sData);     SqlStep(q);
-    q = _PrepareTargetingQuery(sTargets);  SqlStep(q);
-
-    Debug(HexColorString("Targeting database tables have been created", COLOR_GREEN_LIGHT));
-    SetLocalInt(oModule, "TARGETING_INITIALIZED", TRUE);
-}
-
 int _GetLastTargetingHookID()
 {
     string s = "SELECT seq FROM sqlite_sequence WHERE name = @name;";
@@ -539,6 +498,51 @@ string ObjectTypeToString(int nObjectType)
         sResult += (sResult == "" ? "" : ", ") + "Tiles";
 
     return sResult;
+}
+
+void CreateTargetingDataTables(int bReset = FALSE)
+{
+    object oModule = GetModule();
+
+    if (bReset)
+    {
+        string sDropHooks = "DROP TABLE IF EXISTS targeting_hooks;";
+        string sDropTargets = "DROP TABLE IF EXISTS targeting_targets;";
+
+        sqlquery q;
+        q = _PrepareTargetingQuery(sDropHooks);   SqlStep(q);
+        q = _PrepareTargetingQuery(sDropTargets); SqlStep(q);
+
+        DeleteLocalInt(oModule, "TARGETING_INITIALIZED");
+        Warning(HexColorString("Targeting database tables have been dropped", COLOR_RED_LIGHT));
+    }
+
+    if (GetLocalInt(oModule, "TARGETING_INITIALIZED"))
+        return;
+
+    string sData = "CREATE TABLE IF NOT EXISTS targeting_hooks (" +
+        "nHookID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        "sUUID TEXT, " +
+        "sVarName TEXT, " +
+        "nObjectType INTEGER, " +
+        "nUses INTEGER default '1', " +
+        "sScript TEXT, " +
+        "UNIQUE (sUUID, sVarName));";
+
+    string sTargets = "CREATE TABLE IF NOT EXISTS targeting_targets (" +
+        "nTargetID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        "sUUID TEXT, " +
+        "sVarName TEXT, " +
+        "sTargetObject TEXT, " +
+        "sTargetArea TEXT, " +
+        "vTargetLocation TEXT);";
+
+    sqlquery q;
+    q = _PrepareTargetingQuery(sData);     SqlStep(q);
+    q = _PrepareTargetingQuery(sTargets);  SqlStep(q);
+
+    Debug(HexColorString("Targeting database tables have been created", COLOR_GREEN_LIGHT));
+    SetLocalInt(oModule, "TARGETING_INITIALIZED", TRUE);
 }
 
 struct TargetingHook GetTargetingHookDataByHookID(int nHookID)
