@@ -30,22 +30,24 @@ module's working directory.
 
 This package contains the following resources:
 
-| Resource               | Function                                     |
-| ---------------------- | -------------------------------------------- |
-| `util_i_lists.nss`     | CSV and local variable lists master include  |
-| `util_i_csvlists.nss`  | CSV list utilities                           |
-| `util_i_varlists.nss`  | Local variable list utilities                |
-| `util_i_debug.nss`     | Debugging utilities                          |
-| `util_i_libraries.nss` | Library script utilities                     |
-| `util_i_library.nss`   | Library dispatcher boilerplate               |
-| `util_i_datapoint.nss` | System-specific data object creation utility |
-| `util_i_math.nss`      | Common math utilities                        |
-| `util_i_strings.nss`   | String manipulation utilities                |
-| `util_i_color.nss`     | RGB, HSV, and hex color utilities            |
-| `util_i_constants.nss` | Constant value retrieval functions           |
-| `util_i_times.nss`     | Time, date, and duration functions           |
-| `util_i_strftime.nss`  | Formatting functions for dates and times     |
-| `util_c_strftime.nss`  | Configuration file for `util_i_strftime.nss` |
+| Resource               | Function                                      |
+| ---------------------- | --------------------------------------------- |
+| `util_i_lists.nss`     | CSV and local variable lists master include   |
+| `util_i_csvlists.nss`  | CSV list utilities                            |
+| `util_i_varlists.nss`  | Local variable list utilities                 |
+| `util_i_debug.nss`     | Debugging utilities                           |
+| `util_i_libraries.nss` | Library script utilities                      |
+| `util_i_library.nss`   | Library dispatcher boilerplate                |
+| `util_i_datapoint.nss` | System-specific data object creation utility  |
+| `util_i_math.nss`      | Common math utilities                         |
+| `util_i_strings.nss`   | String manipulation utilities                 |
+| `util_i_color.nss`     | RGB, HSV, and hex color utilities             |
+| `util_i_constants.nss` | Constant value retrieval functions            |
+| `util_i_times.nss`     | Time, date, and duration functions            |
+| `util_i_strftime.nss`  | Formatting functions for dates and times      |
+| `util_c_strftime.nss`  | Configuration file for `util_i_strftime.nss`  |
+| `util_i_targeting.nss` | Functions for hooking OnPlayerTarget          |
+| `util_c_targeting.nss` | Configuration file for `util_i_targeting.nss` |
 
 
 Note: `sm-utils` relies on script extensions added by
