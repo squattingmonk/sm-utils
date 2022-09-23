@@ -450,6 +450,25 @@ void _DeleteTargetingHookData(int nHookID)
     SqlStep(q);
 }
 
+void _ExitTargetingMode(int nHookID)
+{
+    struct TargetingHook th = GetTargetingHookDataByHookID(nHookID);
+
+    DeleteTargetingHook(nHookID);
+    DeleteLocalInt(th.oPC, TARGET_HOOK_ID);
+    DeleteLocalInt(th.oPC, TARGET_HOOK_BEHAVIOR);
+
+    if (th.sScript != "")
+    {
+        Debug("Running post-targeting script " + th.sScript + " from Targeting Hook ID " +
+            IntToString(nHookID) + " on " + GetName(th.oPC) + " with varname " + th.sVarName);
+        RunTargetingHookScript(th.sScript, th.oPC);
+    }
+    else
+        Debug("No post-targeting script specified for Targeting Hook ID " + IntToString(nHookID) + " " +
+            "on " + GetName(th.oPC) + " with varname " + th.sVarName);
+}
+
 // Reduces the number of targeting hooks remaining. When the remaining number is
 // 0, the hook is automatically deleted.
 int _DecrementTargetingHookUses(object oPC, int nHookID, int nBehavior)
@@ -462,7 +481,7 @@ int _DecrementTargetingHookUses(object oPC, int nHookID, int nBehavior)
             Debug("Decrementing target hook uses for ID " + HexColorString(IntToString(nHookID), COLOR_CYAN) +
                 "\n  Uses remaining -> " + (nUses ? HexColorString(IntToString(nUses), COLOR_CYAN) : HexColorString(IntToString(nUses), COLOR_RED_LIGHT)) + "\n");
 
-        DeleteTargetingHook(nHookID);
+        _ExitTargetingMode(nHookID);
     }
     else
     {
@@ -695,29 +714,10 @@ int AddTargetingHook(object oPC, string sVarName, int nObjectType = OBJECT_TYPE_
 
 void DeleteTargetingHook(int nHookID)
 {
-    struct TargetingHook th = GetTargetingHookDataByHookID(nHookID);
-
-    if (th == TARGETING_HOOK_INVALID)
-    {
-        Warning("DeleteTargetingHook::Unable to retrieve valid targeting data for " +
-            "targeting hook " + IntToString(nHookID));
-        return;
-    }
-
     if (IsDebugging(DEBUG_LEVEL_DEBUG))
         Debug("Deleting targeting hook ID " + HexColorString(IntToString(nHookID), COLOR_CYAN) + "\n");
 
     _DeleteTargetingHookData(nHookID);
-    DeleteLocalInt(th.oPC, TARGET_HOOK_ID);
-    DeleteLocalInt(th.oPC, TARGET_HOOK_BEHAVIOR);
-
-    if (th.sScript != "")
-    {
-        Debug("Running post-targeting script " + th.sScript);
-        RunTargetingHookScript(th.sScript, th.oPC);
-    }
-    else
-        Debug("No post-targeting script specified");
 }
 
 int SatisfyTargetingHook(object oPC)
@@ -796,7 +796,7 @@ int SatisfyTargetingHook(object oPC)
     }
 
     if (!bValid)
-        DeleteTargetingHook(nHookID);
+        _ExitTargetingMode(nHookID);
     else
     {
         if (th.nUses == -1)
