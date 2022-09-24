@@ -377,7 +377,7 @@ int CreateTimer(object oTarget, string sAction, float fInterval, int nIterations
 int GetIsTimerValid(int nTimerID)
 {
     // Timer IDs less than or equal to 0 are always invalid.
-    if (nTimerID < 0)
+    if (nTimerID <= 0)
         return FALSE;
 
     CreateTimersTable();
