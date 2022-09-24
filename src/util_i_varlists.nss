@@ -42,890 +42,1012 @@ const string VARLIST_TYPE_JSON     = "JL:";
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< VectorToJson >---
-// ---< util_i_varlists >---
-// Returns a json vector object encoded from vector vPosition. This
-// function should be used if creating elements to be used
-// with SetVectorList().
+/// @brief Convert a vector to a json object.
+/// @param vPosition The vector to convert.
 json VectorToJson(vector vPosition = [0.0, 0.0, 0.0]);
 
-// ---< JsonToVector >---
-// ---< util_i_varlists >---
-// Returns a vector decoded from json vector object jPosition. This
-// function should be used to decode elements of a list returned by
-// GetVectorList().
+/// @brief Convert a json object to a vector.
+/// @param jPosition The json object to convert.
 vector JsonToVector(json jPosition);
 
-// ---< LocationToJson >---
-// ---< util_i_varlists >---
-// Returns a json location object encoded from location lLocation.
-// This function should be used when creating elements to be used
-// with SetLocationList().
+/// @brief Convert a location to a json object.
+/// @param lLocation The location to convert.
 json LocationToJson(location lLocation);
 
-// ---< JsonToLocation >---
-// ---< util_i_varlists >---
-// Returns a location decoded from json location object jLocation.
-// This function should be used to decode elements of a list returned
-// by GetLocationList().
+/// @brief Convert a json object to a location.
+/// @param jLocation The json object to convert.
 location JsonToLocation(json jLocation);
 
-// ---< AddListFloat >---
-// ---< util_i_varlists >---
-// Adds fValue to a float list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to a float list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param fValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddListInt >---
-// ---< util_i_varlists >---
-// Adds nValue to an int list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to an int list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param nValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListInt(object oTarget, int nValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddListLocation >---
-// ---< util_i_varlists >---
-// Adds lValue to a location list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to a location list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param lValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListLocation(object oTarget, location lValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddListVector >---
-// ---< util_i_varlists >---
-// Adds vValue to a vector list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to a vector list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param vValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListVector(object oTarget, vector vValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddListObject >---
-// ---< util_i_varlists >---
-// Adds oValue to a object list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to an object list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param oValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListObject(object oTarget, object oValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddListString >---
-// ---< util_i_varlists >---
-// Adds sValue to a string list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to a string list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param sValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListString(object oTarget, string sValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< AddListJson >---
-// ---< util_i_varlists >---
-// Adds jValue to a json list on oTarget given the list name sListName. If
-// bAddUnique is TRUE, this only adds to the list if it is not already there.
-// Returns whether the addition was successful.
+/// @brief Add a value to a json list on a target.
+/// @param oTarget The object the list is stored on.
+/// @param jValue The value to add to the list.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, will not add the value if it is already present.
+/// @returns TRUE if the operation was successful; FALSE otherwise.
 int AddListJson(object oTarget, json jValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< GetListFloat >---
-// ---< util_i_varlists >---
-// Returns the float at nIndex in oTarget's float list sListName. If no float is
-// found at that index, 0.0 is returned.
+/// @brief Return the value at an index in a target's float list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns 0.0 if no value is found at nIndex.
 float GetListFloat(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetListInt >---
-// ---< util_i_varlists >---
-// Returns the int at nIndex in oTarget's int list sListName. If no int is found
-// at that index, 0 is returned.
+/// @brief Return the value at an index in a target's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns 0 if no value is found at nIndex.
 int GetListInt(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetListLocation >---
-// ---< util_i_varlists >---
-// Returns the location at nIndex in oTarget's location list sListName. If no
-// location is found at that index, an invalid location is returned.
+/// @brief Return the value at an index in a target's location list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns LOCATION_INVALID if no value is found at nIndex.
 location GetListLocation(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetListVector >---
-// ---< util_i_varlists >---
-// Returns the vector at nIndex in oTarget's vector list sListName. If no string
-// is found at that index, an origin vector is returned (0, 0, 0).
+/// @brief Return the value at an index in a target's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns [0.0. 0.0, 0.0] if no value was found at nIndex.
 vector GetListVector(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetListObject >---
-// ---< util_i_varlists >---
-// Returns the object at nIndex in oTarget's object list sListName. If no object
-// is found at that index, OBJECT_INVALID is returned.
+/// @brief Return the value at an index in a target's object list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns OBJECT_INVALID if no value was found at nIndex.
 object GetListObject(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetListString >---
-// ---< util_i_varlists >---
-// Returns the string at nIndex in oTarget's string list sListName. If no string
-// is found at that index, "" is returned.
+/// @brief Return the value at an index in a target's string list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns "" if no value was found at nIndex.
 string GetListString(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< GetListJson >---
-// ---< util_i_varlists >---
-// Returns the element at nIndex in oTarget's json list sListName. If no element
-// is found at that index, JsonNull() is returned.
+/// @brief Return the value at an index in a target's json list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @returns JSON_NULL if no value was found at nIndex.
 json GetListJson(object oTarget, int nIndex = 0, string sListName = "");
 
-// ---< DeleteListFloat >---
-// ---< util_i_varlists >---
-// Removes the float at nIndex on oTarget's float list sListName and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListFloat(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< DeleteListInt >---
-// ---< util_i_varlists >---
-// Removes the int at nIndex on oTarget's int list sListName and returns
-// the number of items remaining in the list. IfbMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListInt(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< DeleteListLocation >---
-// ---< util_i_varlists >---
-// Removes the location at nIndex on oTarget's location list sListName and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListLocation(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< DeleteListVector >---
-// ---< util_i_varlists >---
-// Removes the vector at nIndex on oTarget's vector list sListName and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListVector(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< DeleteListObject >---
-// ---< util_i_varlists >---
-// Removes the object at nIndex on oTarget's object list sListName and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListObject(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< DeleteListString >---
-// ---< util_i_varlists >---
-// Removes the string at nIndex on oTarget's string list sListName and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListString(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< DeleteListJson >---
-// ---< util_i_varlists >---
-// Removes the element at nIndex on oTarget's json list sListName and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Delete the value at an index on an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int DeleteListJson(object oTarget, int nIndex, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListFloat >---
-// ---< util_i_varlists >---
-// Removes a float of fValue from the float list sListName on oTarget and
-// returns the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param fValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListFloat(object oTarget, float fValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListInt >---
-// ---< util_i_varlists >---
-// Removes the first int of nValue from the int list sListName on oTarget and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListInt(object oTarget, int nValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListLocation >---
-// ---< util_i_varlists >---
-// Removes the first location of lValue from the location list sListName on oTarget and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param lValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListLocation(object oTarget, location lValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListVector >---
-// ---< util_i_varlists >---
-// Removes the first vector of vValue from the vector list sListName on oTarget and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param vValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListVector(object oTarget, vector vValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListObject >---
-// ---< util_i_varlists >---
-// Removes the first object of oValue from the object list sListName on oTarget and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param oValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListObject(object oTarget, object oValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListString >---
-// ---< util_i_varlists >---
-// Removes the first string of sValue from the string list sListName on oTarget and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListString(object oTarget, string sValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< RemoveListJson >---
-// ---< util_i_varlists >---
-// Removes the first element of jValue from the json list sListName on oTarget and returns
-// the number of items remaining in the list. bMaintainOrder exists for legacy
-// support and is not used.
+/// @brief Remove the first instance of a value from an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param jValue The value to remove.
+/// @param sListName The name of the list.
+/// @param bMaintainOrder Not used; exists for legacy purposes only.
+/// @returns The number of items remanining in the list.
 int RemoveListJson(object oTarget, json jValue, string sListName = "", int bMaintainOrder = FALSE);
 
-// ---< FindListFloat >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the float fValue in the float
-// list sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     float list.
+/// @param oTarget The object the list is stored on.
+/// @param fValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListFloat(object oTarget, float fValue, string sListName = "");
 
-// ---< FindListInt >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the int nValue in the int list
-// sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     int list.
+/// @param oTarget The object the list is stored on.
+/// @param nValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListInt(object oTarget, int nValue, string sListName = "");
 
-// ---< FindListLocation >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the location lValue in the
-// location list sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     location list.
+/// @param oTarget The object the list is stored on.
+/// @param lValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListLocation(object oTarget, location lValue, string sListName = "");
 
-// ---< FindListVector >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the vector vValue in the
-// location list sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     vector list.
+/// @param oTarget The object the list is stored on.
+/// @param vValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListVector(object oTarget, vector vValue, string sListName = "");
 
-// ---< FindListObject >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the obejct oValue in the object
-// list sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     object list.
+/// @param oTarget The object the list is stored on.
+/// @param oValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListObject(object oTarget, object oValue, string sListName = "");
 
-// ---< FindListString >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the string sValue in the string
-// list sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     string list.
+/// @param oTarget The object the list is stored on.
+/// @param sValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListString(object oTarget, string sValue, string sListName = "");
 
-// ---< FindListJson >---
-// ---< util_i_varlists >---
-// Returns the index of the first reference of the element jValue in the json
-// list sListName on oTarget. If it is not in the list, returns -1.
+/// @brief Return the index of the first occurrence of a value in an object's
+///     json list.
+/// @param oTarget The object the list is stored on.
+/// @param jValue The value to find.
+/// @param sListName The name of the list.
+/// @returns The index of the value (0-based), or -1 if it is not in the list.
 int FindListJson(object oTarget, json jValue, string sListName = "");
 
-// ---< HasListFloat >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has a float with the value fValue in its float list
-// sListName.
+/// @brief Return whether a value is present in an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param fValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListFloat(object oTarget, float fValue, string sListName = "");
 
-// ---< HasListInt >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has an int with the value nValue in its int list
-// sListName.
+/// @brief Return whether a value is present in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListInt(object oTarget, int nValue, string sListName = "");
 
-// ---< HasListLocation >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has a location with the value lValue in its locaiton
-// list sListName.
+/// @brief Return whether a value is present in an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param lValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListLocation(object oTarget, location lValue, string sListName = "");
 
-// ---< HasListVector >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has a vector with the value vValue in its vector
-// list sListName.
+/// @brief Return whether a value is present in an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param vValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListVector(object oTarget, vector vValue, string sListName = "");
 
-// ---< HasListObject >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has an object with the value oValue in its object
-// list sListName.
+/// @brief Return whether a value is present in an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param oValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListObject(object oTarget, object oValue, string sListName = "");
 
-// ---< HasListString >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has a string with the value sValue in its string list
-// sListName.
+/// @brief Return whether a value is present in an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListString(object oTarget, string sValue, string sListName = "");
 
-// ---< HasListJson >---
-// ---< util_i_varlists >---
-// Returns whether oTarget has an element with the value jValue in its json list
-// sListName.
+/// @brief Return whether a value is present in an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param jValue The value to find.
+/// @param sListName The name of the list.
+/// @returns TRUE if the value is in the list; FALSE otherwise.
 int HasListJson(object oTarget, json jValue, string sListName = "");
 
-// ---< InsertListFloat >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the float list of sListName on oTarget to fValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Insert a value at an index in an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param fValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListFloat(object oTarget, int nIndex, float fValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< InsertListInt >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the int list of sListName on oTarget to nValue. If the
-// index is at the end of the list, it will be added. If nIndex exceeds the length
-// of the list, nothing is added. If bAddUnique, the insert operation will be
-// conducted first, then subsequent duplicate values will be removed, keeping the
-// passed nValue at the desired nIndex.
+/// @brief Insert a value at an index in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param nValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListInt(object oTarget, int nIndex, int nValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< InsertListLocation >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the location list of sListName on oTarget to lValue. If
-// the index is at the end of the list, it will be added. If it exceeds the
-// length of the list, nothing is added. If bAddUnique, the insert operation will be
-// conducted first, then subsequent duplicate values will be removed, keeping the
-// passed nValue at the desired nIndex.
+/// @brief Insert a value at an index in an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param lValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListLocation(object oTarget, int nIndex, location lValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< InsertListVector >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the vector list of sListName on oTarget to vValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Insert a value at an index in an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param vValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListVector(object oTarget, int nIndex, vector vValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< InsertListObject >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the object list of sListName on oTarget to oValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Insert a value at an index in an object's objeect list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param oValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListObject(object oTarget, int nIndex, object oValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< InsertListString >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the string list of sListName on oTarget to sValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Insert a value at an index in an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param sValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListString(object oTarget, int nIndex, string sValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< InsertListJson >---
-// ---< util_i_varlists >---
-// Inserts item nIndex in the json list of sListName on oTarget to sValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Insert a value at an index in an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to insert the value at. If the index exceeds the
+///     length of the list, nothing is added.
+/// @param jValue The value to insert.
+/// @param sListName The name of the list.
+/// @param bAddUnique If TRUE, the insert operation will be conducted first and
+///     then duplicate values will be removed.
+/// @returns The length of the updated list.
 int InsertListJson(object oTarget, int nIndex, json jValue, string sListName = "", int bAddUnique = FALSE);
 
-// ---< SetListFloat >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the float list of sListName on oTarget to fValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Set the value at an index in an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param fValue The value to set.
+/// @param sListName The name of the list.
 void SetListFloat(object oTarget, int nIndex, float fValue, string sListName = "");
 
-// ---< SetListInt >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the int list of sListName on oTarget to nValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Set the value at an index in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param nValue The value to set.
+/// @param sListName The name of the list.
 void SetListInt(object oTarget, int nIndex, int nValue, string sListName = "");
 
-// ---< SetListLocation >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the location list of sListName on oTarget to lValue. If
-// the index is at the end of the list, it will be added. If it exceeds the
-// length of the list, nothing is added.
+/// @brief Set the value at an index in an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param lValue The value to set.
+/// @param sListName The name of the list.
 void SetListLocation(object oTarget, int nIndex, location lValue, string sListName = "");
 
-// ---< SetListVector >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the vector list of sListName on oTarget to vValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Set the value at an index in an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param vValue The value to set.
+/// @param sListName The name of the list.
 void SetListVector(object oTarget, int nIndex, vector vValue, string sListName = "");
 
-// ---< SetListObject >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the object list of sListName on oTarget to oValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Set the value at an index in an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param oValue The value to set.
+/// @param sListName The name of the list.
 void SetListObject(object oTarget, int nIndex, object oValue, string sListName = "");
 
-// ---< SetListString >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the string list of sListName on oTarget to sValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Set the value at an index in an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param sValue The value to set.
+/// @param sListName The name of the list.
 void SetListString(object oTarget, int nIndex, string sValue, string sListName = "");
 
-// ---< SetListJson >---
-// ---< util_i_varlists >---
-// Sets item nIndex in the json list of sListName on oTarget to sValue. If the
-// index is at the end of the list, it will be added. If it exceeds the length
-// of the list, nothing is added.
+/// @brief Set the value at an index in an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index to set the value of. If the index exceeds the length
+///     of the list, nothing is added.
+/// @param jValue The value to set.
+/// @param sListName The name of the list.
 void SetListJson(object oTarget, int nIndex, json jValue, string sListName = "");
 
-// ---< CopyListFloat >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from float list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's float list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListFloat(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< CopyListInt >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from int list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's int list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListInt(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< CopyListLocation >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from location list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's location list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListLocation(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< CopyListVector >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from vector list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's vector list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListVector(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< CopyListObject >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from object list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's object list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListObject(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< CopyListString >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from string list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's string list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListString(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< CopyListJson >---
-// ---< util_i_varlists >---
-// Starting at nIndex, copies nRange items from json list sSourceName on oSource
-// and adds them to list sTargetName on oTarget. Returns the number of list items
-// copied to the target list. If bAddUnique, the copy operation will be conducted
-// first, then any duplicate values will be removed. Values in sTargetName are
-// prioritized over duplicate values in sSourceName.
+/// @brief Copy value from one object's json list to another's.
+/// @param oSource The object to copy the list values of.
+/// @param oTarget The object to copy the list values to.
+/// @param sSourceName The name of the list on oSource.
+/// @param sTargetName The name of the list on oTarget.
+/// @param nIndex The index to begin copying from.
+/// @param nRange The number of values to copy. If -1, will copy all values from
+///     nIndex and up.
+/// @param bAddUnique If TRUE, the copy operation will be conducted first and
+///     then any duplicate values will be removed. Values in the target list
+///     will be prioritiezed over values from the source list.
+/// @returns The number of values copied.
 int CopyListJson(object oSource, object oTarget, string sSourceName, string sTargetName, int nIndex, int nRange = 1, int bAddUnique = FALSE);
 
-// ---< IncrementListInt >---
-// ---< util_i_varlists >---
-// Increments an integer at nIndex in sListName on oTarget by nIncrement
-// and returns the new value.
+/// @brief Increment the value at an index in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param nIncrement The amount to increment the value by.
+/// @param sListName The name of the list.
+/// @returns The new value of the int.
 int IncrementListInt(object oTarget, int nIndex, int nIncrement = 1, string sListName = "");
 
-// ---< DecrementListInt >---
-// ---< util_i_varlists >---
-// Decrements an integer at nIndex in sListName on oTarget by nDecrement
-// and returns the new value.
+/// @brief Decrement the value at an index in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nIndex The index of the value.
+/// @param nIncrement The amount to decrement the value by.
+/// @param sListName The name of the list.
+/// @returns The new value of the int.
 int DecrementListInt(object oTarget, int nIndex, int nDecrement = -1, string sListName = "");
 
-// ---< GetFloatList >---
-// ---< util_i_varlists >---
-// Retrieves the float list sListName from oTarget.
-// Elements of the returned array can be decoded with
-// JsonGetFloat().
+/// @brief Convert an object's float list to a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+/// @note Elements of the returned array can be decoded with JsonGetFloat().
 json GetFloatList(object oTarget, string sListName = "");
 
-// ---< GetIntList >---
-// ---< util_i_varlists >---
-// Retrieves the int list sListName from oTarget.
-// Elements of the returned array can be decoded with
-// JsonGetInt().
+/// @brief Convert an object's int list to a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+/// @note Elements of the returned array can be decoded with JsonGetInt().
 json GetIntList(object oTarget, string sListName = "");
 
-// ---< GetLocationList >---
-// ---< util_i_varlists >---
-// Retrieves the location list sListName from oTarget.
-// Elements of the returned array can be decoded with
-// JsonToLocation().
+/// @brief Convert an object's location list to a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+/// @note Elements of the returned array can be decoded with JsonToLocation().
 json GetLocationList(object oTarget, string sListName = "");
 
-// ---< GetVectorList >---
-// ---< util_i_varlists >---
-// Retrieves the vector list sListName from oTarget.
-// Elements of the returned array can be decoded with
-// JsonToVector().
+/// @brief Convert an object's vector list to a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+/// @note Elements of the returned array can be decoded with JsonToVector().
 json GetVectorList(object oTarget, string sListName = "");
 
-// ---< GetObjectList >---
-// ---< util_i_varlists >---
-// Retrieves the float list sListName from oTarget.
-// Elements of the returned array can be decoded with
-// StringToObject().
+/// @brief Convert an object's object list to a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+/// @note Elements of the returned array can be decoded with
+///     ObjectToString(JsonGetString()).
 json GetObjectList(object oTarget, string sListName = "");
 
-// ---< GetStringList >---
-// ---< util_i_varlists >---
-// Retrieves the float list sListName from oTarget.
-// Elements of the returned array can be decoded with
-// JsonGetString().
+/// @brief Convert an object's string list to a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+/// @note Elements of the returned array can be decoded with JsonGetString().
 json GetStringList(object oTarget, string sListName = "");
 
-// ---< GetJsonList >---
-// ---< util_i_varlists >---
-// Retrieves the float list sListName from oTarget.
+/// @brief Convert an object's json list into a json array.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 json GetJsonList(object oTarget, string sListName = "");
 
-// ---< SetFloatList >---
-// ---< util_i_varlists >---
-// Sets the float list jList as sListName on oTarget.
-// jList must be an array of floats encoded with JsonFloat().
+/// @brief Save a json array as an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of JsonFloat()s.
+/// @param sListName The name of the list.
 void SetFloatList(object oTarget, json jList, string sListName = "");
 
-// ---< SetIntList >---
-// ---< util_i_varlists >---
-// Sets the int list jList as sListName on oTarget.
-// jList must be an array of ints encoded with JsonInt().
+/// @brief Save a json array as an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of JsonInt()s.
+/// @param sListName The name of the list.
 void SetIntList(object oTarget, json jList, string sListName = "");
 
-// ---< SetLocationList >---
-// ---< util_i_varlists >---
-// Sets the location list jList as sListName on oTarget.
-// jList must be an array of location objects. A location object
-// can be encoded by passing a location to LocationToJson().
+/// @brief Save a json array as an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of JsonLocation()s.
+/// @param sListName The name of the list.
 void SetLocationList(object oTarget, json jList, string sListName = "");
 
-// ---< SetVectorList >---
-// ---< util_i_varlists >---
-// Sets the vector list jList as sListName on oTarget.
-// jList must be an array of vector objects. A vector object
-// can be encoded by passing a vector to VectorToJson()..
+/// @brief Save a json array as an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of JsonVector()s.
+/// @param sListName The name of the list.
 void SetVectorList(object oTarget, json jList, string sListName = "");
 
-// ---< SetObjectList >---
-// ---< util_i_varlists >---
-// Sets the object list jList as sListName on oTarget.
-// jList must be an array of object IDs created with
-// ObjectToString() and encoded via JsonString().
+/// @brief Save a json array as an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of JsonObject()s.
+/// @param sListName The name of the list.
 void SetObjectList(object oTarget, json jList, string sListName = "");
 
-// ---< SetStringList >---
-// ---< util_i_varlists >---
-// Sets the string list jList as sListName on oTarget.
-// jList must be an array of strings created with JsonString().
+/// @brief Save a json array as an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of JsonString()s.
+/// @param sListName The name of the list.
 void SetStringList(object oTarget, json jList, string sListName = "");
 
-// ---< SetJsonList >---
-// ---< util_i_varlists >---
-// Sets the float list jList as sListName on oTarget.
-// jList can be any collection of json objects.
+/// @brief Save a json array as an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param jList A JsonArray() made up of any json types.
+/// @param sListName The name of the list.
 void SetJsonList(object oTarget, json jList, string sListName = "");
 
-// ---< DeleteFloatList >---
-// ---< util_i_varlists >---
-// Deletes the float list sListName from oTarget.
+/// @brief Delete an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteFloatList(object oTarget, string sListName = "");
 
-// ---< DeleteIntList >---
-// ---< util_i_varlists >---
-// Deletes the int list sListName from oTarget.
+/// @brief Delete an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteIntList(object oTarget, string sListName = "");
 
-// ---< DeleteLocationList >---
-// ---< util_i_varlists >---
-// Deletes the location list sListName from oTarget.
+/// @brief Delete an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteLocationList(object oTarget, string sListName = "");
 
-// ---< DeleteVectorList >---
-// ---< util_i_varlists >---
-// Deletes the vector list sListName from oTarget.
+/// @brief Delete an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteVectorList(object oTarget, string sListName = "");
 
-// ---< DeleteObjectList >---
-// ---< util_i_varlists >---
-// Deletes the object list sListName from oTarget.
+/// @brief Delete an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteObjectList(object oTarget, string sListName = "");
 
-// ---< DeleteStringList >---
-// ---< util_i_varlists >---
-// Deletes the string list sListName from oTarget.
+/// @brief Delete an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteStringList(object oTarget, string sListName = "");
 
-// ---< DeleteJsonList >---
-// ---< util_i_varlists >---
-// Deletes the json list sListName from oTarget.
+/// @brief Delete an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void DeleteJsonList(object oTarget, string sListName = "");
 
-// ---< DeclareFloatList >---
-// ---< util_i_varlists >---
-// Creates a float list of sListName on oTarget with nCount fDefault items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create a float list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @param fDefault The value to initialize the list with.
+/// @returns A json array copy of the created list.
 json DeclareFloatList(object oTarget, int nCount, string sListName = "", float fDefault = 0.0);
 
-// ---< DeclareIntList >---
-// ---< util_i_varlists >---
-// Creates an int list of sListName on oTarget with nCount nDefault items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create an int list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @param nDefault The value to initialize the list with.
+/// @returns A json array copy of the created list.
 json DeclareIntList(object oTarget, int nCount, string sListName = "", int nDefault = 0);
 
-// ---< DeclareLocationList >---
-// ---< util_i_varlists >---
-// Creates a location list of sListName on oTarget with nCount null items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create a location list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the created list.
 json DeclareLocationList(object oTarget, int nCount, string sListName = "");
 
-// ---< DeclareVectorList >---
-// ---< util_i_varlists >---
-// Creates a vector list of sListName on oTarget with nCount null items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create a vector list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the created list.
 json DeclareVectorList(object oTarget, int nCount, string sListName = "");
 
-// ---< DeclareObjectList >---
-// ---< util_i_varlists >---
-// Creates an object list of sListName on oTarget with nCount null items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create an object list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the created list.
 json DeclareObjectList(object oTarget, int nCount, string sListName = "");
 
-// ---< DeclareStringList >---
-// ---< util_i_varlists >---
-// Creates a string list of sListName on oTarget with nCount sDefault items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create a string list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @param sDefault The value to initialize the list with.
+/// @returns A json array copy of the created list.
 json DeclareStringList(object oTarget, int nCount, string sListName = "", string sDefault = "");
 
-// ---< DeclareJsonList >---
-// ---< util_i_varlists >---
-// Creates a json list of sListName on oTarget with nCount null items. If
-// oTarget already had a list with this name, that list is deleted before the
-// new one is created.
+/// @brief Create a json list on a target, deleting any current list.
+/// @param oTarget The object to create the list on.
+/// @param nCount The number of values to initialize the list with.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the created list.
 json DeclareJsonList(object oTarget, int nCount, string sListName = "");
 
-// ---< NormalizeFloatList >---
-// ---< util_i_varlists >---
-// Sets length of float list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, fDefault elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareFloatList().
+/// @brief Set the length of an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @param fDefault The value to set any added elements to.
+/// @returns A json array copy of the updated list.
 json NormalizeFloatList(object oTarget, int nCount, string sListName = "", float fDefault = 0.0);
 
-// ---< NormalizeIntList >---
-// ---< util_i_varlists >---
-// Sets length of int list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, nDefault elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareIntList().
+/// @brief Set the length of an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @param nDefault The value to set any added elements to.
+/// @returns A json array copy of the updated list.
 json NormalizeIntList(object oTarget, int nCount, string sListName = "", int nDefault = 0);
 
-// ---< NormalizeLocationList >---
-// ---< util_i_varlists >---
-// Sets length of location list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, JsonNull() elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareLocationList().
+/// @brief Set the length of an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the updated list.
 json NormalizeLocationList(object oTarget, int nCount, string sListName = "");
 
-// ---< NormalizeVectorList >---
-// ---< util_i_varlists >---
-// Sets length of vector list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, JsonNull() elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareVectorList().
+/// @brief Set the length of an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the updated list.
 json NormalizeVectorList(object oTarget, int nCount, string sListName = "");
 
-// ---< NormalizeObjectList >---
-// ---< util_i_varlists >---
-// Sets length of object list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, JsonNull() elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareObjectList().
+/// @brief Set the length of an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the updated list.
 json NormalizeObjectList(object oTarget, int nCount, string sListName = "");
 
-// ---< NormalizeStringList >---
-// ---< util_i_varlists >---
-// Sets length of string list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, sDefault elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareStringList().
+/// @brief Set the length of an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @param sDefault The value to set any added elements to.
+/// @returns A json array copy of the updated list.
 json NormalizeStringList(object oTarget, int nCount, string sListName = "", string sDefault = "");
 
-// ---< NormalizeJsonList >---
-// ---< util_i_varlists >---
-// Sets length of json list sListName on oTarget to nCount. If nCount is less
-// than the current list length, the list is shortened. If nCount is greater than
-// the current list length, JsonNull() elements are added to the list until the list
-// is the desired length. If the list doesn't exist, this function mimics
-// DeclareJsonList().
+/// @brief Set the length of an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param nCount The length to set the list to. If less than the current
+///     length, the list will be shortened to match. If greater than the current
+///     length, additional null values will be added to the end of the list.
+/// @param sListName The name of the list.
+/// @returns A json array copy of the updated list.
 json NormalizeJsonList(object oTarget, int nCount, string sListName = "");
 
-// ---< CopyFloatList >---
-// ---< util_i_varlists >---
-// Copies the float list sSourceName from oSource to oTarget, renamed
-// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
-// that are not already present in the target list.
+/// @brief Copy all items from one object's float list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CopyIntList >---
-// ---< util_i_varlists >---
-// Copies the int list sSourceName from oSource to oTarget, renamed sTargetName.
-// If bAddUnique is TRUE, will only copy items from the source list that are not
-// already present in the target list.
+/// @brief Copy all items from one object's int list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyIntList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CopyLocationList >---
-// ---< util_i_varlists >---
-// Copies the location list sSourceName from oSource to oTarget, renamed
-// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
-// that are not already present in the target list.
+/// @brief Copy all items from one object's location list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyLocationList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CopyVectorList >---
-// ---< util_i_varlists >---
-// Copies the vector list sSourceName from oSource to oTarget, renamed
-// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
-// that are not already present in the target list.
+/// @brief Copy all items from one object's vector list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyVectorList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CopyObjectList >---
-// ---< util_i_varlists >---
-// Copies the object list sSourceName from oSource to oTarget, renamed
-// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
-// that are not already present in the target list.
+/// @brief Copy all items from one object's object list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyObjectList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CopyStringList >---
-// ---< util_i_varlists >---
-// Copies the string list sSourceName from oSource to oTarget, renamed
-// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
-// that are not already present in the target list.
+/// @brief Copy all items from one object's string list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyStringList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CopyJsonList >---
-// ---< util_i_varlists >---
-// Copies the json list sSourceName from oSource to oTarget, renamed
-// sTargetName. If bAddUnique is TRUE, will only copy items from the source list
-// that are not already present in the target list.
+/// @brief Copy all items from one object's json list to another's.
+/// @param oSource The object to copy the list from.
+/// @param oTarget The object to copy the list to.
+/// @param sSourceName The name of the source list.
+/// @param sTargetName The name of the target list.
+/// @param bAddUnique If TRUE, will only copy items that are not already present
+///     in the target list.
 void CopyJsonList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE);
 
-// ---< CountFloatList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's float list sListName.
+/// @brief Return the number of items in an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountFloatList(object oTarget, string sListName = "");
 
-// ---< CountIntList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's int list sListName.
+/// @brief Return the number of items in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountIntList(object oTarget, string sListName = "");
 
-// ---< CountLocationList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's location list sListName.
+/// @brief Return the number of items in an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountLocationList(object oTarget, string sListName = "");
 
-// ---< CountVectorList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's vector list sListName.
+/// @brief Return the number of items in an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountVectorList(object oTarget, string sListName = "");
 
-// ---< CountObjectList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's object list sListName.
+/// @brief Return the number of items in an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountObjectList(object oTarget, string sListName = "");
 
-// ---< CountStringList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's string list sListName.
+/// @brief Return the number of items in an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountStringList(object oTarget, string sListName = "");
 
-// ---< CountJsonList >---
-// ---< util_i_varlists >---
-// Returns the number of items in oTarget's json list sListName.
+/// @brief Return the number of items in an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 int CountJsonList(object oTarget, string sListName = "");
 
-// ---< SortFloatList >---
-// ---< util_i_varlists >---
-// Sorts float list sListName on oTarget in nOrder order.
+/// @brief Sort an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param nOrder A `LIST_ORDER_*` constant representing how to sort the list.
+/// @param sListName The name of the list.
 void SortFloatList(object oTarget, int nOrder = LIST_SORT_ASC, string sListName = "");
 
-// ---< SortIntList >---
-// ---< util_i_varlists >---
-// Sorts int list sListName on oTarget in nOrder order.
+/// @brief Sort an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param nOrder A `LIST_ORDER_*` constant representing how to sort the list.
+/// @param sListName The name of the list.
 void SortIntList(object oTarget, int nOrder = LIST_SORT_ASC, string sListName = "");
 
-// ---< SortStringList >---
-// ---< util_i_varlists >---
-// Sorts string list sListName on oTarget in nOrder order.
+/// @brief Sort an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param nOrder A `LIST_ORDER_*` constant representing how to sort the list.
+/// @param sListName The name of the list.
 void SortStringList(object oTarget, int nOrder = LIST_SORT_ASC, string sListName = "");
 
-// ---< ShuffleFloatList >---
-// ---< util_i_varlists >---
-// Shuffles float list sListName on oTarget.
+/// @brief Shuffle the items in an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleFloatList(object oTarget, string sListName = "");
 
-// ---< ShuffleIntList >---
-// ---< util_i_varlists >---
-// Shuffles int list sListName on oTarget.
+/// @brief Shuffle the items in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleIntList(object oTarget, string sListName = "");
 
-// ---< ShuffleLocationList >---
-// ---< util_i_varlists >---
-// Shuffles location list sListName on oTarget.
+/// @brief Shuffle the items in an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleLocationList(object oTarget, string sListName = "");
 
-// ---< ShuffleVectorList >---
-// ---< util_i_varlists >---
-// Shuffles vector list sListName on oTarget.
+/// @brief Shuffle the items in an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleVectorList(object oTarget, string sListName = "");
 
-// ---< ShuffleObjectList >---
-// ---< util_i_varlists >---
-// Shuffles object list sListName on oTarget.
+/// @brief Shuffle the items in an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleObjectList(object oTarget, string sListName = "");
 
-// ---< ShuffleStringList >---
-// ---< util_i_varlists >---
-// Shuffles string list sListName on oTarget.
+/// @brief Shuffle the items in an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleStringList(object oTarget, string sListName = "");
 
-// ---< ShuffleJsonList >---
-// ---< util_i_varlists >---
-// Shuffles json list sListName on oTarget.
+/// @brief Shuffle the items in an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ShuffleJsonList(object oTarget, string sListName = "");
 
-// ---< ReverseFloatList >---
-// ---< util_i_varlists >---
-// Reverses float list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseFloatList(object oTarget, string sListName = "");
 
-// ---< ReverseIntList >---
-// ---< util_i_varlists >---
-// Reverses int list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseIntList(object oTarget, string sListName = "");
 
-// ---< ReverseLocationList >---
-// ---< util_i_varlists >---
-// Reverses location list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseLocationList(object oTarget, string sListName = "");
 
-// ---< ReverseVectorList >---
-// ---< util_i_varlists >---
-// Reverses vector list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseVectorList(object oTarget, string sListName = "");
 
-// ---< ReverseObjectList >---
-// ---< util_i_varlists >---
-// Reverses object list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseObjectList(object oTarget, string sListName = "");
 
-// ---< ReverseStringList >---
-// ---< util_i_varlists >---
-// Reverses string list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseStringList(object oTarget, string sListName = "");
 
-// ---< ReverseJsonList >---
-// ---< util_i_varlists >---
-// Reverses json list sListName on oTarget.
+/// @brief Reverse the order of the items in an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
 void ReverseJsonList(object oTarget, string sListName = "");
 
 // -----------------------------------------------------------------------------
