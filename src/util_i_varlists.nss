@@ -1,21 +1,17 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_varlists.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
-// Authors: Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-// -----------------------------------------------------------------------------
-// This file holds utility functions for manipulating local variable lists.
-// Because these lists are zero-indexed, they can be used to approximate
-// one-dimensional arrays.
-//
-// Local variable lists are specific to a variable type: string lists and int
-// lists can be maintained separately even when you give them the same name.
-//
-// The majority of functions in this utility apply to each possible variable
-// type: float, int, location, vector, object, string, json. However, there
-// are some that only apply to a subset of variable types, such as
-// Sort[Float|Int|String]List() and [Increment|Decrement]ListInt().
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_i_varlists.nss
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
+/// @brief  Functions for manipulating local variable lists.
+/// @details
+/// Local variable lists are json arrays of a single type stored as local
+/// variables. They are namespaced by type, so you can maintain lists of
+/// different types using the same varname.
+///
+/// The majority of functions in this file apply to each possible variable type:
+/// float, int, location, vector, object, string, json. However, there are some
+/// that only apply to a subset of variable types, such as
+/// Sort[Float|Int|String]List() and [Increment|Decrement]ListInt().
+/// ----------------------------------------------------------------------------
 
 #include "util_i_math"
 
