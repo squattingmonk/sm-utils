@@ -44,19 +44,39 @@ const string VARLIST_TYPE_JSON     = "JL:";
 
 /// @brief Convert a vector to a json object.
 /// @param vPosition The vector to convert.
+/// @note Alias for JsonVector().
 json VectorToJson(vector vPosition = [0.0, 0.0, 0.0]);
+
+/// @brief Convert a vector to a json object.
+/// @param vPosition The vector to convert.
+json JsonVector(vector vPosition = [0.0, 0.0, 0.0]);
 
 /// @brief Convert a json object to a vector.
 /// @param jPosition The json object to convert.
+/// @note Alias for JsonGetVector().
 vector JsonToVector(json jPosition);
+
+/// @brief Convert a json object to a vector.
+/// @param jPosition The json object to convert.
+vector JsonGetVector(json jPosition);
 
 /// @brief Convert a location to a json object.
 /// @param lLocation The location to convert.
+/// @note Alias for JsonLocation().
 json LocationToJson(location lLocation);
+
+/// @brief Convert a location to a json object.
+/// @param lLocation The location to convert.
+json JsonLocation(location lLocation);
 
 /// @brief Convert a json object to a location.
 /// @param jLocation The json object to convert.
+/// @note Alias for JsonGetLocation().
 location JsonToLocation(json jLocation);
+
+/// @brief Convert a json object to a location.
+/// @param jLocation The json object to convert.
+location JsonGetLocation(json jLocation);
 
 /// @brief Add a value to a float list on a target.
 /// @param oTarget The object the list is stored on.
@@ -642,13 +662,13 @@ json GetIntList(object oTarget, string sListName = "");
 /// @brief Convert an object's location list to a json array.
 /// @param oTarget The object the list is stored on.
 /// @param sListName The name of the list.
-/// @note Elements of the returned array can be decoded with JsonToLocation().
+/// @note Elements of the returned array can be decoded with JsonGetLocation().
 json GetLocationList(object oTarget, string sListName = "");
 
 /// @brief Convert an object's vector list to a json array.
 /// @param oTarget The object the list is stored on.
 /// @param sListName The name of the list.
-/// @note Elements of the returned array can be decoded with JsonToVector().
+/// @note Elements of the returned array can be decoded with JsonGetVector().
 json GetVectorList(object oTarget, string sListName = "");
 
 /// @brief Convert an object's object list to a json array.
@@ -1326,6 +1346,11 @@ json VectorToJson(vector vPosition = [0.0, 0.0, 0.0])
     return           JsonObjectSet(jPosition, "z", JsonFloat(vPosition.z));
 }
 
+json JsonVector(vector vPosition = [0.0, 0.0, 0.0])
+{
+    return VectorToJson(vPosition);
+}
+
 vector JsonToVector(json jPosition)
 {
     float x = JsonGetFloat(JsonObjectGet(jPosition, "x"));
@@ -1333,6 +1358,11 @@ vector JsonToVector(json jPosition)
     float z = JsonGetFloat(JsonObjectGet(jPosition, "z"));
 
     return Vector(x, y, z);
+}
+
+vector JsonGetVector(json jPosition)
+{
+    return JsonToVector(jPosition);
 }
 
 json LocationToJson(location lLocation)
@@ -1343,6 +1373,11 @@ json LocationToJson(location lLocation)
     return           JsonObjectSet(jLocation, "facing", JsonFloat(GetFacingFromLocation(lLocation)));
 }
 
+json JsonLocation(location lLocation)
+{
+    return LocationToJson(lLocation);
+}
+
 location JsonToLocation(json jLocation)
 {
     object oArea = StringToObject(JsonGetString(JsonObjectGet(jLocation, "area")));
@@ -1350,6 +1385,11 @@ location JsonToLocation(json jLocation)
     float fFacing = JsonGetFloat(JsonObjectGet(jLocation, "facing"));
 
     return Location(oArea, vPosition, fFacing);
+}
+
+location JsonGetLocation(json jLocation)
+{
+    return JsonToLocation(jLocation);
 }
 
 int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE)
