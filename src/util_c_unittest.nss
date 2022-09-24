@@ -63,7 +63,7 @@ const string UNITTEST_FAILURE_SCRIPT = "";
 // -----------------------------------------------------------------------------
 //                           Unit Test Output Handler
 // -----------------------------------------------------------------------------
-// You may alter the contents of this function, but do not alters its signature.
+// You may alter the contents of this function, but do not alter its signature.
 // -----------------------------------------------------------------------------
 
 /// @brief Custom handler to handle reporting unit test results.
@@ -82,11 +82,11 @@ void HandleUnitTestOutput(string sOutput)
 // -----------------------------------------------------------------------------
 //                      Unit Test Failure Reporting Handler
 // -----------------------------------------------------------------------------
-// You may alter the contents of this function, but do not alters its signature.
+// You may alter the contents of this function, but do not alter its signature.
 // -----------------------------------------------------------------------------
 
 /// @brief Custom handler to report unit testing failures.
-/// @param sOutput TThe formatted and colored output results of a unit test.
+/// @param sOutput The formatted and colored output results of a unit test.
 void HandleUnitTestFailure(string sOutput)
 {
     // This handler can be used to report unit test failures to module systems

@@ -1,12 +1,9 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_library.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-// -----------------------------------------------------------------------------
-// This script contains boilerplate code for creating a library dispatcher. It
-// should only be included in library scripts as it implements main().
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_i_library.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @brief  Boilerplace code for creating a library dispatcher. Should only be
+///     included in library scripts as it implements main().
+/// ----------------------------------------------------------------------------
 
 #include "util_i_libraries"
 
@@ -14,7 +11,6 @@
 //                              Function Protoypes
 // -----------------------------------------------------------------------------
 
-// ---< OnLibraryLoad >---
 // This is a user-defined function that registers function names to a unique (to
 // this library) number. When the function name is run using RunLibraryScript(),
 // this number will be passed to the user-defined function OnLibraryScript(),
@@ -35,7 +31,6 @@
 // }
 void OnLibraryLoad();
 
-// ---< OnLibraryScript >---
 // This is a user-defined function that routes a unique (to the module) script
 // name (sScript) or a unique (to this library) number (nEntry) to a function.
 //

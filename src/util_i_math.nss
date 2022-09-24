@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
-/// @file  util_i_math.nss
-/// @see   https://github.com/squattingmonk/sm-utils
-/// @brief Useful math utility functions.
+/// @file   util_i_math.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @brief  Useful math utility functions.
 /// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------

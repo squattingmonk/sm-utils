@@ -1,14 +1,9 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_lists.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/sm-utils
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-// -----------------------------------------------------------------------------
-// This file holds compatibility functions for converting between CSV and
-// localvar lists. It can be used as a master include for list functions.
-// -----------------------------------------------------------------------------
-// Acknowledgements: these functions are adapted from those in Memetic AI.
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_i_lists.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
+/// @brief  Compatibility functions to convert between CSV and localvar lists.
+/// ----------------------------------------------------------------------------
 
 #include "util_i_csvlists"
 #include "util_i_varlists"

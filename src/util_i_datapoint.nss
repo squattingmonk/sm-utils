@@ -1,20 +1,18 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_datapoint.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/sm-utils
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-// -----------------------------------------------------------------------------
-// This file holds functions for creating and interacting with data points. Data
-// points are invisible objects used to hold variables specific to a system.
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_i_datapoint.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
+/// @brief  Functions for creating and interacting with datapoints, which are
+///     invisible objects used to hold variables specific to a system.
+/// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //                                   Constants
 // -----------------------------------------------------------------------------
 
 const string DATA_PREFIX = "Datapoint: ";
-const string DATA_POINT  = "x1_hen_inv";
-const string DATA_ITEM   = "nw_it_msmlmisc22";
+const string DATA_POINT  = "x1_hen_inv";       ///< Resref for data points
+const string DATA_ITEM   = "nw_it_msmlmisc22"; ///< Resref for data items
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -34,7 +32,7 @@ object CreateDatapoint(string sSystem, object oOwner = OBJECT_INVALID);
 /// @brief Retrieves a datapoint (placeable) that stores variables for a
 ///     specified system
 /// @param sSystem Name of system associated with this datapoint
-/// @param oOwner (optional) Parent object of this datapoint; if omitted, 
+/// @param oOwner (optional) Parent object of this datapoint; if omitted,
 ///     defaults to GetModule()
 /// @param bCreate If TRUE and the datapoint cannot be found, a new datapoint
 ///     will be created at oOwner's location; if oOwner is invalid or is an

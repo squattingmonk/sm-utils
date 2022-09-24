@@ -1,11 +1,9 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_debug.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
-// Authors: Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-// -----------------------------------------------------------------------------
-// This file holds utility functions for generating debug messages.
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_i_debug.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
+/// @brief  Functions for generating debug messages.
+/// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //                                   Constants
@@ -18,19 +16,20 @@ const string DEBUG_LOG      = "DEBUG_LOG";
 const string DEBUG_OVERRIDE = "DEBUG_OVERRIDE";
 const string DEBUG_PREFIX   = "DEBUG_PREFIX";
 
-const int DEBUG_LEVEL_NONE     = 0; // No debug level set
-const int DEBUG_LEVEL_CRITICAL = 1;
-const int DEBUG_LEVEL_ERROR    = 2;
-const int DEBUG_LEVEL_WARNING  = 3;
-const int DEBUG_LEVEL_NOTICE   = 4;
-const int DEBUG_LEVEL_DEBUG    = 5;
+// Debug levels
+const int DEBUG_LEVEL_NONE     = 0; ///< No debug level set
+const int DEBUG_LEVEL_CRITICAL = 1; ///< Errors severe enough to stop the script
+const int DEBUG_LEVEL_ERROR    = 2; ///< Indicates the script malfunctioned in some way
+const int DEBUG_LEVEL_WARNING  = 3; ///< Indicates that unexpected behavior may occur
+const int DEBUG_LEVEL_NOTICE   = 4; ///< Information to track the flow of the function
+const int DEBUG_LEVEL_DEBUG    = 5; ///< Data dumps used for debugging
 
 // Debug logging
-const int DEBUG_LOG_NONE = 0x0;
-const int DEBUG_LOG_FILE = 0x1;
-const int DEBUG_LOG_DM   = 0x2;
-const int DEBUG_LOG_PC   = 0x4;
-const int DEBUG_LOG_ALL  = 0xf;
+const int DEBUG_LOG_NONE = 0x0; ///< Do not log debug messages
+const int DEBUG_LOG_FILE = 0x1; ///< Send debug messages to the log file
+const int DEBUG_LOG_DM   = 0x2; ///< Send debug messages to online DMs
+const int DEBUG_LOG_PC   = 0x4; ///< Send debug messages to the first PC
+const int DEBUG_LOG_ALL  = 0xf; ///< Send messages to the log file, DMs, and first PC
 
 #include "util_i_color"
 #include "util_c_debug"
@@ -39,115 +38,102 @@ const int DEBUG_LOG_ALL  = 0xf;
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< OverrideDebugLevel >---
-// ---< util_i_debug >---
-// Silence all debug messages with a verbosity higher than nLevel. Pass with
-// FALSE to stop overriding the set debug level.
+/// @brief Temporarily override the debug level for all objects.
+/// @param nLevel The maximum verbosity of messages to show. Use FALSE to stop
+///     overriding the debug level.
 void OverrideDebugLevel(int nLevel);
 
-// ---< GetDebugLevel >---
-// ---< util_i_debug >---
-// Returns the minimum level of debug messages that will be logged for oTarget.
-// If no level has been set on oTarget, will check the module's value instead.
+/// @brief Return the verbosity of debug messages displayed for an object.
+/// @param oTarget The object to check the debug level of. If no debug level has
+///     been set on oTarget, will use the module instead.
+/// @returns A `DEBUG_LEVEL_*` constant representing the maximum verbosity of
+///     messages that will be displayed when debugging oTarget.
 int GetDebugLevel(object oTarget = OBJECT_SELF);
 
-// ---< SetDebugLevel >---
-// ---< util_i_debug >---
-// Sets the minimum level of debug messages that will be logged for oTarget. If
-// set to DEBUG_LEVEL_NONE, oTarget will use the module's value instead.
+/// @brief Set the verbosity of debug messages displayed for an object.
+/// @param nLevel A `DEBUG_LEVEL_*` constant representing the maximum verbosity
+///     of messages that will be displayed when debugging oTarget. If set to
+///     `DEBUG_LEVEL_NONE`, oTarget will use the module's debug level instead.
+/// @param oTarget The object to set the debug level of. If no debug level has
+///     been set on oTarget, will use the module instead.
 void SetDebugLevel(int nLevel, object oTarget = OBJECT_SELF);
 
-// ---< GetDebugColor >---
-// ---< util_i_debug >---
-// Returns the string color code (in <cRGB> form) for debug messages of nLevel.
+/// @brief Return the color of debug messages of a given level.
+/// @param nLevel A `DEBUG_LEVEL_*` constant representing the verbosity of debug
+///     messsages to get the color for.
+/// @returns A color code (in <cRGB> form).
 string GetDebugColor(int nLevel);
 
-// ---< SetDebugColor >---
-// ---< util_i_debug >---
-// Sets the string color code (in <cRGB> form) for debug messages of nLevel. If
-// sColor is blank, will use the default color codes.
+/// @brief Set the color of debug messages of a given level.
+/// @param nLevel A `DEBUG_LEVEL_*` constant representing the verbosity of debug
+///     messsages to get the color for.
+/// @param sColor A color core (in <cRBG> form) for the debug messages. If "",
+///     will use the default color code for the level.
 void SetDebugColor(int nLevel, string sColor = "");
 
-// ---< GetDebugPrefix >---
-// ---< util_i_debug >---
-// Returns the prefix oTarget uses before its debug messages.
+/// @brief Return the prefix an object uses before its debug messages.
+/// @param oTarget The target to check for a prefix.
+/// @returns The user-defined prefix if one has been set. If it has not, will
+///     return the object's tag (or name, if the object has no tag) in square
+///     brackets.
 string GetDebugPrefix(object oTarget = OBJECT_SELF);
 
-// ---< SetDebugPrefix >---
-// ---< util_i_debug >---
-// Sets the prefix oTarget uses before its debug messages. You can include color
-// codes in the prefix. If a prefix is not set, the default prefix will be the
-// object's tag in brackets. The default color for the prefix can be set using
-// SetDebugColor(DEBUG_LEVEL_NONE, sColor);
+/// @brief Set the prefix an object uses before its debug messages.
+/// @param sPrefix The prefix to set. You can include color codes in the prefix,
+///     but you can also set thedefault color code for all prefixes using
+///     `SetDebugColor(DEBUG_COLOR_NONE, sColor);`.
+/// @param oTarget The target to set the prefix for.
 void SetDebugPrefix(string sPrefix, object oTarget = OBJECT_SELF);
 
-// ---< GetDebugLogging >---
-// ---< util_i_debug >---
-// Returns the enabled debug logging destinations. This is a bitmasked field
-// that may contain the following:
-// - DEBUG_LOG_NONE: do not log debug messages
-// - DEBUG_LOG_FILE: log debug messages to the log file
-// - DEBUG_LOG_DM: send debug messages to online DMs
-// - DEBUG_LOG_PC: send debug messages to the first PC
-// - DEBUG_LOG_ALL: sends messages to the log file, online DMs, and the first PC
-// Note: only messages with a priority of GetDebugLevel() or higher will be
-// logged.
+/// @brief Return the enabled debug logging destinations.
+/// @returns A bitmask of `DEBUG_LOG_*` values.
 int GetDebugLogging();
 
-// ---< SetDebugLogging >---
-// ---< util_i_debug >---
-// Enables debug logging to nEnabled. This is a bitmasked field that may contain
-// the following:
-// - DEBUG_LOG_NONE: do not log debug messages
-// - DEBUG_LOG_FILE: log debug messages to the log file
-// - DEBUG_LOG_DM: send debug messages to online DMs
-// - DEBUG_LOG_PC: send debug messages to the first PC
-// - DEBUG_LOG_ALL: sends messages to the log file, online DMs, and the first PC
-// Note: only messages with a priority of GetDebugLevel() or higher will be
-// logged.
+/// @brief Set the enabled debug logging destinations.
+/// @param nEnabled A bitmask of `DEBUG_LOG_*` destinations to enable.
 void SetDebugLogging(int nEnabled);
 
-// ---< IsDebugging >---
-// ---< util_i_debug >---
-// Returns whether debug messages of nLevel will be logged on oTarget. Useful
-// for avoiding spending cycles compiling extra debug information if it will not
-// be shown.
-// Parameters:
-// - nLevel: The error level of the message.
-//   Possible values:
-//   - DEBUG_LEVEL_CRITICAL: errors severe enough to stop the script
-//   - DEBUG_LEVEL_ERROR: indicates the script malfunctioned in some way
-//   - DEBUG_LEVEL_WARNING: indicates that unexpected behavior may occur
-//   - DEBUG_LEVEL_NOTICE: information to track the flow of the function
-//   - DEBUG_LEVEL_DEBUG: data dumps used for debugging
-// - oTarget: The object to debug.
+/// @brief Return whether debug messages of a given level will be logged on a
+///     target. Useful for avoiding spending cycles computing extra debug
+///     information if it will not be shown.
+/// @param nLevel A `DEBUG_LEVEL_*` constant representing the message verbosity.
+/// @param oTarget The object that would be debugged.
+/// @returns TRUE if messages of nLevel would be logged on oTarget; FALSE
+///     otherwise.
 int IsDebugging(int nLevel, object oTarget = OBJECT_SELF);
 
-// ---< Debug >---
-// ---< util_i_debug >---
-// If oTarget has a debug level of nLevel or higher, logs sMessages to all
-// destinations set with SetDebugLogging(). If no debug level is set on oTarget,
-// will debug using the module's debug level instead.
+/// If oTarget has a debug level of nLevel or higher, logs sMessages to all
+/// destinations set with SetDebugLogging(). If no debug level is set on
+/// oTarget,
+/// will debug using the module's debug level instead.
+/// @brief Display a debug message.
+/// @details If the target has a debug level of nLevel or higher, sMessage will
+///     be sent to all destinations enabled by SetDebugLogging(). If no debug
+///     level is set on oTarget, will debug using the module's debug level
+///     instead.
+/// @param sMessage The message to display.
+/// @param nLevel A `DEBUG_LEVEL_*` constant representing the message verbosity.
+/// @param oTarget The object originating the message.
 void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF);
 
-// ---< Notice >---
-// ---< util_i_debug >---
-// Alias for Debug() that issues a general notice.
+/// @brief Display a general notice message. Alias for Debug().
+/// @param sMessage The message to display.
+/// @param oTarget The object originating the message.
 void Notice(string sMessage, object oTarget = OBJECT_SELF);
 
-// ---< Warning >---
-// ---< util_i_debug >---
-// Alias for Debug() that issues a warning.
+/// @brief Display a warning message. Alias for Debug().
+/// @param sMessage The message to display.
+/// @param oTarget The object originating the message.
 void Warning(string sMessage, object oTarget = OBJECT_SELF);
 
-// ---< Error >---
-// ---< util_i_debug >---
-// Alias for Debug() that issues an error.
+/// @brief Display an error message. Alias for Debug().
+/// @param sMessage The message to display.
+/// @param oTarget The object originating the message.
 void Error(string sMessage, object oTarget = OBJECT_SELF);
 
-// ---< CriticalError >---
-// ---< util_i_debug >---
-// Alias for Debug() that issues a critical error.
+/// @brief Display a critical error message. Alias for Debug().
+/// @param sMessage The message to display.
+/// @param oTarget The object originating the message.
 void CriticalError(string sMessage, object oTarget = OBJECT_SELF);
 
 // -----------------------------------------------------------------------------

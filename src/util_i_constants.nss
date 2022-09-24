@@ -1,53 +1,47 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_constant.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/sm-utils
-// Authors: Ed Burke (tinygiant) <af.hog.pilot@gmail.com>
-// -----------------------------------------------------------------------------
-// Description:
-//  Retrieves the string, int or float value of a constant from any
-//      script file.  **Note** Some external tools offer the ability to
-//      filter specific file types from the built module.  These functions
-//      require uncompiled `.nss` files, otherwise only nwscript constants
-//      will be retrievable.
-// ----- Acknowledgements ------------------------------------------------------
-// Based on clippy's code at
-//      https://github.com/Finaldeath/nwscript_utility_scripts
-// -----------------------------------------------------------------------------
-// Builder Use:
-//  None!  Leave me alone.
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-//                               Example Usage
-// -----------------------------------------------------------------------------
-/*
-    // To retrieve the value of string constant MODULE_EVENT_ON_NUI
-    //  from the core framework file `core_i_const`:
-    struct CONSTANT c = GetConstantString("MODULE_EVENT_ON_NUI", "core_i_const");
-    string sSetting = c.sValue;
-
-    // If successful, sSetting will contain the string value "OnNUI".
-    // If not successful, c.bError will be TRUE, c.sError will contain the
-    //  reason for the error, and c.sValue will be set to an empty string ("").
-
-    // To retrieve the value of integer constant EVENT_STATE_OK
-    //  from the core framework file `core_i_const`:
-    struct CONSTANT c = GetConstantInt("EVENT_STATE_OK", "core_i_const");
-    int nState = c.bError ? -1 : c.nValue;
-
-    // or
-
-    if (!c.bError)
-    {
-        int nState = c.nValue;
-        ...
-    }
-
-    // If successful, nState will contain the integer value 0.  Since an
-    //  error value will also return 0, scripts should check [struct].bError
-    //  before using any constant that could return 0 as a valid value. 
-*/
+/// ----------------------------------------------------------------------------
+/// @file   util_i_constants.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
+/// @brief  Functions to retrieve the value of a constant from a script file.
+/// @details
+///
+/// ## Example Usage
+///
+/// To retrieve the value of string constant `MODULE_EVENT_ON_NUI` from the Core
+/// Framework file `core_i_constants`:
+/// ```nwscript
+/// struct CONSTANT c = GetConstantString("MODULE_EVENT_ON_NUI", "core_i_constants");
+/// string sSetting = c.sValue;
+/// ```
+/// If successful, `sSetting` will contain the string value "OnNUI". If not
+/// successful, `c.bError` will be TRUE, `c.sError` will contain the reason for
+/// the error, and `c.sValue` will be set to an empty string ("").
+///
+/// To retrieve the value of integer constant `EVENT_STATE_OK`from the Core
+/// Framework file `core_i_constants`:
+/// ```nwscript
+/// struct CONSTANT c = GetConstantInt("EVENT_STATE_OK", "core_i_constants");
+/// int nState = c.bError ? -1 : c.nValue;
+///
+/// // or...
+/// if (!c.bError)
+/// {
+///     int nState = c.nValue;
+///     ...
+/// }
+/// ```
+/// If successful, `nState` will contain the integer value 0. Since an error
+/// value will also return 0, scripts should check `[struct].bError` before
+/// using any constant that could return 0 as a valid value.
+///
+/// @note These functions require uncompiled `.nss` files, otherwise only base
+///     nwscript constants will be retrievable. If you use a tool such as nasher
+///     to build your module, ensure you do not filter out the `.nss` files when
+///     building.
+///
+/// @note Based on clippy's code at
+///     https://github.com/Finaldeath/nwscript_utility_scripts
+/// ----------------------------------------------------------------------------
 
 #include "util_i_debug"
 
@@ -58,6 +52,23 @@
 const string CONSTANTS_RESULT                   = "CONSTANTS_RESULT";
 const string CONSTANTS_ERROR_FILE_NOT_FOUND     = "FILE NOT FOUND";
 const string CONSTANTS_ERROR_CONSTANT_NOT_FOUND = "VARIABLE DEFINED WITHOUT TYPE";
+
+// -----------------------------------------------------------------------------
+//                                     Types
+// -----------------------------------------------------------------------------
+
+struct CONSTANT
+{
+    int    bError;
+    string sError;
+
+    string sValue;
+    int    nValue;
+    float  fValue;
+
+    string sFile;
+    string sConstant;
+};
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -94,24 +105,7 @@ struct CONSTANT GetConstantInt(string sConstant, string sFile = "");
 struct CONSTANT GetConstantFloat(string sConstant, string sFile = "");
 
 // -----------------------------------------------------------------------------
-//                           Function Implementations
-// -----------------------------------------------------------------------------
-
-struct CONSTANT
-{
-    int    bError;
-    string sError;
-    
-    string sValue;
-    int    nValue;
-    float  fValue;
-    
-    string sFile;
-    string sConstant;
-};
-
-// -----------------------------------------------------------------------------
-//                              Private Functions
+//                               Private Functions
 // -----------------------------------------------------------------------------
 
 // Attempts to retrieve the value of sConstant from sFile.  If found, the
@@ -126,7 +120,7 @@ struct CONSTANT constants_RetrieveConstant(string sConstant, string sFile, strin
     int COLOR_FAIL = COLOR_MESSAGE_FEEDBACK;
 
     struct CONSTANT c;
-    string sError, sChunk = "SetLocal" + sType + "(GetModule(), \"" + 
+    string sError, sChunk = "SetLocal" + sType + "(GetModule(), \"" +
         CONSTANTS_RESULT + "\", " + sConstant + ");";
 
     c.sConstant = sConstant;
@@ -157,7 +151,7 @@ struct CONSTANT constants_RetrieveConstant(string sConstant, string sFile, strin
 }
 
 // -----------------------------------------------------------------------------
-//                              Public Functions
+//                        Public Function Implementations
 // -----------------------------------------------------------------------------
 
 struct CONSTANT GetConstantString(string sConstant, string sFile = "")

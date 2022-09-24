@@ -1,94 +1,117 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_nss.nss
-//  System: Utilities (include script)
-//     URL: https://github.com/squattingmonk/nwn-core-framework
-// Authors: Daz <daztek@gmail.com>
-// -----------------------------------------------------------------------------
-// This file holds helper functions for assembling scripts to execute with
-// `ExecuteScriptChunk()`.
-// -----------------------------------------------------------------------------
-// Acknowledgement: these scripts have been borrowed from Daz's EventSystem. See
-// https://github.com/Daztek/EventSystem
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
+/// @file   util_i_nss.nss
+/// @author Daz <daztek@gmail.com>
+/// @brief  Functions to assemble scripts for use with `ExecuteScriptChunk()`.
+/// @note   Borrowed from https://github.com/Daztek/EventSystem
+/// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// Wraps sContents into a `void main()` block.
+/// @brief Return a `void main()` block.
+/// @param sContents The contents of the block.
 string NssVoidMain(string sContents);
 
-// Wraps sContents into an `int StartingConditional()` block.
+/// @brief Return an `int StartingConditional()` block.
+/// @param sContents The contents of the block.
 string NssStartingConditional(string sContents);
 
-// Create an include directive for sIncludeFile.
+/// @brief Return an include directive.
+/// @param sIncludeFile The file to include.
 string NssInclude(string sIncludeFile);
 
-// Create an if statement comparing sLeft to sRight using the comparison
-// operator sComparison.
+/// @brief Return an if statement with a comparison.
+/// @param sLeft The left side of the comparison. If sComparison or sRight are
+///     blank, will be evalated as a boolean expression.
+/// @param sComparison The comparison operator.
+/// @param sRight The right side of the comparison.
 string NssIf(string sLeft, string sComparison = "", string sRight = "");
 
-// Create an else-if statement comparing sLeft to sRight using the comparison
-// operator sComparison.
+/// @brief Return an else statement.
+string NssElse();
+
+/// @brief Return an else-if statement with a comparison.
+/// @param sLeft The left side of the comparison. If sComparison or sRight are
+///     blank, will be evalated as a boolean expression.
+/// @param sComparison The comparison operator.
+/// @param sRight The right side of the comparison.
 string NssElseIf(string sLeft, string sComparison = "", string sRight = "");
 
-// Create a while statement comparing sLeft to sRight using the comparison
-// operator sComparison.
+/// @brief Create a while statement with a comparison.
+/// @param sLeft The left side of the comparison. If sComparison or sRight are
+///     blank, will be evalated as a boolean expression.
+/// @param sComparison The comparison operator.
+/// @param sRight The right side of the comparison.
 string NssWhile(string sLeft, string sComparison = "", string sRight = "");
 
-// Wraps sContents with curly brackets.
+/// @brief Return a script block bounded by curly brackets.
+/// @param sContents The contents of the block.
 string NssBrackets(string sContents);
 
-// Wraps a string with double quotes.
+/// @brief Return a string wrapped in double quotes.
+/// @param sString The string to wrap.
 string NssQuote(string sString);
 
-// Return a switch statement evaluating sVariable and dispatching to the case
-// statements in sCases.
+/// @brief Return a switch statement.
+/// @param sVariable The variable to evaluate in the switch statement.
+/// @param sCases A series of case statements the switch should dispatch to.
+/// @see NssCase().
 string NssSwitch(string sVariable, string sCases);
 
-// Return a case statement matching nCase containing sContents. If bBreak is
-// TRUE, a break statement will be added after the case statement.
+/// @brief Return a case statement.
+/// @param nCase The value matching the switch statement.
+/// @param sContents The contents of the case block.
+/// @param bBreak If TRUE, will add a break statement after sContents.
 string NssCase(int nCase, string sContents, int bBreak = TRUE);
 
-// Returns an object variable declaration and/or assignment. The variable will
-// have the varname sVarName and the value sValue. If sValue is blank, no value
-// will be assigned to the variable. If bIncludeType is TRUE, the variable will
-// be declared as well.
+/// @brief Return an object variable declaration and/or assignment.
+/// @param sVarName The name for the variable.
+/// @param sValue The value to assign to the variable. If blank, no value will
+///     be assigned.
+/// @param bIncludeType If TRUE, the variable will be declared as well.
 string NssObject(string sVarName, string sValue = "", int bIncludeType = TRUE);
 
-// Returns a string variable declaration and/or assignment. The variable will
-// have the varname sVarName and the value sValue. If sValue is blank, no value
-// will be assigned to the variable. If bIncludeType is TRUE, the variable will
-// be declared as well.
+/// @brief Return a string variable declaration and/or assignment.
+/// @param sVarName The name for the variable.
+/// @param sValue The value to assign to the variable. If blank, no value will
+///     be assigned.
+/// @param bIncludeType If TRUE, the variable will be declared as well.
 string NssString(string sVarName, string sValue = "", int bIncludeType = TRUE);
 
-// Returns an int variable declaration and/or assignment. The variable will have
-// the varname sVarName and the value sValue. If sValue is blank, no value will
-// be assigned to the variable. If bIncludeType is TRUE, the variable will be
-// declared as well.
+/// @brief Return an int variable declaration and/or assignment.
+/// @param sVarName The name for the variable.
+/// @param sValue The value to assign to the variable. If blank, no value will
+///     be assigned.
+/// @param bIncludeType If TRUE, the variable will be declared as well.
 string NssInt(string sVarName, string sValue = "", int bIncludeType = TRUE);
 
-// Returns a float variable declaration and/or assignment. The variable will
-// have the varname sVarName and the value sValue. If sValue is blank, no value
-// will be assigned to the variable. If bIncludeType is TRUE, the variable will
-// be declared as well.
+/// @brief Return a float variable declaration and/or assignment.
+/// @param sVarName The name for the variable.
+/// @param sValue The value to assign to the variable. If blank, no value will
+///     be assigned.
+/// @param bIncludeType If TRUE, the variable will be declared as well.
 string NssFloat(string sVarName, string sValue = "", int bIncludeType = TRUE);
 
-// Returns a vector variable declaration and/or assignment. The variable will
-// have the varname sVarName and the value sValue. If sValue is blank, no value
-// will be assigned to the variable. If bIncludeType is TRUE, the variable will
-// be declared as well.
+/// @brief Return a vector variable declaration and/or assignment.
+/// @param sVarName The name for the variable.
+/// @param sValue The value to assign to the variable. If blank, no value will
+///     be assigned.
+/// @param bIncludeType If TRUE, the variable will be declared as well.
 string NssVector(string sVarName, string sValue = "", int bIncludeType = TRUE);
 
-// Returns a location variable declaration and/or assignment. The variable will
-// have the varname sVarName and the value sValue. If sValue is blank, no value
-// will be assigned to the variable. If bIncludeType is TRUE, the variable will
-// be declared as well.
+/// @brief Return a location variable declaration and/or assignment.
+/// @param sVarName The name for the variable.
+/// @param sValue The value to assign to the variable. If blank, no value will
+///     be assigned.
+/// @param bIncludeType If TRUE, the variable will be declared as well.
 string NssLocation(string sVarName, string sValue = "", int bIncludeType = TRUE);
 
-// Return a call, prototype, or definition of a function named sFunction and
-// having the arguments sArguments. If bAddSemicolon is TRUE, a semicolon will
-// be added to the end of the statement.
+/// @brief Return a call, prototype, or definition of a function.
+/// @param sFunction The name of the function.
+/// @param sArguments The list of arguments for the function.
+/// @param bAddSemicolon If TRUE, a semicolon will be assed to the end of the
+///     statement.
 string NssFunction(string sFunction, string sArguments = "", int bAddSemicolon = TRUE);
 
 // -----------------------------------------------------------------------------
@@ -118,6 +141,11 @@ string NssCompare(string sLeft, string sComparison, string sRight)
 string NssIf(string sLeft, string sComparison = "", string sRight = "")
 {
     return "if (" + NssCompare(sLeft, sComparison, sRight) + ") ";
+}
+
+string NssElse()
+{
+    return "else ";
 }
 
 string NssElseIf(string sLeft, string sComparison = "", string sRight = "")

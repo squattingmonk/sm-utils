@@ -1,5 +1,8 @@
-/// @file util_i_sqlite.nss
-/// @brief Helper functions for using the NWN:EE SQLite databases.
+/// ----------------------------------------------------------------------------
+/// @file   util_i_sqlite.nss
+/// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @brief  Helper functions for NWN:EE SQLite databases.
+/// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes

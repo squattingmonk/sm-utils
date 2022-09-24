@@ -1,10 +1,11 @@
 /// ----------------------------------------------------------------------------
 /// @file   util_i_strings.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
 /// @brief  Functions for formatting times
 /// ----------------------------------------------------------------------------
 /// @details This file holds utility functions for manipulating strings.
-// -----------------------------------------------------------------------------
+/// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //                                   Constants
@@ -19,161 +20,160 @@ const string CHARSET_ALPHA_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
 
-// ---< GetSubStringCount >---
-// ---< util_i_strings >---
-// Returns the number of occurrences of sSubString within sString.
+/// @brief Return the number of occurrences of a substring within a string.
+/// @param sString The string to search.
+/// @param sSubString The substring to search for.
 int GetSubStringCount(string sString, string sSubString);
 
-// ---< FindSubStringN >---
-// ---< util_i_strings >---
-// Returns the position of the nNth occurrence of sSubString within sString. If
-// the substring was not found at least nNth + 1 times, returns -1.
+/// @brief Return the position of a given occurrence of a substring within a
+///     string.
+/// @param sString The string to search.
+/// @param sSubString The substring to search for.
+/// @param nNth The occurrence to search for. Uses a zero-based index.
+/// @returns The position of the start of the nNth occurrence of the substring,
+///     or -1 if the substring did not occur at least nNth + 1 times.
 int FindSubStringN(string sString, string sSubString, int nNth = 0);
 
-// ---< GetChar >---
-// ---< util_i_strings >---
-// Returns the character at index nPos in sString.
+/// @brief Return the character at a position in a string.
+/// @param sString The string to search.
+/// @param nPos The position to check.
+/// @returns "" if sString is not nPos + 1 characters long.
 string GetChar(string sString, int nPos);
 
-// ---< GetStringSlice >---
-// ---< util_i_strings >---
-// Returns a substring of sString from index nStart to nEnd. If nEnd is -1, will
-// return to the end of the string. Basically a convenience wrapper around
-// GetSubString().
+/// @brief Return the substring of a string bounded by a start and end position.
+/// @param sString The string to search.
+/// @param nStart The starting position of the substring to return.
+/// @param nEnd The ending position of the substring to return. If -1, will
+///     return to the end of the string.
+/// @returns "" if nStart is not at least nStart + 1 characters long or if nEnd
+///     is < nStart and not -1.
 string GetStringSlice(string sString, int nStart, int nEnd = -1);
 
-// ---< ReplaceSubString >---
-// ---< util_i_strings >---
-// Replaces the characters in sString from index nStart to nEnd with sSub.
+/// @brief Replace the substring bounded by a string slice with another string.
+/// @param sString The string to search.
+/// @param sSub The substring to replace with.
+/// @param nStart The starting position in sString of the substring to replace.
+/// @param nEnd The ending position in sString of the substring to replace.
 string ReplaceSubString(string sString, string sSub, int nStart, int nEnd);
 
-// ---< SubstituteSubString >---
-// ---< util_i_strings >---
-// Substitutes the characters in sString with sSub in place of sToken.
+/// @brief Replace a substring in a string with another string.
+/// @param sString The string to search.
+/// @param sToken The substring to search for.
+/// @param sSub The substring to replace with.
 string SubstituteSubString(string sString, string sToken, string sSub);
 
-// ---< HasSubString >---
-// ---< util_i_strings >---
-// Returns whether sString contains sSubString after nStart chars.
+/// @brief Return whether a string contains a substring.
+/// @param sString The string to search.
+/// @param sSubString The substring to search for.
+/// @param nStart The position in sString to begin searching from (0-based).
+/// @returns TRUE if sSubString is in sString, FALSE otherwise.
 int HasSubString(string sString, string sSubString, int nStart = 0);
 
-// ---< GetAnyCharsInSet >---
-// ---< util_i_strings >---
-// Returns whether any characters in sSet are in sString
+/// @brief Return whether any of a string's characters are in a character set.
+/// @param sString The string to search.
+/// @param sSet The set of characters to search for.
+/// @returns TRUE if any characters are in the set; FALSE otherwise.
 int GetAnyCharsInSet(string sString, string sSet);
 
-// ---< GetAllCharsInSet >---
-// ---< util_i_strings >---
-// Returns whether all characters in sString are in sSet.
+/// @brief Return whether all of a string's characters are in a character set.
+/// @param sString The string to search.
+/// @param sSet The set of characters to search for.
+/// @returns TRUE if all characters are in the set; FALSE otherwise.
 int GetAllCharsInSet(string sString, string sSet);
 
-// ---< GetIsUpperCase >---
-// ---< util_i_strings >---
-// Returns whether all letters in sString are upper-case.
+/// @brief Return whether all letters in a string are upper-case.
+/// @param sString The string to check.
 int GetIsUpperCase(string sString);
 
-// ---< GetIsLowerCase >---
-// ---< util_i_strings >---
-// Returns whether all letters x in sString are lower-case.
+/// @brief Return whether all letters in a string are lower-case.
+/// @param sString The string to check.
 int GetIsLowerCase(string sString);
 
-// ---< GetIsAlpha >---
-// ---< util_i_strings >---
-// Returns whether all characters in sString are letters.
+/// @brief Return whether all characters in sString are letters.
+/// @param sString The string to check.
 int GetIsAlpha(string sString);
 
-// ---< GetIsNumeric >---
-// ---< util_i_strings >---
-// Returns whether all characters in sString are digits.
+/// @brief Return whether all characters in sString are digits.
+/// @param sString The string to check.
 int GetIsNumeric(string sString);
 
-// ---< GetIsAlphaNumeric >---
-// ---< util_i_strings >---
-// Returns whether all characters in sString are letter or digits.
+/// @brief Return whether all characters in sString are letters or digits.
+/// @param sString The string to check.
 int GetIsAlphaNumeric(string sString);
 
-// ---< TrimStringLeft >---
-// ---< util_i_strings >---
-// Trims any characters in sRemove from the left side of sString.
+/// @brief Trim characters from the left side of a string.
+/// @param sString The string to trim.
+/// @param sRemove The set of characters to remove.
 string TrimStringLeft(string sString, string sRemove = " ");
 
-// ---< TrimStringRight >---
-// ---< util_i_strings >---
-// Trims any characters in sRemove from the right side of sString.
+/// @brief Trim characters from the right side of a string.
+/// @param sString The string to trim.
+/// @param sRemove The set of characters to remove.
 string TrimStringRight(string sString, string sRemove = " ");
 
-// ---< TrimString >---
-// ---< util_i_strings >---
-// Trims any characters in sRemove from the left and right side of sString. This
-// can be used to remove leading and trailing whitespace.
+/// @brief Trim characters from both sides of a string.
+/// @param sString The string to trim.
+/// @param sRemove The set of characters to remove.
 string TrimString(string sString, string sRemove = " ");
 
-// ---< FormatValues >---
-// ---< util_i_strings >---
-// Formats the values in the json array jArray as a string using sFormat. The
-// conversion is done using the sqlite printf() function. The number of elements
-// in jArray must match the number of format specifiers in sFormat. Only float,
-// int, or string elements are allowed. For details on format specifiers, see
-// https://sqlite.org/printf.html.
-//
-// Example:
-//   FormatValues(JsonParse("[\"Blue\", 255]"), "%s: #%06X"); // "Blue: #0000FF"
+/// @brief Interpolate values from a json array into a string using sqlite's
+///     printf().
+/// @param jArray A json array containing float, int, or string elements to
+///     interpolate. The number of elements must match the number of format
+///     specifiers in sFormat.
+/// @param sFormat The string to interpolate the values into. Must contain
+///     format specifiers that correspond to the elements in jArray. For details
+///     on format specifiers, see https://sqlite.org/printf.html.
+/// @example
+///   FormatValues(JsonParse("[\"Blue\", 255]"), "%s: #%06X"); // "Blue: #0000FF"
 string FormatValues(json jArray, string sFormat);
 
-// ---< FormatFloat >---
-// ---< util_i_strings >---
-// Formats f as a string using sFormat. The conversion is done using the sqlite
-// printf() function. f will be passed as an argument to the query as many times
-// as necessary to cover all format specifiers. For details on format
-// specifiers, see https://sqlite.org/printf.html.
-//
-// Examples:
-//   FormatFloat(15.0, "%d"); // "15"
-//   FormatFloat(15.0, "%.2f"); // "15.00"
-//   FormatFloat(15.0, "%05.1f"); // "015.0"
+/// @brief Interpolate a float into a string using sqlite's printf().
+/// @param f A float to interpolate. Will be passed as an argument to the query
+///     as many times as necessary to cover all format specifiers.
+/// @param sFormat The string to interpolate the value into. For details on
+///     format specifiers, see https://sqlite.org/printf.html.
+/// @example
+///   FormatFloat(15.0, "%d"); // "15"
+///   FormatFloat(15.0, "%.2f"); // "15.00"
+///   FormatFloat(15.0, "%05.1f"); // "015.0"
 string FormatFloat(float f, string sFormat);
 
-// ---< FormatInt >---
-// ---< util_i_strings >---
-// Formats n as a string using sFormat. The conversion is done using the sqlite
-// printf() function. n will be passed as an argument to the query as many times
-// as necessary to cover all format specifiers. For details on format
-// specifiers, see https://sqlite.org/printf.html.
-//
-// Examples:
-//   FormatInt(15, "%d"); // "15"
-//   FormatInt(15, "%04d"); // "0015"
-//   FormatInt(15, "In hexadecimal, %d is %#x"); // "In hexadecimal, 15 is 0xf"
-//   FormatInt(1000, "%,d"); // "1,000"
+/// @brief Interpolate an int into a string using sqlite's printf().
+/// @param n An int to interpolate. Will be passed as an argument to the query
+///     as many times as necessary to cover all format specifiers.
+/// @param sFormat The string to interpolate the value into. For details on
+///     format specifiers, see https://sqlite.org/printf.html.
+/// @example
+///   FormatInt(15, "%d"); // "15"
+///   FormatInt(15, "%04d"); // "0015"
+///   FormatInt(15, "In hexadecimal, %d is %#x"); // "In hexadecimal, 15 is 0xf"
+///   FormatInt(1000, "%,d"); // "1,000"
 string FormatInt(int n, string sFormat);
 
-// ---< FormatString >---
-// ---< util_i_strings >---
-// Formats s as a string using sFormat. The conversion is done using the sqlite
-// printf() function. s will be passed as an argument to the query as many times
-// as necessary to cover all format specifiers. For details on format
-// specifiers, see https://sqlite.org/printf.html.
-//
-// Examples:
-//   FormatString("foo", "%sbar"); // "foobar"
-//   FormatString("foo", "%5sbar"); // "  foobar"
-//   FormatString("foo", "%-5sbar"); // "foo  bar"
+/// @brief Interpolate a string into another string using sqlite's printf().
+/// @param s A string to interpolate. Will be passed as an argument to the query
+///     as many times as necessary to cover all format specifiers.
+/// @param sFormat The string to interpolate the value into. For details on
+///     format specifiers, see https://sqlite.org/printf.html.
+/// @example
+///   FormatString("foo", "%sbar"); // "foobar"
+///   FormatString("foo", "%5sbar"); // "  foobar"
+///   FormatString("foo", "%-5sbar"); // "foo  bar"
 string FormatString(string s, string sFormat);
 
-// ---< SubstituteString >---
-// ---< util_i_strings >---
-// Performs a string substitution against designated tokens in s using
-// values from jArray.  String s should have tokens which contain a
-// designator, default `$`, with a number, denoting the position of the
-// associated value in jArray.  jArray can contain any combination
-// of strings, floats, decimals and booleans.
-//
-// Assumes jArray = ["Today", 34, 2.5299999999, true];
-//
-// Examples:
-//   SubstituteString("$1, I ran $2 miles."); // "Today, I ran 34 miles."
-//   SubstituteString("The circle's radius is $3."); // "The circles radius is 2.53."
-//   SubstituteString("The applicant answered: $4"); // "The applicant answered: true"
+/// @brief Substitute tokens in a string with values from a json array.
+/// @param s The string to interpolate the values into. Should have tokens wich
+///     contain sDesignator followed by a number denoting the position of the
+///     value in jArray (1-based index).
+/// @param jArray An array of values to interpolate. May be any combination of
+///     strings, floats, decimals, or booleans.
+/// @param sDesignator The character denoting the beginning of a token.
+/// @example
+///   // Assumes jArray = ["Today", 34, 2.5299999999, true];
+///   SubstituteString("$1, I ran $2 miles.", jArray);        // "Today, I ran 34 miles."
+///   SubstituteString("The circle's radius is $3.", jArray); // "The circle's radius is 2.53."
+///   SubstituteString("The applicant answered: $4", jArray); // "The applicant answered: true"
 string SubstituteString(string s, json jArray, string sDesignator = "$");
 
 // -----------------------------------------------------------------------------

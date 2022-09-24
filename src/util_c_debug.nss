@@ -35,7 +35,7 @@ const string DEBUG_PARAM_TARGET  = "DEBUG_PARAM_TARGET";
 // -----------------------------------------------------------------------------
 //                                 Debug Handler
 // -----------------------------------------------------------------------------
-// You may alter the contents of this function, but do not alters its signature.
+// You may alter the contents of this function, but do not alter its signature.
 // -----------------------------------------------------------------------------
 
 /// @brief Custom debug event handler
