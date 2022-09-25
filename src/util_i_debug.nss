@@ -201,8 +201,15 @@ string GetDebugPrefix(object oTarget = OBJECT_SELF)
     string sPrefix = GetLocalString(oTarget, DEBUG_PREFIX);
     if (sPrefix == "")
     {
-        string sTag = GetTag(oTarget);
-        sPrefix = "[" + (sTag != "" ? sTag : GetName(oTarget)) + "]";
+        if (!GetIsObjectValid(oTarget))
+        {
+            sColor = GetDebugColor(DEBUG_LEVEL_WARNING);
+            sPrefix = "Invalid Object: #" + ObjectToString(oTarget);
+        }
+        else
+            sPrefix = (sPrefix = GetTag(oTarget)) == "" ?  GetName(oTarget) : sPrefix;
+
+        sPrefix = "[" + sPrefix + "]";
     }
 
     return ColorString(sPrefix, sColor);
