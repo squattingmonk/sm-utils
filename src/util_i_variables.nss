@@ -508,6 +508,7 @@ json GetPlayerJson(object oPlayer, string sVarName);
 string GetPlayerVariableTag(object oPlayer, int nType, string sVarName);
 
 /// @brief Returns a json array of key-value pairs.
+/// @param oPlayer Player object reference.
 /// @param nType VARIABLE_TYPE_*, accepts bitmasked values.
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
