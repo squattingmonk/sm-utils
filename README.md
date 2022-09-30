@@ -32,27 +32,32 @@ This package contains the following resources:
 
 | Resource               | Function                                      |
 | ---------------------- | --------------------------------------------- |
-| `util_i_lists.nss`     | CSV and local variable lists master include   |
+| `util_c_color.nss`     | Configuration file for `util_i_color.nss`     |
+| `util_i_color.nss`     | RGB, HSV, and hex color utilities             |
+| `util_i_constants.nss` | Constant value retrieval functions            |
 | `util_i_csvlists.nss`  | CSV list utilities                            |
-| `util_i_varlists.nss`  | Local variable list utilities                 |
+| `util_i_datapoint.nss` | System-specific data object creation utility  |
+| `util_c_debug.nss`     | Configuration file for `util_i_debug.nss`     |
 | `util_i_debug.nss`     | Debugging utilities                           |
 | `util_i_libraries.nss` | Library script utilities                      |
 | `util_i_library.nss`   | Library dispatcher boilerplate                |
-| `util_i_datapoint.nss` | System-specific data object creation utility  |
+| `util_i_lists.nss`     | CSV and local variable lists master include   |
+| `util_i_matching.nss`  | Functions for glob-matching strings           |
 | `util_i_math.nss`      | Common math utilities                         |
-| `util_i_strings.nss`   | String manipulation utilities                 |
-| `util_i_color.nss`     | RGB, HSV, and hex color utilities             |
-| `util_c_color.nss`     | Configuration file for `util_i_color.nss`     |
-| `util_i_constants.nss` | Constant value retrieval functions            |
-| `util_i_times.nss`     | Time, date, and duration functions            |
-| `util_i_strftime.nss`  | Formatting functions for dates and times      |
+| `util_i_nss.nss`       | Functions for building executable scripts     |
+| `util_i_sqlite.nss`    | Functions for interfacing with sqlite dbs     |
 | `util_c_strftime.nss`  | Configuration file for `util_i_strftime.nss`  |
-| `util_i_unittest.nss`  | Functions for testing other scripts           |
-| `util_c_unittest.nss`  | Configuration file for `util_i_unittest.nss`  |
-| `util_i_targeting.nss` | Functions for hooking OnPlayerTarget          |
+| `util_i_strftime.nss`  | Formatting functions for dates and times      |
+| `util_i_strings.nss`   | String manipulation utilities                 |
 | `util_c_targeting.nss` | Configuration file for `util_i_targeting.nss` |
+| `util_i_targeting.nss` | Functions for hooking OnPlayerTarget          |
 | `util_i_timers.nss`    | Functions for running scripts on an interval  |
-
+| `util_i_times.nss`     | Time, date, and duration functions            |
+| `util_c_unittest.nss`  | Configuration file for `util_i_unittest.nss`  |
+| `util_i_unittest.nss`  | Functions for testing other scripts           |
+| `util_c_variables.nss` | Configuration file for `util_i_variables.nss` |
+| `util_i_variables.nss` | Functions for handling sqlite-based variables |
+| `util_i_varlists.nss`  | Local variable list utilities                 |
 
 Note: `sm-utils` relies on script extensions added by
 [nwnsc](https://github.com/nwneetools/nwnsc). This prevents error messages when
