@@ -1166,7 +1166,7 @@ sqlquery _PrepareVariableDeleteByTime(object oObject, int nTime, string sTag, in
 
 /// @brief Increments/Decremenst an existing variable (int/float).  If the variable
 ///     does not exist, creates variables, then increments/decrements.
-sqlquery _PrepareVariableIncrement(object oObject, string sVarName, string sTag, int bCampaign)
+sqlquery _PrepareVariableIncrement(object oObject, int nType, string sVarName, string sTag, int bCampaign)
 {
     int bPC = GetIsPC(oObject);
     string sTable = bPC ? VARIABLE_TABLE_PC : VARIABLE_TABLE_MODULE;
@@ -1180,6 +1180,7 @@ sqlquery _PrepareVariableIncrement(object oObject, string sVarName, string sTag,
                 "RETURNING value;";
 
     sqlquery q = bPC || !bCampaign ? _PrepareQueryObject(oObject, s) : _PrepareQueryCampaign(s);
+    SqlBindInt   (q, "@type", nType);
     SqlBindString(q, "@varname", sVarName);
     SqlBindString(q, "@tag", sTag);
     return q;
@@ -1507,9 +1508,8 @@ void DeleteModuleVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string sVarN
 
 int IncrementModuleInt(string sVarName, int nIncrement = 1, string sTag = "")
 {
-    sqlquery q = _PrepareVariableIncrement(GetModule(), sVarName, sTag, FALSE);
+    sqlquery q = _PrepareVariableIncrement(GetModule(), VARIABLE_TYPE_INT, sVarName, sTag, FALSE);
     SqlBindInt(q, "@value", nIncrement);
-    SqlBindInt(q, "@type", VARIABLE_TYPE_INT);
     return SqlStep(q) ? SqlGetInt(q, 0) : 0;
 }
 
@@ -1523,9 +1523,8 @@ int DecrementModuleInt(string sVarName, int nDecrement = -1, string sTag = "")
 
 float IncrementModuleFloat(string sVarName, float fIncrement = 1.0, string sTag = "")
 {
-    sqlquery q = _PrepareVariableIncrement(GetModule(), sVarName, sTag, FALSE);
+    sqlquery q = _PrepareVariableIncrement(GetModule(), VARIABLE_TYPE_FLOAT, sVarName, sTag, FALSE);
     SqlBindFloat(q, "@value", fIncrement);
-    SqlBindInt  (q, "@type", VARIABLE_TYPE_FLOAT);
     return SqlStep(q) ? SqlGetFloat(q, 0) : 0.0;
 }
 
@@ -1759,9 +1758,8 @@ void DeletePlayerVariablesByPattern(object oPlayer, int nType = VARIABLE_TYPE_NO
 
 int IncrementPlayerInt(object oPlayer, string sVarName, int nIncrement = 1, string sTag = "")
 {
-    sqlquery q = _PrepareVariableIncrement(oPlayer, sVarName, sTag, FALSE);
+    sqlquery q = _PrepareVariableIncrement(oPlayer, VARIABLE_TYPE_INT, sVarName, sTag, FALSE);
     SqlBindInt(q, "@value", nIncrement);
-    SqlBindInt(q, "@type", VARIABLE_TYPE_INT);
     return SqlStep(q) ? SqlGetInt(q, 0) : 0;
 }
 
@@ -1775,9 +1773,8 @@ int DecrementPlayerInt(object oPlayer, string sVarName, int nDecrement = -1, str
 
 float IncrementPlayerFloat(object oPlayer, string sVarName, float fIncrement = 1.0, string sTag = "")
 {
-    sqlquery q = _PrepareVariableIncrement(oPlayer, sVarName, sTag, FALSE);
+    sqlquery q = _PrepareVariableIncrement(oPlayer, VARIABLE_TYPE_FLOAT, sVarName, sTag, FALSE);
     SqlBindFloat(q, "@value", fIncrement);
-    SqlBindInt  (q, "@type", VARIABLE_TYPE_FLOAT);
     return SqlStep(q) ? SqlGetFloat(q, 0) : 0.0;
 }
 
@@ -2011,9 +2008,8 @@ void DeletePersistentVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string s
 
 int IncrementPersistentInt(string sVarName, int nIncrement = 1, string sTag = "")
 {
-    sqlquery q = _PrepareVariableIncrement(OBJECT_INVALID, sVarName, sTag, FALSE);
+    sqlquery q = _PrepareVariableIncrement(OBJECT_INVALID, VARIABLE_TYPE_INT, sVarName, sTag, FALSE);
     SqlBindInt(q, "@value", nIncrement);
-    SqlBindInt(q, "@type", VARIABLE_TYPE_INT);
     return SqlStep(q) ? SqlGetInt(q, 0) : 0;
 }
 
@@ -2027,9 +2023,8 @@ int DecrementPersistentInt(string sVarName, int nDecrement = -1, string sTag = "
 
 float IncrementPersistentFloat(string sVarName, float fIncrement = 1.0, string sTag = "")
 {
-    sqlquery q = _PrepareVariableIncrement(OBJECT_INVALID, sVarName, sTag, FALSE);
+    sqlquery q = _PrepareVariableIncrement(OBJECT_INVALID, VARIABLE_TYPE_FLOAT, sVarName, sTag, FALSE);
     SqlBindFloat(q, "@value", fIncrement);
-    SqlBindInt  (q, "@type", VARIABLE_TYPE_FLOAT);
     return SqlStep(q) ? SqlGetFloat(q, 0) : 0.0;
 }
 
