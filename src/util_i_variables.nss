@@ -212,25 +212,27 @@ json GetModuleJson(string sVarName);
 /// @param sVarName Name of the variable.
 string GetModuleVariableTag(int nType, string sVarName);
 
-/// @brief Returns a json array of variable values or key-value pairs
-/// @param nType Bitwise VARIABLE_TYPE_*.
+/// @brief Returns a json array of key-value pairs.
+/// @param nType VARIABLE_TYPE_*, accepts bitmasked values.
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards.
-/// @param nTime (+) is after, (-) is before.
-/// @note If no parameters are passed, no variables will be returned.
-/// @details If nType is a single variable type, this function will return
-///     an array of variable values of that type.  If nType is a bitmasked
-///     array of more than one variable type, this function will return an
-///     array of json objects containing information about each variable
-///     found.  Each json object in the array will contain the following
-///     key-value pairs:
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
+/// @note If no parameters are passed, all variables will be returned.
+/// @details This function will return an array of json objects containing
+///     information about each variable found.  Each json object in the
+///     array will contain the following key-value pairs:
 ///         tag: <tag> {string}
 ///         timestamp: <timestamp> {int} UNIX seconds
 ///         type: <type> {int} Reference to VARIABLE_TYPE_*
 ///         value: <value> {type} Type depends on type
+///             -- objects will be returned as a string object id which
+///                 can be used in StringToObject()
+///             -- serialized objects will be returned as their json
+///                 representation and can be used in JsonToObject()
 ///         varname: <varname> {string}
-json GetModuleVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string sVarName = "",
+json GetModuleVariablesByPattern(int nType = VARIABLE_TYPE_ALL, string sVarName = "",
                                  string sTag = "", int nTime = 0);
 
 /// @brief Delete a variable from the module's volatile sqlite database.
@@ -304,7 +306,8 @@ void DeleteModuleVariablesAfter(int nTime);
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards.
-/// @param nTime (+) is after, (-) is before.
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
 /// @note If no parameters are passed, no variables will be returned.
 /// @warning Calling this method without passing any parameters will result
 ///     in all variables in the module's volatile sqlite database being
@@ -504,26 +507,27 @@ json GetPlayerJson(object oPlayer, string sVarName);
 /// @param sVarName Name of the variable.
 string GetPlayerVariableTag(object oPlayer, int nType, string sVarName);
 
-/// @brief Returns a json array of variable values or key-value pairs
-/// @param oPlayer Player object reference.
-/// @param nType Bitwise VARIABLE_TYPE_*.
+/// @brief Returns a json array of key-value pairs.
+/// @param nType VARIABLE_TYPE_*, accepts bitmasked values.
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards.
-/// @param nTime (+) is after, (-) is before.
-/// @note If no parameters are passed, no variables will be returned.
-/// @details If nType is a single variable type, this function will return
-///     an array of variable values of that type.  If nType is a bitmasked
-///     array of more than one variable type, this function will return an
-///     array of json objects containing information about each variable
-///     found.  Each json object in the array will contain the following
-///     key-value pairs:
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
+/// @note If no parameters are passed, all variables will be returned.
+/// @details This function will return an array of json objects containing
+///     information about each variable found.  Each json object in the
+///     array will contain the following key-value pairs:
 ///         tag: <tag> {string}
 ///         timestamp: <timestamp> {int} UNIX seconds
 ///         type: <type> {int} Reference to VARIABLE_TYPE_*
 ///         value: <value> {type} Type depends on type
+///             -- objects will be returned as a string object id which
+///                 can be used in StringToObject()
+///             -- serialized objects will be returned as their json
+///                 representation and can be used in JsonToObject()
 ///         varname: <varname> {string}
-json GetPlayerVariablesByPattern(object oPlayer, int nType = VARIABLE_TYPE_NONE,
+json GetPlayerVariablesByPattern(object oPlayer, int nType = VARIABLE_TYPE_ALL,
                                  string sVarName = "", string sTag = "", int nTime = 0);
 
 /// @brief Delete a variable from the player's sqlite database.
@@ -612,7 +616,8 @@ void DeletePlayerVariablesAfter(object oPlayer, int nTime);
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards.
-/// @param nTime (+) is after, (-) is before.
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
 /// @note If no parameters are passed, no variables will be returned.
 /// @warning Calling this method without passing any parameters will result
 ///     in all variables in the player's sqlite database being
@@ -798,25 +803,27 @@ json GetPersistentJson(string sVarName);
 /// @param sVarName Name of the variable.
 string GetPersistentVariableTag(int nType, string sVarName);
 
-/// @brief Returns a json array of variable values or key-value pairs
-/// @param nType Bitwise VARIABLE_TYPE_*.
+/// @brief Returns a json array of key-value pairs.
+/// @param nType VARIABLE_TYPE_*, accepts bitmasked values.
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards.
-/// @param nTime (+) is after, (-) is before.
-/// @note If no parameters are passed, no variables will be returned.
-/// @details If nType is a single variable type, this function will return
-///     an array of variable values of that type.  If nType is a bitmasked
-///     array of more than one variable type, this function will return an
-///     array of json objects containing information about each variable
-///     found.  Each json object in the array will contain the following
-///     key-value pairs:
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
+/// @note If no parameters are passed, all variables will be returned.
+/// @details This function will return an array of json objects containing
+///     information about each variable found.  Each json object in the
+///     array will contain the following key-value pairs:
 ///         tag: <tag> {string}
 ///         timestamp: <timestamp> {int} UNIX seconds
 ///         type: <type> {int} Reference to VARIABLE_TYPE_*
 ///         value: <value> {type} Type depends on type
+///             -- objects will be returned as a string object id which
+///                 can be used in StringToObject()
+///             -- serialized objects will be returned as their json
+///                 representation and can be used in JsonToObject()
 ///         varname: <varname> {string}
-json GetPersistentVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string sVarName = "",
+json GetPersistentVariablesByPattern(int nType = VARIABLE_TYPE_ALL, string sVarName = "",
                                      string sTag = "", int nTime = 0);
 
 /// @brief Delete a variable from the campaign database.
@@ -888,7 +895,8 @@ void DeletePersistentVariablesAfter(int nTime);
 /// @param sVarName Variable name pattern, accepts glob patterns, sets
 ///     and wildcards.
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards.
-/// @param nTime (+) is after, (-) is before.
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
 /// @note If no parameters are passed, no variables will be returned.
 /// @warning Calling this method without passing any parameters will result
 ///     in all variables in the campaign database being
@@ -1086,7 +1094,8 @@ sqlquery _PrepareSimpleVariableDelete(object oObject, int nType, string sVarName
 /// @param nType Bitwise VARIABLE_TYPE_*
 /// @param sVarName Variable name pattern, accept glob patterns, sets and wildcards
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards
-/// @param nTime (+) is after, (-) is before
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
 /// @warning If no parameters are passed, this query will result in a simple "DELETE ALL"
 ///     and will delete all variables in oObject's database.
 sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "", 
@@ -1115,7 +1124,8 @@ sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE
 /// @param nType Bitwise VARIABLE_TYPE_*
 /// @param sVarName Variable name pattern, accept glob patterns, sets and wildcards
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards
-/// @param nTime (+) is after, (-) is before
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
 /// @warning If no parameters are passed, this query will result in no variables being
 ///     retrieved.
 sqlquery _PrepareComplexVariableSelect(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "", 
@@ -1125,7 +1135,7 @@ sqlquery _PrepareComplexVariableSelect(object oObject, int nType = VARIABLE_TYPE
     string sTable = bPC ? VARIABLE_TABLE_PC : VARIABLE_TABLE_MODULE;
     string sWhere =  (sVarName == "" ? "" : " $" + IntToString(++n) + " varname GLOB @varname");
            sWhere += (sTag == ""     ? "" : " $" + IntToString(++n) + " tag GLOB @tag");
-           sWhere += (nType < 0      ? "" : " $" + IntToString(++n) + " type & @type > 0");
+           sWhere += (nType <= 0     ? "" : " $" + IntToString(++n) + " type & @type > 0");
            sWhere += (nTime == 0     ? "" : " $" + IntToString(++n) + " timestamp " + (nTime > 0 ? ">" : "<") + " @time");
     
     json jKeyWords = ListToJson("WHERE,AND,AND,AND");
@@ -1207,48 +1217,32 @@ sqlquery _PrepareVariableAppend(object oObject, string sVarName, string sTag, in
     return q;
 }
 
-/// @brief Returns a json of variable values or json objects containing
-///     variable metadata.
-json _GetVariablesByPattern(sqlquery q, int nType)
+/// @brief Returns a json array of json objects containing variable metadata.
+json _GetVariablesByPattern(sqlquery q)
 {
-    int bSingleType = (nType & (nType - 1)) == 0;
     json jResult = JsonArray();
+    json jInsert = JsonObject();
 
-    if (bSingleType)
+    while (SqlStep(q))
     {
-        while (SqlStep(q))
-        {
-            json jInsert;
-            if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
-                jInsert = JsonString(SqlGetString(q, 2));
-            else
-                jInsert = SqlGetJson(q, 2);
+        // Query fields: type, varname, value, tag, timestamp
+        //                 0      1       2     3       4
+        int nType = SqlGetInt(q, 0);
 
-            jResult = JsonArrayInsert(jResult, jInsert);
-        }
-    }
-    else
-    {
-        json jInsert = JsonObject();
-        while (SqlStep(q))
-        {
-            int nType = SqlGetInt(q, 0);
+        jInsert = JsonObjectSet(jInsert, "type", JsonInt(nType));
+        jInsert = JsonObjectSet(jInsert, "varname", JsonString(SqlGetString(q, 1)));
+    
+        json jValue;
+        if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
+            jValue = JsonString(SqlGetString(q, 2));
+        else
+            jValue = SqlGetJson(q, 2);
 
-            jInsert = JsonObjectSet(jInsert, "type", JsonInt(nType));
-            jInsert = JsonObjectSet(jInsert, "varname", JsonString(SqlGetString(q, 1)));
-        
-            json jValue;
-            if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
-                jValue = JsonString(SqlGetString(q, 2));
-            else
-                jValue = SqlGetJson(q, 2);
+        jInsert = JsonObjectSet(jInsert, "value", jValue);
+        jInsert = JsonObjectSet(jInsert, "tag", JsonString(SqlGetString(q, 3)));
+        jInsert = JsonObjectSet(jInsert, "timestamp", SqlGetJson(q, 4));
 
-            jInsert = JsonObjectSet(jInsert, "value", jValue);
-            jInsert = JsonObjectSet(jInsert, "tag", JsonString(SqlGetString(q, 3)));
-            jInsert = JsonObjectSet(jInsert, "timestamp", SqlGetJson(q, 4));
-
-            jResult = JsonArrayInsert(jResult, jInsert);
-        }
+        jResult = JsonArrayInsert(jResult, jInsert);
     }
 
     return jResult;
@@ -1414,11 +1408,11 @@ string GetModuleVariableTag(int nType, string sVarName)
     return SqlStep(q) ? SqlGetString(q, 0) : "";
 }
 
-json GetModuleVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string sVarName = "",
+json GetModuleVariablesByPattern(int nType = VARIABLE_TYPE_ALL, string sVarName = "",
                                  string sTag = "", int nTime = 0)
 {
     sqlquery q = _PrepareComplexVariableSelect(GetModule(), nType, sVarName, sTag, nTime, FALSE);
-    return _GetVariablesByPattern(q, nType);
+    return _GetVariablesByPattern(q);
 }
 
 // DeleteModule* ---------------------------------------------------------------
@@ -1664,11 +1658,11 @@ string GetPlayerVariableTag(object oPlayer, int nType, string sVarName)
     return SqlStep(q) ? SqlGetString(q, 0) : "";
 }
 
-json GetPlayerVariablesByPattern(object oPlayer, int nType = VARIABLE_TYPE_NONE,
+json GetPlayerVariablesByPattern(object oPlayer, int nType = VARIABLE_TYPE_ALL,
                                  string sVarName = "", string sTag = "", int nTime = 0)
 {
     sqlquery q = _PrepareComplexVariableSelect(oPlayer, nType, sVarName, sTag, nTime, FALSE);
-    return _GetVariablesByPattern(q, nType);
+    return _GetVariablesByPattern(q);
 }
 
 // DeletePlayer* ---------------------------------------------------------------
@@ -1914,11 +1908,11 @@ string GetPersistentVariableTag(int nType, string sVarName)
     return SqlStep(q) ? SqlGetString(q, 0) : "";
 }
 
-json GetPersistentVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string sVarName = "",
+json GetPersistentVariablesByPattern(int nType = VARIABLE_TYPE_ALL, string sVarName = "",
                                  string sTag = "", int nTime = 0)
 {
     sqlquery q = _PrepareComplexVariableSelect(OBJECT_INVALID, nType, sVarName, sTag, nTime, FALSE);
-    return _GetVariablesByPattern(q, nType);
+    return _GetVariablesByPattern(q);
 }
 
 // DeletePersistent* ---------------------------------------------------------------
