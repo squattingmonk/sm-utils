@@ -1,11 +1,8 @@
-// -----------------------------------------------------------------------------
-//    File: util_i_variables.nss
-//  System: PW Administration (data management)
-// -----------------------------------------------------------------------------
-// Description:
-//  Include for primary data control functions.
-// -----------------------------------------------------------------------------
-
+/// ----------------------------------------------------------------------------
+/// @file   util_i_variables.nss
+/// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
+/// @brief  Database storage functions
+/// ----------------------------------------------------------------------------
 /// @details The functions in this include are meant to complement and extend
 /// the game's basic variable handling functions, such as GetLocalInt() and
 /// SetLocalString().  These functions allow variable storage in the module's
@@ -985,7 +982,7 @@ string _VariableTypeToString(int nType)
     else if (nType == VARIABLE_TYPE_SERIALIZED) return "SERIALIZED";
     else if (nType == VARIABLE_TYPE_NONE)       return "NONE";
     else if (nType == VARIABLE_TYPE_ALL)        return "ALL";
-    else                                        return "UNKNOWN";    
+    else                                        return "UNKNOWN";
 }
 
 /// @brief Prepares an query against an object (module/player).  Ensures
@@ -1071,7 +1068,7 @@ sqlquery _PrepareTagUpdate(object oObject, int nType, string sVarName, string sT
     SqlBindInt   (q, "@type", nType);
     SqlBindString(q, "@varname", sVarName);
     SqlBindString(q, "@tag", sTag);
-    return q;    
+    return q;
 }
 
 /// @brief Prepares an delete query to remove a variable stored in any database.
@@ -1099,7 +1096,7 @@ sqlquery _PrepareSimpleVariableDelete(object oObject, int nType, string sVarName
 ///     nTime, a negative value will filter for timestamps before nTime.
 /// @warning If no parameters are passed, this query will result in a simple "DELETE ALL"
 ///     and will delete all variables in oObject's database.
-sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "", 
+sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "",
                                        string sTag = "", int nTime = 0, int bCampaign = FALSE)
 {
     int n, bPC = GetIsPC(oObject);
@@ -1108,7 +1105,7 @@ sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE
            sWhere += (sTag == ""     ? "" : " $" + IntToString(++n) + " tag GLOB @tag");
            sWhere += (nType <= 0     ? "" : " $" + IntToString(++n) + " type & @type > 0");
            sWhere += (nTime == 0     ? "" : " $" + IntToString(++n) + " timestamp " + (nTime > 0 ? ">" : "<") + " @time");
-    
+
     json jKeyWords = ListToJson("WHERE,AND,AND,AND");
     string s = "DELETE FROM " + sTable + sWhere + ";";
            s = SubstituteString(s, jKeyWords);
@@ -1129,7 +1126,7 @@ sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE
 ///     nTime, a negative value will filter for timestamps before nTime.
 /// @warning If no parameters are passed, this query will result in no variables being
 ///     retrieved.
-sqlquery _PrepareComplexVariableSelect(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "", 
+sqlquery _PrepareComplexVariableSelect(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "",
                                        string sTag = "", int nTime = 0, int bCampaign = FALSE)
 {
     int n, bPC = GetIsPC(oObject);
@@ -1138,7 +1135,7 @@ sqlquery _PrepareComplexVariableSelect(object oObject, int nType = VARIABLE_TYPE
            sWhere += (sTag == ""     ? "" : " $" + IntToString(++n) + " tag GLOB @tag");
            sWhere += (nType <= 0     ? "" : " $" + IntToString(++n) + " type & @type > 0");
            sWhere += (nTime == 0     ? "" : " $" + IntToString(++n) + " timestamp " + (nTime > 0 ? ">" : "<") + " @time");
-    
+
     json jKeyWords = ListToJson("WHERE,AND,AND,AND");
     string s = "SELECT type, varname, value, tag, timestamp FROM " + sTable + sWhere + ";";
            s = SubstituteString(s, jKeyWords);
@@ -1232,7 +1229,7 @@ json _GetVariablesByPattern(sqlquery q)
 
         jInsert = JsonObjectSet(jInsert, "type", JsonInt(nType));
         jInsert = JsonObjectSet(jInsert, "varname", JsonString(SqlGetString(q, 1)));
-    
+
         json jValue;
         if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
             jValue = JsonString(SqlGetString(q, 2));
