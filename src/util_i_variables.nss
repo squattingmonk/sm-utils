@@ -62,22 +62,24 @@
 ///                 pass 0 to ignore timestamps.
 
 #include "util_i_lists"
+#include "util_i_matching"
 #include "util_c_variables"
 
 // -----------------------------------------------------------------------------
 //                                  Constants
 // -----------------------------------------------------------------------------
 
-const int VARIABLE_TYPE_NONE         = 0x00;
-const int VARIABLE_TYPE_INT          = 0x01;
-const int VARIABLE_TYPE_FLOAT        = 0x02;
-const int VARIABLE_TYPE_STRING       = 0x04;
-const int VARIABLE_TYPE_OBJECT       = 0x08;
-const int VARIABLE_TYPE_VECTOR       = 0x10;
-const int VARIABLE_TYPE_LOCATION     = 0x20;
-const int VARIABLE_TYPE_JSON         = 0x40;
-const int VARIABLE_TYPE_SERIALIZED   = 0x80;
-const int VARIABLE_TYPE_ALL          = 0xff;
+const int VARIABLE_TYPE_NONE         = 0x0000;
+const int VARIABLE_TYPE_INT          = 0x0001;
+const int VARIABLE_TYPE_FLOAT        = 0x0002;
+const int VARIABLE_TYPE_STRING       = 0x0004;
+const int VARIABLE_TYPE_OBJECT       = 0x0008;
+const int VARIABLE_TYPE_VECTOR       = 0x0010;
+const int VARIABLE_TYPE_LOCATION     = 0x0020;
+const int VARIABLE_TYPE_JSON         = 0x0040;
+const int VARIABLE_TYPE_SERIALIZED   = 0x0080;
+const int VARIABLE_TYPE_CASSOWARY    = 0x0100;
+const int VARIABLE_TYPE_ALL          = 0x01ff;
 
 const string VARIABLE_OBJECT   = "VARIABLE:VOLATILE";
 const string VARIABLE_CAMPAIGN = "VARIABLE:CAMPAIGN";
@@ -99,6 +101,174 @@ location LOCATION_INVALID = Location(OBJECT_INVALID, Vector(), 0.0);
 ///     during OnModuleLoad.  Table creation is handled during
 ///     the variable setting process.
 void CreateVariableTable(object oObject = OBJECT_INVALID);
+
+// -----------------------------------------------------------------------------
+//                               Local Variables
+// -----------------------------------------------------------------------------
+
+/// @brief Returns a json array of all local variables on oObject.
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param nType VARIABLE_TYPE_* constant for type of variable to retrieve.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to retrieve.  Accepts glob wildcard and
+///     set syntax.
+/// @returns a JSON array of variables set on oObject.  The array will consist
+///     of JSON objects with the following key:value pairs:
+///         type: <type> {int} Reference to VARIABLE_TYPE_*
+///         value: <value> {type} Type depends on type
+///             -- objects will be returned as a string object id which
+///                 can be used in StringToObject()
+///         varname: <varname> {string}
+json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "");
+
+/// @brief Deletes local variables from oObject.
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param nType VARIABLE_TYPE_* constant for type of variable to delete.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to delete.  Accepts glob wildcard and
+///     set syntax.
+void DeleteLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "");
+
+/// @brief Copies local variables from oObject to the module's volatile sqlite
+///     database.
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to copy.  Accepts glob wildcard and
+///     set syntax.
+/// @param sTag Optional tag reference.  All variables copied with this function
+///     will have sTag applied.
+/// @param bDelete If TRUE, deletes the local variables from oObject after they
+///     are copied to the module database.
+void CopyLocalVariablesToModule(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                string sTag = "", int bDelete = TRUE);
+
+/// @brief Copies local variables from oObject to oPlayer's sqlite database.
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param oPlayer Player object reference.
+/// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to copy.  Accepts glob wildcard and
+///     set syntax.
+/// @param sTag Optional tag reference.  All variables copied with this function
+///     will have sTag applied.
+/// @param bDelete If TRUE, deletes the local variables from oObject after they
+///     are copied to the module database.
+void CopyLocalVariablesToPlayer(object oObject, object oPlayer, int nType = VARIABLE_TYPE_ALL,
+                                string sVarName = "", string sTag = "", int bDelete = TRUE);
+
+/// @brief Copies local variables from oObject to the campaign database.
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to copy.  Accepts glob wildcard and
+///     set syntax.
+/// @param sTag Optional tag reference.  All variables copied with this function
+///     will have sTag applied.
+/// @param bDelete If TRUE, deletes the local variables from oObject after they
+///     are copied to the module database.
+void CopyLocalVariablesToPersistent(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                    string sTag = "", int bDelete = TRUE);
+
+/// @brief Copies variables from the module's volatile sqlite database to oObject.
+/// @param oObject Game object to set local variables on.
+/// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to copy.  Accepts glob wildcard and
+///     set syntax.
+/// @param sTag Optional tag reference.  Accepts glob wildcard and set syntax.
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
+/// @param bDelete If TRUE, deletes the local variables from oObject after they
+///     are copied to the module database.
+/// @note This method *can* be used to set variables onto the module object.
+void CopyModuleVariablesToObject(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                 string sTag = "", int nTime = 0, int bDelete = TRUE);
+
+/// @brief Copies variables from a player's sqlite database to oObject.
+/// @param oPlayer Player object to copy variables from.
+/// @param oObject Game object to set local variables on.
+/// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to copy.  Accepts glob wildcard and
+///     set syntax.
+/// @param sTag Optional tag reference.  Accepts glob wildcard and set syntax.
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
+/// @param bDelete If TRUE, deletes the local variables from oObject after they
+///     are copied to the module database.
+/// @note This method *can* be used to set variables onto the module object.
+void CopyPlayerVariablesToObject(object oPlayer, object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                 string sTag = "", int nTime = 0, int bDelete = TRUE);
+
+/// @brief Copies variables from the campaign database to oObject.
+/// @param oObject Game object to set local variables on.
+/// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
+///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
+/// @param sVarName Name of variable to copy.  Accepts glob wildcard and
+///     set syntax.
+/// @param sTag Optional tag reference.  Accepts glob wildcard and set syntax.
+/// @param nTime A positive value will filter for timestamps after
+///     nTime, a negative value will filter for timestamps before nTime.
+/// @param bDelete If TRUE, deletes the local variables from oObject after they
+///     are copied to the module database.
+/// @note This method *can* be used to set variables onto the module object.
+void CopyPersistentVariablesToObject(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                     string sTag = "", int nTime = 0, int bDelete = TRUE);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalInt(object oObject, string sVarName);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalFloat(object oObject, string sVarName);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalString(object oObject, string sVarName);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalObject(object oObject, string sVarName);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalLocation(object oObject, string sVarName);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalCassowary(object oObject, string sVarName);
+
+/// @brief Determines whether a local variable has been set on oObject
+/// @param oObject Game object to get local variables from.  This method will
+///     not work on the module object (GetModule()).
+/// @param sVarName Name of variable to retrieve.  This must be the exact varname,
+///     glob wildcards and sets are not accepted.
+int HasLocalJson(object oObject, string sVarName);
 
 // -----------------------------------------------------------------------------
 //                               Module Database
@@ -971,7 +1141,7 @@ string AppendPersistentString(string sVarName, string sAppend, string sTag = "")
 //                              Private Functions
 // -----------------------------------------------------------------------------
 
-/// @brief Returns the variable type as a string
+/// @private Returns the variable type as a string
 /// @note For debug purposes only.
 string _VariableTypeToString(int nType)
 {
@@ -988,7 +1158,46 @@ string _VariableTypeToString(int nType)
     else                                        return "UNKNOWN";    
 }
 
-/// @brief Prepares an query against an object (module/player).  Ensures
+/// @private Converts an NWN type to a VARIABLE_TYPE_*
+int _TypeToVariableType(json jType)
+{
+    int nType = JsonGetInt(jType);
+
+    if      (nType == 1) return VARIABLE_TYPE_INT;
+    else if (nType == 2) return VARIABLE_TYPE_FLOAT;
+    else if (nType == 3) return VARIABLE_TYPE_STRING;
+    else if (nType == 4) return VARIABLE_TYPE_OBJECT;
+    else if (nType == 5) return VARIABLE_TYPE_LOCATION;
+    else if (nType == 6) return VARIABLE_TYPE_CASSOWARY;
+    else if (nType == 7) return VARIABLE_TYPE_JSON;
+    return                      VARIABLE_TYPE_NONE;
+}
+
+/// @private Deletes a single local variable
+void _DeleteLocalVariable(object oObject, string sVarName, int nType)
+{
+    if      (nType == VARIABLE_TYPE_INT)       DeleteLocalInt(oObject, sVarName);
+    else if (nType == VARIABLE_TYPE_FLOAT)     DeleteLocalFloat(oObject, sVarName);
+    else if (nType == VARIABLE_TYPE_STRING)    DeleteLocalString(oObject, sVarName);
+    else if (nType == VARIABLE_TYPE_OBJECT)    DeleteLocalObject(oObject, sVarName);
+    else if (nType == VARIABLE_TYPE_LOCATION)  DeleteLocalLocation(oObject, sVarName);
+    else if (nType == VARIABLE_TYPE_CASSOWARY) DeleteLocalCassowary(oObject, sVarName);
+    else if (nType == VARIABLE_TYPE_JSON)      DeleteLocalJson(oObject, sVarName);
+}
+
+/// @private Sets a single local variable
+void _SetLocalVariable(object oObject, string sVarName, int nType, json jValue)
+{
+    if      (nType == VARIABLE_TYPE_INT)       SetLocalInt(oObject, sVarName, JsonGetInt(jValue));
+    else if (nType == VARIABLE_TYPE_FLOAT)     SetLocalFloat(oObject, sVarName, JsonGetFloat(jValue));
+    else if (nType == VARIABLE_TYPE_STRING)    SetLocalString(oObject, sVarName, JsonGetString(jValue));
+    else if (nType == VARIABLE_TYPE_OBJECT)    SetLocalObject(oObject, sVarName, StringToObject(JsonGetString(jValue)));
+    else if (nType == VARIABLE_TYPE_LOCATION)  SetLocalLocation(oObject, sVarName, JsonToLocation(jValue));
+    //else if (nType == VARIABLE_TYPE_CASSOWARY) SetLocalCassowary(oObject, sVarName, );
+    else if (nType == VARIABLE_TYPE_JSON)      SetLocalJson(oObject, sVarName, jValue);
+}
+
+/// @private Prepares an query against an object (module/player).  Ensures
 ///     appropriate tables have been created before attempting query.
 sqlquery _PrepareQueryObject(object oObject, string sQuery)
 {
@@ -996,7 +1205,7 @@ sqlquery _PrepareQueryObject(object oObject, string sQuery)
     return SqlPrepareQueryObject(oObject, sQuery);
 }
 
-/// @brief Prepares an query against an campaign database.  Ensures
+/// @private Prepares an query against an campaign database.  Ensures
 ///     appropriate tables have been created before attempting query.
 sqlquery _PrepareQueryCampaign(string sQuery)
 {
@@ -1004,7 +1213,7 @@ sqlquery _PrepareQueryCampaign(string sQuery)
     return SqlPrepareQueryCampaign(VARIABLE_CAMPAIGN_DATABASE, sQuery);
 }
 
-/// @brief Prepares a select query to retrieve a variable value stored
+/// @private Prepares a select query to retrieve a variable value stored
 ///     in any database.
 sqlquery _PrepareVariableSelect(object oObject, int nType, string sVarName, int bCampaign)
 {
@@ -1021,6 +1230,8 @@ sqlquery _PrepareVariableSelect(object oObject, int nType, string sVarName, int 
     return q;
 }
 
+/// @private Prepares a select query to retrieve the tag associated with
+///     a variable.
 sqlquery _PrepareTagSelect(object oObject, int nType, string sVarName, int bCampaign)
 {
     int bPC = GetIsPC(oObject);
@@ -1036,7 +1247,7 @@ sqlquery _PrepareTagSelect(object oObject, int nType, string sVarName, int bCamp
     return q;
 }
 
-/// @brief Prepares an insert query to stored a variable in any database.
+/// @private Prepares an insert query to stored a variable in any database.
 sqlquery _PrepareVariableInsert(object oObject, int nType, string sVarName, string sTag, int bCampaign)
 {
     int bPC = GetIsPC(oObject);
@@ -1057,6 +1268,7 @@ sqlquery _PrepareVariableInsert(object oObject, int nType, string sVarName, stri
     return q;
 }
 
+/// @private Prepares an update query to modify the tag assicated with a variable.
 sqlquery _PrepareTagUpdate(object oObject, int nType, string sVarName, string sTag, int bCampaign)
 {
     int bPC = GetIsPC(oObject);
@@ -1074,7 +1286,7 @@ sqlquery _PrepareTagUpdate(object oObject, int nType, string sVarName, string sT
     return q;    
 }
 
-/// @brief Prepares an delete query to remove a variable stored in any database.
+/// @private Prepares an delete query to remove a variable stored in any database.
 sqlquery _PrepareSimpleVariableDelete(object oObject, int nType, string sVarName, int bCampaign)
 {
     int bPC = GetIsPC(oObject);
@@ -1091,7 +1303,7 @@ sqlquery _PrepareSimpleVariableDelete(object oObject, int nType, string sVarName
     return q;
 }
 
-/// @brief Prepares a complex delete query to remove multiple variables by criteria.
+/// @private Prepares a complex delete query to remove multiple variables by criteria.
 /// @param nType Bitwise VARIABLE_TYPE_*
 /// @param sVarName Variable name pattern, accept glob patterns, sets and wildcards
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards
@@ -1121,7 +1333,7 @@ sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE
     return q;
 }
 
-/// @brief Prepares a complex select query to retrieve multiple variables by criteria.
+/// @private Prepares a complex select query to retrieve multiple variables by criteria.
 /// @param nType Bitwise VARIABLE_TYPE_*
 /// @param sVarName Variable name pattern, accept glob patterns, sets and wildcards
 /// @param sTag Tag pattern, accepts glob patterns, sets and wildcards
@@ -1151,31 +1363,31 @@ sqlquery _PrepareComplexVariableSelect(object oObject, int nType = VARIABLE_TYPE
     return q;
 }
 
-/// @brief Wrapper for ComplexDelete
+/// @private Wrapper for ComplexDelete.
 sqlquery _PrepareVariableDeleteAll(object oObject, string sTag, int bCampaign)
 {
     return _PrepareComplexVariableDelete(oObject, 0, "", sTag, 0, bCampaign);
 }
 
-/// @brief Wrapper for ComplexDelete
+/// @private Wrapper for ComplexDelete.
 sqlquery _PrepareVariableDeleteByName(object oObject, string sVarName, string sTag, int bCampaign)
 {
     return _PrepareComplexVariableDelete(oObject, 0, sVarName, sTag, 0, bCampaign);
 }
 
-/// @brief Wrapper for ComplexDelete
+/// @private Wrapper for ComplexDelete.
 sqlquery _PrepareVariableDeleteByType(object oObject, int nType, string sTag, int bCampaign)
 {
     return _PrepareComplexVariableDelete(oObject, nType, "", sTag, 0, bCampaign);
 }
 
-/// @brief Wrapper for ComplexDelete
+/// @private Wrapper for ComplexDelete.
 sqlquery _PrepareVariableDeleteByTime(object oObject, int nTime, string sTag, int bCampaign)
 {
     return _PrepareComplexVariableDelete(oObject, 0, "", sTag, nTime, bCampaign);
 }
 
-/// @brief Increments/Decremenst an existing variable (int/float).  If the variable
+/// @private Increments/Decremenst an existing variable (int/float).  If the variable
 ///     does not exist, creates variables, then increments/decrements.
 sqlquery _PrepareVariableIncrement(object oObject, int nType, string sVarName, string sTag, int bCampaign)
 {
@@ -1197,7 +1409,7 @@ sqlquery _PrepareVariableIncrement(object oObject, int nType, string sVarName, s
     return q;
 }
 
-/// @brief Appends a string to an existing variable.  If the variables does not
+/// @private Appends a string to an existing variable.  If the variables does not
 ///     exist, creates the variable, then appends.
 sqlquery _PrepareVariableAppend(object oObject, string sVarName, string sTag, int bCampaign)
 {
@@ -1218,7 +1430,7 @@ sqlquery _PrepareVariableAppend(object oObject, string sVarName, string sTag, in
     return q;
 }
 
-/// @brief Returns a json array of json objects containing variable metadata.
+/// @private Returns a json array of json objects containing variable metadata.
 json _GetVariablesByPattern(sqlquery q)
 {
     json jResult = JsonArray();
@@ -1247,6 +1459,70 @@ json _GetVariablesByPattern(sqlquery q)
     }
 
     return jResult;
+}
+
+/// @private Opens an sqlite transaction
+void _BeginSQLTransaction(object oTarget, int bCampaign)
+{
+    int bPC = GetIsPC(oTarget);
+    string s = "BEGIN TRANSACTION;";
+    sqlquery q = bPC || !bCampaign ? _PrepareQueryObject(oTarget, s) : _PrepareQueryCampaign(s);
+    SqlStep(q);
+}
+
+/// @private Commits an open sqlite transaction
+void _CommitSQLTransaction(object oTarget, int bCampaign)
+{
+    int bPC = GetIsPC(oTarget);
+    string s = "COMMIT TRANSACTION;";
+    sqlquery q = bPC || !bCampaign ? _PrepareQueryObject(oTarget, s) : _PrepareQueryCampaign(s);
+    SqlStep(q);   
+}
+
+/// @private Copies specified variables from oSource (game object) to oTarget (db).
+void _CopyVariablesToDatabase(object oSource, object oTarget, int nTypes, string sVarNames,
+                              string sTag, int bCampaign, int bDelete)
+{
+    _BeginSQLTransaction(oTarget, bCampaign);
+    
+    json jVariables = GetLocalVariables(oSource, nTypes, sVarNames);
+    int n; for (n; n < JsonGetLength(jVariables); n++)
+    {
+        json   jVariable = JsonPointer(jVariables, "/" + IntToString(n));
+        int    nType     = JsonGetInt(JsonPointer(jVariable, "/type"));
+        string sVarName  = JsonGetString(JsonPointer(jVariable, "/varname"));
+        json   jValue    = JsonPointer(jVariable, "/value");
+
+        sqlquery q = _PrepareVariableInsert(oTarget, nType, sVarName, sTag, bCampaign);
+        SqlBindJson(q, "@value", jValue);
+        SqlStep(q);
+
+        if (bDelete)
+            _DeleteLocalVariable(oSource, sVarName, nType);
+    }
+
+    _CommitSQLTransaction(oTarget, bCampaign);
+}
+
+/// @private Copies specified variables from oSource (db) to oTarget (game object).
+void _CopyVariablesToObject(object oSource, object oTarget, int nTypes, string sVarNames,
+                            string sTag, int nTime, int bCampaign, int bDelete)
+{
+    sqlquery q = _PrepareComplexVariableSelect(oSource, nTypes, sVarNames, sTag, nTime, bCampaign);
+    json jVariables = _GetVariablesByPattern(q);
+
+    int n; for (n; n < JsonGetLength(jVariables); n++)
+    {
+        json   jVariable = JsonPointer(jVariables, "/" + IntToString(n));
+        int    nType     = JsonGetInt(JsonPointer(jVariable, "/type"));
+        string sVarName  = JsonGetString(JsonPointer(jVariable, "/varname"));
+        json   jValue    = JsonPointer(jVariable, "/value");
+
+        _SetLocalVariable(oTarget, sVarName, nType, jValue);
+    }
+
+    if (bDelete)
+        SqlStep(_PrepareComplexVariableDelete(oSource, nTypes, sVarNames, sTag, nTime, bCampaign));
 }
 
 // -----------------------------------------------------------------------------
@@ -1288,6 +1564,134 @@ void CreateVariableTable(object oObject = OBJECT_INVALID)
 
     SqlStep(q);
     SetLocalInt(oObject, sVarName, TRUE);
+}
+
+// -----------------------------------------------------------------------------
+//                               Local Variables
+// -----------------------------------------------------------------------------
+
+json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "")
+{
+    json jResult = JsonArray();
+
+    if (oObject == GetModule())
+        return jResult;
+
+    json jVarTable = JsonPointer(ObjectToJson(oObject, TRUE), "/VarTable/value");
+    int n; for (n; n < JsonGetLength(jVarTable); n++)
+    {
+        string sPointer = "/" + IntToString(n);
+        string sName = JsonGetString(JsonPointer(jVarTable, sPointer + "/Name/value"));
+        int nVarType = _TypeToVariableType(JsonPointer(jVarTable, sPointer + "/Type/value"));
+
+        if ((nType & nVarType) == 0)
+            continue;
+
+        if (sVarName != "" && !GetMatchesPattern(sName, sVarName))
+            continue;
+       
+        json jValue;
+        if (nVarType == VARIABLE_TYPE_LOCATION)
+            jValue = LocationToJson(GetLocalLocation(oObject, sName));
+        else if (nVarType == VARIABLE_TYPE_JSON)
+            jValue = JsonPointer(jVarTable, sPointer + "/Value/value/JSON/value");
+        else
+            jValue = JsonPointer(jVarTable, sPointer + "/Value/value");
+
+        // TODO need to test cassowary, however the hell that works.
+        json jInsert = JsonObject();
+             jInsert = JsonObjectSet(jInsert, "type", JsonInt(nVarType));
+             jInsert = JsonObjectSet(jInsert, "varname", JsonString(sName));
+             jInsert = JsonObjectSet(jInsert, "value", jValue);
+
+        jResult = JsonArrayInsert(jResult, jInsert);
+    }
+
+    return jResult;
+}
+
+void DeleteLocalVariables(object oObject, int nTypes = VARIABLE_TYPE_ALL, string sVarNames = "")
+{
+    json jVariables = GetLocalVariables(oObject, nTypes, sVarNames);
+    int n; for (n; n < JsonGetLength(jVariables); n++)
+    {
+        json   jVariable = JsonArrayGet(jVariables, n);
+        int    nType =     JsonGetInt(JsonObjectGet(jVariable, "type"));
+        string sName =     JsonGetString(JsonObjectGet(jVariable, "varname"));
+
+        _DeleteLocalVariable(oObject, sName, nType);
+    }
+}
+
+void CopyLocalVariablesToModule(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                string sTag = "", int bDelete = TRUE)
+{
+    _CopyVariablesToDatabase(oObject, GetModule(), nType, sVarName, sTag, FALSE, bDelete);
+}
+
+void CopyLocalVariablesToPlayer(object oObject, object oPlayer, int nType = VARIABLE_TYPE_ALL,
+                                string sVarName = "", string sTag = "", int bDelete = TRUE)
+{
+    _CopyVariablesToDatabase(oObject, oPlayer, nType, sVarName, sTag, FALSE, bDelete);
+}
+
+void CopyLocalVariablesToPersistent(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                    string sTag = "", int bDelete = TRUE)
+{
+    _CopyVariablesToDatabase(oObject, OBJECT_INVALID, nType, sVarName, sTag, TRUE, bDelete);
+}
+
+void CopyModuleVariablesToObject(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                 string sTag = "", int nTime = 0, int bDelete = TRUE)
+{
+    _CopyVariablesToObject(GetModule(), oObject, nType, sVarName, sTag, nTime, FALSE, bDelete);
+}
+
+void CopyPlayerVariablesToObject(object oPlayer, object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                 string sTag = "", int nTime = 0, int bDelete = TRUE)
+{
+    _CopyVariablesToObject(oPlayer, oObject, nType, sVarName, sTag, nTime, FALSE, bDelete);
+}
+
+void CopyPersistentVariablesToObject(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "",
+                                     string sTag = "", int nTime = 0, int bDelete = TRUE)
+{
+    _CopyVariablesToObject(OBJECT_INVALID, oObject, nType, sVarName, sTag, nTime, TRUE, bDelete);
+}
+
+int HasLocalInt(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_INT, sVarName));
+}
+
+int HasLocalFloat(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_FLOAT, sVarName));
+}
+
+int HasLocalString(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_STRING, sVarName));
+}
+
+int HasLocalObject(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_OBJECT, sVarName));
+}
+
+int HasLocalLocation(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_LOCATION, sVarName));
+}
+
+int HasLocalCassowary(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_CASSOWARY, sVarName));
+}
+
+int HasLocalJson(object oObject, string sVarName)
+{
+    return JsonGetLength(GetLocalVariables(oObject, VARIABLE_TYPE_JSON, sVarName));
 }
 
 // SetModule* ------------------------------------------------------------------
