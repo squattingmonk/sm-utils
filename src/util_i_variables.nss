@@ -3,7 +3,7 @@
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
 /// @brief  Functions for managing database variables
 /// ----------------------------------------------------------------------------
-///
+
 /// @details The functions in this include are meant to complement and extend
 /// the game's basic variable handling functions, such as GetLocalInt() and
 /// SetLocalString().  These functions allow variable storage in the module's
@@ -1185,7 +1185,7 @@ string _VariableTypeToString(int nType)
     else if (nType == VARIABLE_TYPE_SERIALIZED) return "SERIALIZED";
     else if (nType == VARIABLE_TYPE_NONE)       return "NONE";
     else if (nType == VARIABLE_TYPE_ALL)        return "ALL";
-    else                                        return "UNKNOWN";    
+    else                                        return "UNKNOWN";
 }
 
 /// @private Converts an NWN type to a VARIABLE_TYPE_*
@@ -1349,7 +1349,7 @@ sqlquery _PrepareSimpleVariableDelete(object oObject, int nType, string sVarName
 /// @param bCampaign TRUE if targeting the campaign db.
 /// @warning If no parameters are passed, this query will result in a simple "DELETE ALL"
 ///     and will delete all variables in oObject's database.
-sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "", 
+sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE_NONE, string sVarName = "",
                                        string sTag = "", int nTime = 0, int bCampaign = FALSE)
 {
     int n, bPC = GetIsPC(oObject);
@@ -1358,7 +1358,7 @@ sqlquery _PrepareComplexVariableDelete(object oObject, int nType = VARIABLE_TYPE
            sWhere += (sTag == ""     ? "" : " $" + IntToString(++n) + " tag GLOB @tag");
            sWhere += (nType <= 0     ? "" : " $" + IntToString(++n) + " type & @type > 0");
            sWhere += (nTime == 0     ? "" : " $" + IntToString(++n) + " timestamp " + (nTime > 0 ? ">" : "<") + " @time");
-    
+
     json jKeyWords = ListToJson("WHERE,AND,AND,AND");
     string s = "DELETE FROM " + sTable + sWhere + ";";
            s = SubstituteString(s, jKeyWords);
@@ -1492,7 +1492,7 @@ json _VariableQueryToJson(sqlquery q)
 
         jInsert = JsonObjectSet(jInsert, "type", JsonInt(nType));
         jInsert = JsonObjectSet(jInsert, "varname", JsonString(SqlGetString(q, 1)));
-    
+
         json jValue;
         if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
             jValue = JsonString(SqlGetString(q, 2));
