@@ -30,21 +30,24 @@
 ///         DeleteModuleVariablesByTag("my_test_event");
 ///         ```
 ///
-///     - Advanced Usage:  There are several functions which allow criteria
+/// Advanced Usage:
+///     - Glob/wildcard Syntax:  There are several functions which allow criteria
 ///         to be specified to retrieve or delete variables.  These criteria
-///         allow the use of bitmasked types and glob expressions.
+///         allow the use of bitmasked types and glob syntax.  If the function
+///         description specified this ability, the following syntax is allowed:
 ///             nType - Can be a single variable type, such as
 ///                 VARIABLE_TYPE_INT, or a bitmasked set of variable types,
 ///                 such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.  Other
 ///                 normal bitwise operators are also allowed.  To select
 ///                 all variables types except integer, the value can be
-///                 passed as ~VARIABLE_TYPE_INT.  Pass 0 or VARIABLE_TYPE_NONE
-///                 to ignore variable types.
+///                 passed as ~VARIABLE_TYPE_INT.  Pass VARIABLE_TYPE_ALL
+///                 to ignore variable types.  Passing VARIABLE_TYPE_NONE will
+///                 generally result in zero returned results.
 ///             sVarName - Can be an exact varname as previously set, or
 ///                 will accept any wildcards or sets allowed by glob:
 ///                     **Glob operations are case-senstive**
 ///                     * - 0 or more characters
-///                     ? - A single character
+///                     ? - Any single character
 ///                     [a-j] - Any single character in the range a-j
 ///                     [a-zA-Z] - Any single upper or lowercase letter
 ///                     [0-9] - Any single digit
@@ -57,8 +60,38 @@
 ///                 the variable anytime a variable is inserted or updated.
 ///                 If nTime is negative, the system will match all variables
 ///                 set before nTime.  If nTime is positive, the system will
-///                 match all variables set after nTime.  Omitting nTime or
-///                 pass 0 to ignore timestamps.
+///                 match all variables set after nTime.  The easiest way to
+///                 understand this concept is to determine the time you want
+///                 to compare against (in Unix seconds), then pass that time
+///                 as negative to seek variables set/updated before that time,
+///                 or positive to seek variables set/updated after that time.
+///                 Pass 0 to ignore timestamps.
+///
+///     - Copying from Database to Locals:  There are three functions which allow
+///         variables which meet specific criteria to be copied from a specified
+///         database to local variables on a game object.  Due to the way local
+///         variables are saved on a game object, the variable's tag, if any,
+///         will be lost during the copy.  This means that the variable type and
+///         name must be unique to the game object.  If not, the variable on
+///         the game object will be overwritten.  These methods may be useful to
+///         initialize a set of variables on a new character, or reset specific
+///         system variables on a game object.
+///
+///     - Copying from Locals to Database:  There are three functions which allow
+///         variables which meet specific criteria to be copied from a game object
+///         to a specified database.  Local variables do not have tags, however, a
+///         tag can be supplied to these functions and the tag will be saved into
+///         the database.  These methods may be useful to save current object
+///         state into a persistent database to be later retrieved individually
+///         of by mass copy with a database -> local copy method.
+///
+///     - Record uniqueness:  Module, Player and Persistent variables are stored
+///         in sqlite databases.  Each record is unique based on variable type,
+///         name and tag.  The variable tag is optional.  This behavior allows
+///         multiple variables with the same type and name, but with different
+///         tags.  If using tags, it is incumbent upon the user to include the
+///         desired tag is in all functions calls to ensure the correct record
+///         is operated on.
 
 #include "util_i_lists"
 #include "util_i_matching"
@@ -119,7 +152,7 @@ void CreateVariableTable(object oObject = OBJECT_INVALID);
 ///             -- objects will be returned as a string object id which
 ///                 can be used in StringToObject()
 ///         varname: <varname> {string}
-json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "");
+json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "*");
 
 /// @brief Deletes local variables from oObject.
 /// @param oObject Game object to get local variables from.  This method will
@@ -1203,6 +1236,24 @@ int _TypeToVariableType(json jType)
     return                      VARIABLE_TYPE_NONE;
 }
 
+/// @private Converts VARIABLE_TYPE_* bitmask to IN
+string _VariableTypeToArray(int nTypes)
+{
+    if      (nTypes == VARIABLE_TYPE_NONE) return "";
+    else if (nTypes == VARIABLE_TYPE_ALL)  return "1,2,3,4,5,6,7";
+
+    string sArray;    
+    if (nTypes & VARIABLE_TYPE_INT)       sArray = AddListItem(sArray, "1");
+    if (nTypes & VARIABLE_TYPE_FLOAT)     sArray = AddListItem(sArray, "2");
+    if (nTypes & VARIABLE_TYPE_STRING)    sArray = AddListItem(sArray, "3");
+    if (nTypes & VARIABLE_TYPE_OBJECT)    sArray = AddListItem(sArray, "4");
+    if (nTypes & VARIABLE_TYPE_LOCATION)  sArray = AddListItem(sArray, "5");
+    if (nTypes & VARIABLE_TYPE_CASSOWARY) sArray = AddListItem(sArray, "6");
+    if (nTypes & VARIABLE_TYPE_JSON)      sArray = AddListItem(sArray, "7");
+    
+    return sArray;
+}
+
 /// @private Deletes a single local variable
 void _DeleteLocalVariable(object oObject, string sVarName, int nType)
 {
@@ -1411,6 +1462,41 @@ json _DatabaseVariablesToJson(object oObject, int nType, string sVarName, string
     return SqlStep(q) ? SqlGetJson(q, 0) : JsonArray();
 }
 
+json _LocalVariablesToJson(object oObject, int nType, string sVarName)
+{
+    if (!GetIsObjectValid(oObject) || oObject == GetModule())
+        return JsonArray();
+
+    json jVarTable = JsonPointer(ObjectToJson(oObject, TRUE), "/VarTable/value");
+    if (!JsonGetLength(jVarTable))
+        return JsonArray();
+
+    int n;
+    string sWhere =  (sVarName == "" ? "" : " $" + IntToString(++n) + " variable_object ->> 'varname' GLOB @varname");
+           sWhere += (nType <= 0     ? "" : " $" + IntToString(++n) + " variable_object ->> 'type' IN (" + _VariableTypeToArray(nType) + ")"); 
+    
+    json jKeyWords = ListToJson("WHERE,AND");
+    string s = "WITH local_variables AS " +
+                    "(SELECT json_object('type', v.value -> 'Type.value', " +
+                                        "'varname', v.value -> 'Name.value', " +
+                                        "'value', v.value -> 'Value.value') as variable_object " +
+                    "FROM json_each(@vartable) as v) " +
+                "SELECT json_group_array(json(variable_object)) FROM local_variables " + sWhere + ";";
+
+/*
+                    "WHERE variable_object ->> 'type' IN (" + _VariableTypeToArray(nTypes) + ") " +
+                        "AND variable_object ->> 'varname' GLOB @varnames;";
+*/
+           s = SubstituteString(s, jKeyWords);
+
+    sqlquery q = SqlPrepareQueryObject(GetModule(), s);
+    SqlBindJson(q, "@vartable", jVarTable);
+    SqlBindString(q, "@varname", "*");
+
+    return SqlStep(q) ? SqlGetJson(q, 0) : JsonArray();
+}
+
+
 /// @private Wrapper for ComplexDelete.
 sqlquery _PrepareVariableDeleteAll(object oObject, string sTag, int bCampaign)
 {
@@ -1478,37 +1564,6 @@ sqlquery _PrepareVariableAppend(object oObject, string sVarName, string sTag, in
     return q;
 }
 
-/// @private Returns a json array of json objects containing variable metadata.
-json _VariableQueryToJson(sqlquery q)
-{
-    json jResult = JsonArray();
-    json jInsert = JsonObject();
-
-    while (SqlStep(q))
-    {
-        // Query fields: type, varname, value, tag, timestamp
-        //                 0      1       2     3       4
-        int nType = SqlGetInt(q, 0);
-
-        jInsert = JsonObjectSet(jInsert, "type", JsonInt(nType));
-        jInsert = JsonObjectSet(jInsert, "varname", JsonString(SqlGetString(q, 1)));
-    
-        json jValue;
-        if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
-            jValue = JsonString(SqlGetString(q, 2));
-        else
-            jValue = SqlGetJson(q, 2);
-
-        jInsert = JsonObjectSet(jInsert, "value", jValue);
-        jInsert = JsonObjectSet(jInsert, "tag", JsonString(SqlGetString(q, 3)));
-        jInsert = JsonObjectSet(jInsert, "timestamp", SqlGetJson(q, 4));
-
-        jResult = JsonArrayInsert(jResult, jInsert);
-    }
-
-    return jResult;
-}
-
 /// @private Opens an sqlite transaction
 void _BeginSQLTransaction(object oTarget, int bCampaign)
 {
@@ -1531,10 +1586,14 @@ void _CommitSQLTransaction(object oTarget, int bCampaign)
 void _CopyVariablesToDatabase(object oSource, object oTarget, int nTypes, string sVarNames,
                               string sTag, int bCampaign, int bDelete)
 {
-    _BeginSQLTransaction(oTarget, bCampaign);
-    
     json jVariables = GetLocalVariables(oSource, nTypes, sVarNames);
-    int n; for (n; n < JsonGetLength(jVariables); n++)
+    int nCount = JsonGetLength(jVariables);
+
+    if (!nCount)
+        return;
+    
+    _BeginSQLTransaction(oTarget, bCampaign);
+    int n; for (n; n < nCount; n++)
     {
         json   jVariable = JsonPointer(jVariables, "/" + IntToString(n));
         int    nType     = JsonGetInt(JsonPointer(jVariable, "/type"));
@@ -1557,7 +1616,12 @@ void _CopyVariablesToObject(object oSource, object oTarget, int nTypes, string s
                             string sTag, int nTime, int bCampaign, int bDelete)
 {
     json jVariables = _DatabaseVariablesToJson(oSource, nTypes, sVarNames, sTag, nTime, bCampaign);
-    int n; for (n; n < JsonGetLength(jVariables); n++)
+    int nCount = JsonGetLength(jVariables);
+
+    if (!nCount)
+        return;
+
+    int n; for (n; n < nCount; n++)
     {
         json   jVariable = JsonPointer(jVariables, "/" + IntToString(n));
         int    nType     = JsonGetInt(JsonPointer(jVariable, "/type"));
@@ -1616,44 +1680,26 @@ void CreateVariableTable(object oObject = OBJECT_INVALID)
 //                               Local Variables
 // -----------------------------------------------------------------------------
 
-json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "")
+json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVarName = "*")
 {
-    json jResult = JsonArray();
-
     if (oObject == GetModule())
-        return jResult;
+        return JsonArray();
 
-    json jVarTable = JsonPointer(ObjectToJson(oObject, TRUE), "/VarTable/value");
-    int n; for (n; n < JsonGetLength(jVarTable); n++)
+    json jVariables = _LocalVariablesToJson(oObject, nType, sVarName);
+    int nCount = JsonGetLength(jVariables);
+
+    if (!nCount)
+        return JsonArray();
+
+    int n; for (n; n < nCount; n++)
     {
-        string sPointer = "/" + IntToString(n);
-        string sName = JsonGetString(JsonPointer(jVarTable, sPointer + "/Name/value"));
-        int nVarType = _TypeToVariableType(JsonPointer(jVarTable, sPointer + "/Type/value"));
+        json j = JsonArrayGet(jVariables, n);
+             j = JsonObjectSet(j, "type", JsonInt(_TypeToVariableType(JsonObjectGet(j, "type"))));
 
-        if ((nType & nVarType) == 0)
-            continue;
-
-        if (sVarName != "" && !GetMatchesPattern(sName, sVarName))
-            continue;
-       
-        json jValue;
-        if (nVarType == VARIABLE_TYPE_LOCATION)
-            jValue = LocationToJson(GetLocalLocation(oObject, sName));
-        else if (nVarType == VARIABLE_TYPE_JSON)
-            jValue = JsonPointer(jVarTable, sPointer + "/Value/value/JSON/value");
-        else
-            jValue = JsonPointer(jVarTable, sPointer + "/Value/value");
-
-        // TODO need to test cassowary, however the hell that works.
-        json jInsert = JsonObject();
-             jInsert = JsonObjectSet(jInsert, "type", JsonInt(nVarType));
-             jInsert = JsonObjectSet(jInsert, "varname", JsonString(sName));
-             jInsert = JsonObjectSet(jInsert, "value", jValue);
-
-        jResult = JsonArrayInsert(jResult, jInsert);
+        jVariables = JsonArraySet(jVariables, n, j);
     }
 
-    return jResult;
+    return jVariables;
 }
 
 void DeleteLocalVariables(object oObject, int nTypes = VARIABLE_TYPE_ALL, string sVarNames = "")
