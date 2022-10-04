@@ -1564,37 +1564,6 @@ sqlquery _PrepareVariableAppend(object oObject, string sVarName, string sTag, in
     return q;
 }
 
-/// @private Returns a json array of json objects containing variable metadata.
-json _VariableQueryToJson(sqlquery q)
-{
-    json jResult = JsonArray();
-    json jInsert = JsonObject();
-
-    while (SqlStep(q))
-    {
-        // Query fields: type, varname, value, tag, timestamp
-        //                 0      1       2     3       4
-        int nType = SqlGetInt(q, 0);
-
-        jInsert = JsonObjectSet(jInsert, "type", JsonInt(nType));
-        jInsert = JsonObjectSet(jInsert, "varname", JsonString(SqlGetString(q, 1)));
-
-        json jValue;
-        if (nType & (VARIABLE_TYPE_STRING | VARIABLE_TYPE_OBJECT))
-            jValue = JsonString(SqlGetString(q, 2));
-        else
-            jValue = SqlGetJson(q, 2);
-
-        jInsert = JsonObjectSet(jInsert, "value", jValue);
-        jInsert = JsonObjectSet(jInsert, "tag", JsonString(SqlGetString(q, 3)));
-        jInsert = JsonObjectSet(jInsert, "timestamp", SqlGetJson(q, 4));
-
-        jResult = JsonArrayInsert(jResult, jInsert);
-    }
-
-    return jResult;
-}
-
 /// @private Opens an sqlite transaction
 void _BeginSQLTransaction(object oTarget, int bCampaign)
 {
