@@ -146,7 +146,7 @@ void CreateVariableTable(object oObject);
 
 /// @brief Returns a json array of all local variables on oObject.
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param nType VARIABLE_TYPE_* constant for type of variable to retrieve.
 ///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
 /// @param sVarName Name of variable to retrieve.  Accepts glob wildcard and
@@ -162,7 +162,7 @@ json GetLocalVariables(object oObject, int nType = VARIABLE_TYPE_ALL, string sVa
 
 /// @brief Deletes local variables from oObject.
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param nType VARIABLE_TYPE_* constant for type of variable to delete.
 ///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
 /// @param sVarName Name of variable to delete.  Accepts glob wildcard and
@@ -171,7 +171,7 @@ void DeleteLocalVariables(object oObject, int nType = VARIABLE_TYPE_NONE, string
 
 /// @brief Copies local variables from oObject to another game object oTarget.
 /// @param oSource Game object to get local variables from.  This method will
-///     not work on the module object (GetModule()).
+///     not work on the module object.
 /// @param oTarget The game object to copy local variables to.
 /// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
 ///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
@@ -185,7 +185,7 @@ void CopyLocalVariablesToObject(object oSource, object oTarget, int nType = VARI
 
 /// @brief Copies local variables from oSource to oDatabase.
 /// @param oSource Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param oDatabase Database to copy variables to (PC Object || DB_MODULE || DB_CAMPAIGN).
 /// @param nType VARIABLE_TYPE_* constant for type of variable to copy.
 ///     Accepts bitmasked types such as VARIABLE_TYPE_INT | VARIABLE_TYPE_FLOAT.
@@ -231,42 +231,42 @@ void CopyDatabaseVariablesToDatabase(object oSource, object oTarget, int nType =
 
 /// @brief Determines whether a local variable has been set on oObject
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param sVarName Name of variable to retrieve.  This must be the exact varname,
 ///     glob wildcards and sets are not accepted.
 int HasLocalInt(object oObject, string sVarName);
 
 /// @brief Determines whether a local variable has been set on oObject
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param sVarName Name of variable to retrieve.  This must be the exact varname,
 ///     glob wildcards and sets are not accepted.
 int HasLocalFloat(object oObject, string sVarName);
 
 /// @brief Determines whether a local variable has been set on oObject
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param sVarName Name of variable to retrieve.  This must be the exact varname,
 ///     glob wildcards and sets are not accepted.
 int HasLocalString(object oObject, string sVarName);
 
 /// @brief Determines whether a local variable has been set on oObject
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param sVarName Name of variable to retrieve.  This must be the exact varname,
 ///     glob wildcards and sets are not accepted.
 int HasLocalObject(object oObject, string sVarName);
 
 /// @brief Determines whether a local variable has been set on oObject
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param sVarName Name of variable to retrieve.  This must be the exact varname,
 ///     glob wildcards and sets are not accepted.
 int HasLocalLocation(object oObject, string sVarName);
 
 /// @brief Determines whether a local variable has been set on oObject
 /// @param oObject Game object to get local variables from.  This method will
-///     not work on the module object (DB_MODULE).
+///     not work on the module object.
 /// @param sVarName Name of variable to retrieve.  This must be the exact varname,
 ///     glob wildcards and sets are not accepted.
 int HasLocalJson(object oObject, string sVarName);
