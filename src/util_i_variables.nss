@@ -98,6 +98,7 @@
 ///         desired tag is in all functions calls to ensure the correct record
 ///         is operated on.
 
+#include "util_i_debug"
 #include "util_i_lists"
 #include "util_i_matching"
 #include "util_c_variables"
@@ -122,11 +123,6 @@ const string VARIABLE_CAMPAIGN = "VARIABLE:CAMPAIGN";
 
 object DB_MODULE = GetModule();
 object DB_CAMPAIGN = OBJECT_INVALID;
-
-// TODO superfluous with .35 LOCATION_INVALID update?
-// Delete once .35 is stable and nwnsc has been udpated.
-// Udpate GetModuleSerialized() signature with LOCATION_INVALID?
-location LOCATION_INVALID = Location(OBJECT_INVALID, Vector(), 0.0);
 
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
@@ -468,7 +464,7 @@ void DeleteModuleVariables();
 ///     in all variables in the module's volatile sqlite database being
 ///     deleted without additional warning.
 void DeleteModuleVariablesByPattern(int nType = VARIABLE_TYPE_NONE, string sVarName = "",
-                                    string sTag = "", int nTime = 0);
+                                    string sTag = "*", int nTime = 0);
 
 /// @brief Increments an integer variable in the module's volatile sqlite
 ///     database by nIncrement. If the variable doesn't exist, it will be
@@ -1782,13 +1778,18 @@ object GetModuleSerialized(string sVarName, string sTag, location l, object oTar
 location GetModuleLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(DB_MODULE, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : LOCATION_INVALID;
+    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector GetModuleVector(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(DB_MODULE, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    return SqlStep(q) ? JsonToVector(SqlGetJson(q, 0)) : Vector();
+
+    vector v;
+    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    else            v = Vector();
+
+    return v;
 }
 
 json GetModuleJson(string sVarName, string sTag = "")
@@ -1837,13 +1838,18 @@ void DeleteModuleSerialized(string sVarName, string sTag = "")
 location DeleteModuleLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(DB_MODULE, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : LOCATION_INVALID;
+    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector DeleteModuleVector(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(DB_MODULE, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    return SqlStep(q) ? JsonToVector(SqlGetJson(q, 0)) : Vector();
+
+    vector v;
+    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    else            v = Vector();
+
+    return v;
 }
 
 json DeleteModuleJson(string sVarName, string sTag = "")
@@ -1992,13 +1998,18 @@ object GetPlayerSerialized(object oPlayer, string sVarName, string sTag, locatio
 location GetPlayerLocation(object oPlayer, string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(oPlayer, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : LOCATION_INVALID;
+    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector GetPlayerVector(object oPlayer, string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(oPlayer, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    return SqlStep(q) ? JsonToVector(SqlGetJson(q, 0)) : Vector();
+
+    vector v;
+    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    else            v = Vector();
+
+    return v;
 }
 
 json GetPlayerJson(object oPlayer, string sVarName, string sTag = "")
@@ -2047,13 +2058,18 @@ void DeletePlayerSerialized(object oPlayer, string sVarName, string sTag = "")
 location DeletePlayerLocation(object oPlayer, string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(oPlayer, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : LOCATION_INVALID;
+    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector DeletePlayerVector(object oPlayer, string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(oPlayer, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    return SqlStep(q) ? JsonToVector(SqlGetJson(q, 0)) : Vector();
+
+    vector v;
+    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    else            v = Vector();
+
+    return v;
 }
 
 json DeletePlayerJson(object oPlayer, string sVarName, string sTag = "")
@@ -2207,13 +2223,18 @@ object GetPersistentSerialized(string sVarName, string sTag, location l, object 
 location GetPersistentLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(DB_CAMPAIGN, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : LOCATION_INVALID;
+    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector GetPersistentVector(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(DB_CAMPAIGN, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    return SqlStep(q) ? JsonToVector(SqlGetJson(q, 0)) : Vector();
+
+    vector v;
+    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    else            v = Vector();
+
+    return v;
 }
 
 json GetPersistentJson(string sVarName, string sTag = "")
@@ -2262,13 +2283,18 @@ void DeletePersistentSerialized(string sVarName, string sTag = "")
 location DeletePersistentLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(DB_CAMPAIGN, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : LOCATION_INVALID;
+    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector DeletePersistentVector(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(DB_CAMPAIGN, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    return SqlStep(q) ? JsonToVector(SqlGetJson(q, 0)) : Vector();
+
+    vector v;
+    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    else            v = Vector();
+
+    return v;
 }
 
 json DeletePersistentJson(string sVarName, string sTag = "")
