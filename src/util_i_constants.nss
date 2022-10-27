@@ -117,7 +117,7 @@ struct CONSTANT constants_RetrieveConstant(string sConstant, string sFile, strin
 {
     int COLOR_KEY = COLOR_BLUE_LIGHT;
     int COLOR_VALUE = COLOR_SALMON;
-    int COLOR_FAIL = COLOR_MESSAGE_FEEDBACK;
+    int COLOR_FAILED = COLOR_MESSAGE_FEEDBACK;
 
     struct CONSTANT c;
     string sError, sChunk = "SetLocal" + sType + "(GetModule(), \"" +
@@ -140,7 +140,7 @@ struct CONSTANT constants_RetrieveConstant(string sConstant, string sFile, strin
         else
             c.sError = sError;
 
-        string sMessage = "[CONSTANTS] " + HexColorString("Failed", COLOR_FAIL) + " to retrieve constant value" +
+        string sMessage = "[CONSTANTS] " + HexColorString("Failed", COLOR_FAILED) + " to retrieve constant value" +
             "\n   " + HexColorString("sConstant", COLOR_KEY) + "  " + HexColorString(sConstant, COLOR_VALUE) +
             "\n   " + HexColorString("sFile",     COLOR_KEY) + "  " + HexColorString(c.sFile,   COLOR_VALUE) +
             "\n   " + HexColorString("Reason",    COLOR_KEY) + "  " + HexColorString(c.sError,  COLOR_VALUE);
