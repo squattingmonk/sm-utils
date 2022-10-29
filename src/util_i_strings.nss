@@ -176,6 +176,12 @@ string FormatString(string s, string sFormat);
 ///   SubstituteString("The applicant answered: $4", jArray); // "The applicant answered: true"
 string SubstituteString(string s, json jArray, string sDesignator = "$");
 
+/// @brief Repeats a string multiple times.
+/// @param s The string to repeat.
+/// @param n The number of times to repeat s.
+/// @returns The repeated string.
+string RepeatString(string s, int n);
+
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -394,4 +400,13 @@ string SubstituteString(string s, json jArray, string sDesignator = "$")
     }
 
     return s;
+}
+
+string RepeatString(string s, int n)
+{
+    string sResult;
+    while (n-- > 0)
+        sResult += s;
+
+    return sResult;
 }
