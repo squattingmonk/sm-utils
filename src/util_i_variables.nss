@@ -267,6 +267,54 @@ int HasLocalLocation(object oObject, string sVarName);
 ///     glob wildcards and sets are not accepted.
 int HasLocalJson(object oObject, string sVarName);
 
+/// @brief Returns a local or default value.
+/// @param oObject Game object to find variable on.
+/// @param sVarName Name of variable to retrive.
+/// @param nDefault Value to return if variable not found.
+/// @warning Passing the module object into oObject may not return
+///     the correct value.  Use this function only on non-module objects.
+int GetLocalIntOrDefault(object oObject, string sVarname, int nDefault);
+
+/// @brief Returns a local or default value.
+/// @param oObject Game object to find variable on.
+/// @param sVarName Name of variable to retrive.
+/// @param fDefault Value to return if variable not found.
+/// @warning Passing the module object into oObject may not return
+///     the correct value.  Use this function only on non-module objects.
+float GetLocalFloatOrDefault(object oObject, string sVarname, float fDefault);
+
+/// @brief Returns a local or default value.
+/// @param oObject Game object to find variable on.
+/// @param sVarName Name of variable to retrive.
+/// @param sDefault Value to return if variable not found.
+/// @warning Passing the module object into oObject may not return
+///     the correct value.  Use this function only on non-module objects.
+string GetLocalStringOrDefault(object oObject, string sVarname, string sDefault);
+
+/// @brief Returns a local or default value.
+/// @param oObject Game object to find variable on.
+/// @param sVarName Name of variable to retrive.
+/// @param oDefault Value to return if variable not found.
+/// @warning Passing the module object into oObject may not return
+///     the correct value.  Use this function only on non-module objects.
+object GetLocalObjectOrDefault(object oObject, string sVarname, object oDefault);
+
+/// @brief Returns a local or default value.
+/// @param oObject Game object to find variable on.
+/// @param sVarName Name of variable to retrive.
+/// @param lDefault Value to return if variable not found.
+/// @warning Passing the module object into oObject may not return
+///     the correct value.  Use this function only on non-module objects.
+location GetLocalLocationOrDefault(object oObject, string sVarname, location lDefault);
+
+/// @brief Returns a local or default value.
+/// @param oObject Game object to find variable on.
+/// @param sVarName Name of variable to retrive.
+/// @param jDefault Value to return if variable not found.
+/// @warning Passing the module object into oObject may not return
+///     the correct value.  Use this function only on non-module objects.
+json GetLocalJsonOrDefault(object oObject, string sVarname, json jDefault);
+
 // -----------------------------------------------------------------------------
 //                               Module Database
 // -----------------------------------------------------------------------------
@@ -1678,6 +1726,78 @@ int HasLocalLocation(object oObject, string sVarName)
 int HasLocalJson(object oObject, string sVarName)
 {
     return JsonGetLength(_LocalVariablesToJson(oObject, VARIABLE_TYPE_JSON, sVarName));
+}
+
+int GetLocalIntOrDefault(object oObject, string sVarName, int nDefault)
+{
+    int nValue = GetLocalInt(oObject, sVarName);
+    if (nValue == 0)
+    {
+        if (HasLocalInt(oObject, sVarName)) return nValue;
+        else                                return nDefault;
+    }
+
+    return nDefault;
+}
+
+float GetLocalFloatOrDefault(object oObject, string sVarName, float fDefault)
+{
+    float fValue = GetLocalFloat(oObject, sVarName);
+    if (fValue == 0.0)
+    {
+        if (HasLocalFloat(oObject, sVarName)) return fValue;
+        else                                  return fDefault;
+    }
+
+    return fDefault;
+}
+
+string GetLocalStringOrDefault(object oObject, string sVarName, string sDefault)
+{
+    string sValue = GetLocalString(oObject, sVarName);
+    if (sValue == "")
+    {
+        if (HasLocalString(oObject, sVarName)) return sValue;
+        else                                   return sDefault;
+    }
+
+    return sDefault;
+}
+
+object GetLocalObjectOrDefault(object oObject, string sVarName, object oDefault)
+{
+    object oValue = GetLocalObject(oObject, sVarName);
+    if (oValue == OBJECT_INVALID)
+    {
+        if (HasLocalObject(oObject, sVarName)) return oValue;
+        else                                  return oDefault;
+    }
+
+    return oDefault;
+}
+
+location GetLocalLocationOrDefault(object oObject, string sVarName, location lDefault)
+{
+    location lValue = GetLocalLocation(oObject, sVarName);
+    if (lValue == Location(OBJECT_INVALID, Vector(), 0.0))
+    {
+        if (HasLocalLocation(oObject, sVarName)) return lValue;
+        else                                     return lDefault;
+    }
+
+    return lDefault;
+}
+
+json GetLocalJsonOrDefault(object oObject, string sVarName, json jDefault)
+{
+    json jValue = GetLocalJson(oObject, sVarName);
+    if (jValue == JsonNull())
+    {
+        if (HasLocalJson(oObject, sVarName)) return jValue;
+        else                                 return jDefault;
+    }
+
+    return jDefault;
 }
 
 // SetModule* ------------------------------------------------------------------
