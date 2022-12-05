@@ -1737,7 +1737,7 @@ int GetLocalIntOrDefault(object oObject, string sVarName, int nDefault)
         else                                return nDefault;
     }
 
-    return nDefault;
+    return nValue;
 }
 
 float GetLocalFloatOrDefault(object oObject, string sVarName, float fDefault)
@@ -1749,7 +1749,7 @@ float GetLocalFloatOrDefault(object oObject, string sVarName, float fDefault)
         else                                  return fDefault;
     }
 
-    return fDefault;
+    return fValue;
 }
 
 string GetLocalStringOrDefault(object oObject, string sVarName, string sDefault)
@@ -1761,7 +1761,7 @@ string GetLocalStringOrDefault(object oObject, string sVarName, string sDefault)
         else                                   return sDefault;
     }
 
-    return sDefault;
+    return sValue;
 }
 
 object GetLocalObjectOrDefault(object oObject, string sVarName, object oDefault)
@@ -1773,7 +1773,7 @@ object GetLocalObjectOrDefault(object oObject, string sVarName, object oDefault)
         else                                  return oDefault;
     }
 
-    return oDefault;
+    return oValue;
 }
 
 location GetLocalLocationOrDefault(object oObject, string sVarName, location lDefault)
@@ -1785,7 +1785,7 @@ location GetLocalLocationOrDefault(object oObject, string sVarName, location lDe
         else                                     return lDefault;
     }
 
-    return lDefault;
+    return lValue;
 }
 
 json GetLocalJsonOrDefault(object oObject, string sVarName, json jDefault)
@@ -1797,7 +1797,7 @@ json GetLocalJsonOrDefault(object oObject, string sVarName, json jDefault)
         else                                 return jDefault;
     }
 
-    return jDefault;
+    return jValue;
 }
 
 // SetModule* ------------------------------------------------------------------
