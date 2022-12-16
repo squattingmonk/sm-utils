@@ -185,32 +185,24 @@ string GetListItem(string sList, int nIndex = 0)
     return TrimString(GetStringSlice(sList, nLeft, nRight));
 }
 
-// Private implementation of FindListItem. nParsed is used to preserve the index
-// on recursion.
-int _FindListItem(string sList, string sListItem, int nParsed = 0)
-{
-    // Sanity check.
-    if (sList == "" || sListItem == "") return -1;
-
-    // Is the item even in the list?
-    int nOffset = FindSubString(sList, sListItem);
-    if (nOffset == -1) return -1;
-
-    // Quickest way to find it: count the commas that occur before the item.
-    int i = GetSubStringCount(GetStringLeft(sList, nOffset), ",");
-
-    // Make sure it's not a partial match.
-    if (GetListItem(sList, i) == sListItem)
-        return i + nParsed;
-
-    // Okay, so let's slim down the list and re-execute.
-    string sParsed = StringParse(sList, GetListItem(sList, ++i));
-    return _FindListItem(StringRemoveParsed(sList, sParsed), sListItem, i + nParsed);
-}
-
 int FindListItem(string sList, string sListItem)
 {
-    return _FindListItem(sList, sListItem);
+    sList = TrimString(sList);
+    sListItem = TrimString(sListItem);
+    if (sList == "")
+        return -1;
+
+    int nItem, nStart, nEnd;
+    do
+    {
+        nEnd = FindSubString(sList, ",", nStart);
+        if (TrimString(GetStringSlice(sList, nStart, nEnd)) == sListItem)
+            return nItem;
+        nItem++;
+        nStart = nEnd + 1;
+    }
+    while (nEnd >= 0);
+    return -1;
 }
 
 int HasListItem(string sList, string sListItem)
