@@ -250,7 +250,7 @@ string ReplaceSubString(string sString, string sSub, int nStart, int nEnd)
            GetSubString(sString, nEnd + 1, nLength - nEnd);
 }
 
-string string SubstituteSubStrings(string sString, string sToken, string sSub)(string sString, string sToken, string sSub)
+string SubstituteSubString(string sString, string sToken, string sSub)
 {
     int nPos;
     if ((nPos = FindSubString(sString, sToken)) == -1)
