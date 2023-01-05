@@ -62,6 +62,12 @@ string ReplaceSubString(string sString, string sSub, int nStart, int nEnd);
 /// @param sSub The substring to replace with.
 string SubstituteSubString(string sString, string sToken, string sSub);
 
+/// @brief Replace all substrings in a string with another string.
+/// @param sString The string to search.
+/// @param sToken The substring to search for.
+/// @param sSub The substring to replace with.
+string SubstituteSubStrings(string sString, string sToken, string sSub);
+
 /// @brief Return whether a string contains a substring.
 /// @param sString The string to search.
 /// @param sSubString The substring to search for.
@@ -237,20 +243,28 @@ string GetStringSlice(string sString, int nStart, int nEnd = -1)
 string ReplaceSubString(string sString, string sSub, int nStart, int nEnd)
 {
     int nLength = GetStringLength(sString);
-    if (nStart < 0 || nStart >= nLength || nStart >= nEnd)
+    if (nStart < 0 || nStart >= nLength || nStart > nEnd)
         return sString;
 
     return GetSubString(sString, 0, nStart) + sSub +
            GetSubString(sString, nEnd + 1, nLength - nEnd);
 }
 
-string SubstituteSubString(string sString, string sToken, string sSub)
+string string SubstituteSubStrings(string sString, string sToken, string sSub)(string sString, string sToken, string sSub)
 {
     int nPos;
     if ((nPos = FindSubString(sString, sToken)) == -1)
         return sString;
 
     return ReplaceSubString(sString, sSub, nPos, nPos + GetStringLength(sToken) - 1);
+}
+
+string SubstituteSubStrings(string sString, string sToken, string sSub)
+{
+    while (FindSubString(sString, sToken) >= 0)
+        sString = SubstituteSubString(sString, sToken, sSub);
+
+    return sString;
 }
 
 int HasSubString(string sString, string sSubString, int nStart = 0)
