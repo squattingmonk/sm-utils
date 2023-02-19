@@ -410,7 +410,7 @@ string SubstituteString(string s, json jArray, string sDesignator = "$")
         else if (nType == JSON_TYPE_BOOL)    sValue = JsonGetInt(jValue) == 1 ? "true" : "false";
         else continue;
 
-        s = SubstituteSubString(s, sDesignator + IntToString(n + 1), sValue);
+        s = SubstituteSubStrings(s, sDesignator + IntToString(n + 1), sValue);
     }
 
     return s;
