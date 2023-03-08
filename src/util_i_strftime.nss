@@ -841,8 +841,8 @@ string strftime(struct Time t, string sFormat, string sLocale)
         {
             case -1:
             {
-                string sError = GetStringSlice(sFormat, nOffset, nPos + 1);
-                string sColored = GetStringSlice(sFormat, 0, nOffset) +
+                string sError = GetStringSlice(sFormat, nOffset, nPos);
+                string sColored = GetStringSlice(sFormat, 0, nOffset - 1) +
                                   HexColorString(sError, COLOR_RED) +
                                   GetStringSlice(sFormat, nPos + 1);
                 Error("Illegal time format \"" + sError + "\": " + sColored);
