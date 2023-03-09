@@ -182,7 +182,7 @@ string GetListItem(string sList, int nIndex = 0)
         return "";
 
     // Get the element
-    return TrimString(GetStringSlice(sList, nLeft, nRight));
+    return TrimString(GetStringSlice(sList, nLeft, nRight - 1));
 }
 
 int FindListItem(string sList, string sListItem)
@@ -196,7 +196,7 @@ int FindListItem(string sList, string sListItem)
     do
     {
         nEnd = FindSubString(sList, ",", nStart);
-        if (TrimString(GetStringSlice(sList, nStart, nEnd)) == sListItem)
+        if (TrimString(GetStringSlice(sList, nStart, nEnd - 1)) == sListItem)
             return nItem;
         nItem++;
         nStart = nEnd + 1;
@@ -221,16 +221,18 @@ string DeleteListItem(string sList, int nIndex = 0)
         if (nIndex)
         {
             nPos = FindSubStringN(sList, ",", nIndex - 1);
-            return TrimStringRight(GetStringSlice(sList, 0, nPos));
+            return TrimStringRight(GetStringSlice(sList, 0, nPos - 1));
         }
 
         return "";
     }
 
     string sRight = GetStringSlice(sList, nPos + 1);
+    if (!nIndex)
+        return sRight;
     nPos = FindSubStringN(sList, ",", nIndex - 1);
     sRight = nPos < 0 ? TrimStringLeft(sRight) : sRight;
-    return GetStringSlice(sList, 0, nPos + 1) + sRight;
+    return GetStringSlice(sList, 0, nPos) + sRight;
 }
 
 string RemoveListItem(string sList, string sListItem)
@@ -310,7 +312,7 @@ json ListToJson(string sList)
     do
     {
         nEnd = FindSubString(sList, ",", nStart);
-        sItem = TrimString(GetStringSlice(sList, nStart, nEnd));
+        sItem = TrimString(GetStringSlice(sList, nStart, nEnd - 1));
         jRet = JsonArrayInsert(jRet, JsonString(sItem));
         nStart = nEnd + 1;
     } while (nEnd != -1);

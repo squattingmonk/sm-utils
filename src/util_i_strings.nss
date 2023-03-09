@@ -47,6 +47,8 @@ string GetChar(string sString, int nPos);
 ///     return to the end of the string.
 /// @returns "" if nStart is not at least nStart + 1 characters long or if nEnd
 ///     is < nStart and not -1.
+/// @note Both nStart and nEnd are inclusive, so if nStart == nEnd, the
+///     character at that index will be returned.
 string GetStringSlice(string sString, int nStart, int nEnd = -1);
 
 /// @brief Replace the substring bounded by a string slice with another string.
@@ -234,10 +236,10 @@ string GetStringSlice(string sString, int nStart, int nEnd = -1)
     if (nEnd < 0 || nEnd > nLength)
         nEnd = nLength;
 
-    if (nStart < 0 || nStart >= nLength || nStart >= nEnd)
+    if (nStart < 0 || nStart > nEnd)
         return "";
 
-    return GetSubString(sString, nStart, nEnd - nStart);
+    return GetSubString(sString, nStart, nEnd - nStart + 1);
 }
 
 string ReplaceSubString(string sString, string sSub, int nStart, int nEnd)
