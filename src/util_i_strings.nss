@@ -401,7 +401,7 @@ string SubstituteString(string s, json jArray, string sDesignator = "$")
     if (JsonGetType(jArray) != JSON_TYPE_ARRAY)
         return s;
 
-    int n; for (n; n < JsonGetLength(jArray); n++)
+    int n; for (n = JsonGetLength(jArray) - 1; n >= 0; n--)
     {
         string sValue;
         json jValue = JsonArrayGet(jArray, n);
