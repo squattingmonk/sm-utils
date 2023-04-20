@@ -104,6 +104,22 @@ struct CONSTANT GetConstantInt(string sConstant, string sFile = "");
 ///     fValue - The value of the constant retrieved, if successful, or 0.0
 struct CONSTANT GetConstantFloat(string sConstant, string sFile = "");
 
+/// @brief Find an constant name given the constant value.
+/// @param sPrefix The prefix portion of the constant name being sought.
+/// @param jValue The value of the sPrefix_* constant being sought.  This must be
+///     a json value to simplify argument passage.  Create via a Json* function,
+///     such as JsonInt(n), JsonString(s) or JsonFloat(f).
+/// @param bSuffixOnly If TRUE, will only return the portion of the constant name
+///     found after sPrefix, not including an intervening underscore.
+/// @param sFile If passed, sFile will be searched for the appropriate constant name.
+///     If not passed, `nwscript.nss` will be searched.
+/// @note Does not work with nwscript TRUE/FALSE.  Floats that are affected by
+///     floating point error, such as 1.67, will also fail to find the correct
+///     constant name. Floats that end in .0, such as for DIRECTION_, work correctly.
+/// @warning This function is primarily designed for debugging messages.  Using it
+///     regularly can result in degraded performance.
+string GetConstantName(string sPrefix, json jValue, int bSuffixOnly = FALSE, string sFile = "");
+
 // -----------------------------------------------------------------------------
 //                               Private Functions
 // -----------------------------------------------------------------------------
@@ -179,4 +195,15 @@ struct CONSTANT GetConstantFloat(string sConstant, string sFile = "")
         c.fValue = GetLocalFloat(GetModule(), CONSTANTS_RESULT);
 
     return c;
+}
+
+string GetConstantName(string sPrefix, json jValue, int bSuffixOnly = FALSE, string sFile = "")
+{
+    if (sFile == "") sFile = "nwscript";
+
+    sPrefix = GetStringUpperCase(bSuffixOnly ? sPrefix + "_?(" : "(" + sPrefix);
+    json jMatch = RegExpMatch(sPrefix + ".*?)(?: |=).*?=\\s*(" +
+        JsonDump(jValue) + ");", ResManGetFileContents(sFile, RESTYPE_NSS));
+
+    return jMatch != JsonArray() ? JsonGetString(JsonArrayGet(jMatch, 1)) : "";
 }
