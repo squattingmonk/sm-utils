@@ -72,6 +72,17 @@ float ceil(float f);
 /// @note In case of a tie (i.e., +/- 0.5), rounds away from 0.
 float round(float f);
 
+/// @brief Determine if x is in [a..b]
+/// @param x Value to compare
+/// @param a Low end of range
+/// @param b High end of range
+int between(int x, int a, int b);
+
+/// @brief Determine if x is in [a..b]
+/// @param x Value to compare
+/// @param a Low end of range
+/// @param b High end of range
+int fbetween(float x, float a, float b);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
@@ -153,4 +164,14 @@ float ceil(float f)
 float round(float f)
 {
     return IntToFloat(FloatToInt(f + (f < 0.0 ? -0.5 : 0.5)));
+}
+
+int between(int x, int a, int b)
+{
+    return ((x - a) * (x - b)) <= 0;
+}
+
+int fbetween(float x, float a, float b)
+{
+    return ((x - a) * (x - b)) <= 0.0;
 }
