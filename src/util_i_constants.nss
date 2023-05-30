@@ -203,7 +203,7 @@ string GetConstantName(string sPrefix, json jValue, int bSuffixOnly = FALSE, str
 
     sPrefix = GetStringUpperCase(bSuffixOnly ? sPrefix + "_?(" : "(" + sPrefix);
     json jMatch = RegExpMatch(sPrefix + ".*?)(?: |=).*?=\\s*(" +
-        JsonDump(jValue) + ");", ResManGetFileContents(sFile, RESTYPE_NSS));
+        JsonDump(jValue) + ")\\s*;", ResManGetFileContents(sFile, RESTYPE_NSS));
 
     return jMatch != JsonArray() ? JsonGetString(JsonArrayGet(jMatch, 1)) : "";
 }
