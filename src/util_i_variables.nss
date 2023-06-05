@@ -98,8 +98,7 @@
 ///         desired tag is in all functions calls to ensure the correct record
 ///         is operated on.
 
-#include "util_i_debug"
-#include "util_i_lists"
+#include "util_i_csvlists"
 #include "util_i_matching"
 #include "util_c_variables"
 
@@ -1077,6 +1076,45 @@ string AppendPersistentString(string sVarName, string sAppend, string sTag = "")
 //                              Private Functions
 // -----------------------------------------------------------------------------
 
+/// @private Converts a vector to a json object representing a vector
+json _VectorToJson(vector v = [0.0, 0.0, 0.0])
+{
+    json j = JsonObjectSet(JsonObject(), "x", JsonFloat(v.x));
+         j = JsonObjectSet(j, "y", JsonFloat(v.y));
+    return   JsonObjectSet(j, "z", JsonFloat(v.z));
+}
+
+/// @private Converts a json object representing a vector to a vector
+vector _JsonToVector(json j)
+{
+    float x = JsonGetFloat(JsonObjectGet(j, "x"));
+    float y = JsonGetFloat(JsonObjectGet(j, "y"));
+    float z = JsonGetFloat(JsonObjectGet(j, "z"));
+
+    return Vector(x, y, z);
+}
+
+/// @private Converts a location to a json object representing a location
+/// @note Uses that area tag for persistence since the object ID changes on
+///     every restart.  Having multiple areas with the same tag may lead to
+///     undefined behavior or unexpected results.
+json _LocationToJson(location l)
+{
+    json j = JsonObjectSet(JsonObject(), "area", JsonString(GetTag(GetAreaFromLocation(l))));
+         j = JsonObjectSet(j, "position", _VectorToJson(GetPositionFromLocation(l)));
+    return   JsonObjectSet(j, "facing", JsonFloat(GetFacingFromLocation(l)));
+}
+
+/// @private Converts a json object representing a location to a location
+location _JsonToLocation(json j)
+{
+    object o = GetObjectByTag(JsonGetString(JsonObjectGet(j, "area")));
+    vector v = _JsonToVector(JsonObjectGet(j, "position"));
+    float f  = JsonGetFloat(JsonObjectGet(j, "facing"));
+
+    return Location(o, v, f);
+}
+
 /// @private Returns the variable type as a string
 /// @note For debug purposes only.
 string _VariableTypeToString(int nType)
@@ -1108,7 +1146,8 @@ int _TypeToVariableType(json jType)
     return                      VARIABLE_TYPE_NONE;
 }
 
-/// @private Converts VARIABLE_TYPE_* bitmask to IN
+/// @private Converts VARIABLE_TYPE_* bitmask to a comma-delimited string
+///     usable in a query IN clause
 string _VariableTypeToArray(int nTypes)
 {
     if      (nTypes == VARIABLE_TYPE_NONE) return "";
@@ -1143,7 +1182,7 @@ void _SetLocalVariable(object oObject, string sVarName, int nType, json jValue)
     else if (nType == VARIABLE_TYPE_FLOAT)     SetLocalFloat(oObject, sVarName, JsonGetFloat(jValue));
     else if (nType == VARIABLE_TYPE_STRING)    SetLocalString(oObject, sVarName, JsonGetString(jValue));
     else if (nType == VARIABLE_TYPE_OBJECT)    SetLocalObject(oObject, sVarName, StringToObject(JsonGetString(jValue)));
-    else if (nType == VARIABLE_TYPE_LOCATION)  SetLocalLocation(oObject, sVarName, JsonToLocation(jValue));
+    else if (nType == VARIABLE_TYPE_LOCATION)  SetLocalLocation(oObject, sVarName, _JsonToLocation(jValue));
     else if (nType == VARIABLE_TYPE_JSON)      SetLocalJson(oObject, sVarName, jValue);
 }
 
@@ -1182,6 +1221,9 @@ sqlquery _PrepareVariableSelect(object oObject, int nType, string sVarName, stri
 }
 
 /// @private Prepares an insert query to stored a variable in any database.
+/// @note Values are converted to native sql types with the ->> operator in order to
+///     make them queryable in standard sqlite queries.  Values are converted back to
+///     json or native nwn types as required in other functions.
 sqlquery _PrepareVariableInsert(object oObject, int nType, string sVarName, string sTag)
 {
     int bPC       = GetIsPC(oObject);
@@ -1189,8 +1231,8 @@ sqlquery _PrepareVariableInsert(object oObject, int nType, string sVarName, stri
     string sTable = bPC ? VARIABLE_TABLE_PC : VARIABLE_TABLE_MODULE;
 
     string s =  "INSERT INTO " + sTable + " (type, varname, value, tag, timestamp) " +
-                "VALUES (@type, @varname, @value, @tag, strftime('%s','now')) " +
-                "ON CONFLICT (type, varname, tag) DO UPDATE SET value = @value, " +
+                "VALUES (@type, @varname, @value ->> '$', @tag, strftime('%s','now')) " +
+                "ON CONFLICT (type, varname, tag) DO UPDATE SET value = @value ->> '$', " +
                 "tag = @tag, timestamp = strftime('%s','now');";
 
     sqlquery q = bPC || !bCampaign ? _PrepareQueryObject(oObject, s) : _PrepareQueryCampaign(s);
@@ -1327,7 +1369,7 @@ json _LocalVariablesToJson(object oObject, int nType, string sVarName)
     return SqlStep(q) ? SqlGetJson(q, 0) : JsonArray();
 }
 
-/// @private Increments/Decremenst an existing variable (int/float).  If the variable
+/// @private Increments/Decrements an existing variable (int/float).  If the variable
 ///     does not exist, creates variable, then increments/decrements.
 sqlquery _PrepareVariableIncrement(object oObject, int nType, string sVarName, string sTag)
 {
@@ -1400,14 +1442,11 @@ void _CopyVariablesToDatabase(object oSource, object oDatabase, int nTypes,
 
     if (!GetIsPC(oDatabase) && oDatabase != DB_MODULE && oDatabase != DB_CAMPAIGN)
     {
-        if (IsDebugging(DEBUG_LEVEL_NOTICE))
-            Notice("Attempt to copy local variables to database failed:" +
-                "\n  oSource -> " + GetName(oSource) +
-                "\n  oDatabase -> " + GetName(oDatabase) +
-                "\n  nTypes -> " + IntToHexString(nTypes) +
-                "\n  sVarName -> " + sVarNames +
-                "\n  sTag -> " + sTag +
-                "\n  bDelete -> " + (bDelete ? "TRUE" : "FALSE"));
+        Variable_Debug("Attempt to copy local variables to database failed: " +
+                "destination database must be a PC object, the module object " +
+                "or a campaign database" +
+                "\n  Destination Database (tag) -> " + GetTag(oDatabase),
+                DEBUG_SEVERITY_ERROR);
         return;
     }
 
@@ -1444,15 +1483,11 @@ void _CopyVariablesToObject(object oDatabase, object oTarget, int nTypes, string
 {
     if (!GetIsPC(oDatabase) && oDatabase != DB_MODULE && oDatabase != DB_CAMPAIGN)
     {
-        if (IsDebugging(DEBUG_LEVEL_NOTICE))
-            Notice("Attempt to copy database variables to game object failed:" +
-                "\n  oDatabase -> " + GetName(oDatabase) +
-                "\n  oTarget -> " + GetName(oTarget) +
-                "\n  nTypes -> " + IntToHexString(nTypes) +
-                "\n  sVarName -> " + sVarNames +
-                "\n  sTag -> " + sTag +
-                "\n  nTime -> " + IntToString(nTime) +
-                "\n  bDelete -> " + (bDelete ? "TRUE" : "FALSE"));
+        Variable_Debug("Attempt to copy database variables to object failed: " +
+                "source database must be a PC object, the module object " +
+                "or a campaign database" +
+                "\n  Source Database (tag) -> " + GetTag(oDatabase),
+                DEBUG_SEVERITY_ERROR);
         return;
     }
 
@@ -1484,15 +1519,12 @@ void _CopyDatabaseVariablesToDatabase(object oSource, object oTarget, int nTypes
         (!GetIsPC(oTarget) && oTarget != DB_MODULE && oTarget != DB_CAMPAIGN) ||
         (oSource == oTarget))
     {
-        if (IsDebugging(DEBUG_LEVEL_NOTICE))
-            Notice("Attempt to copy variables between databases failed:" +
-                "\n  oSource -> " + GetName(oSource) +
-                "\n  oTarget -> " + GetName(oTarget) +
-                "\n  nTypes -> " + IntToHexString(nTypes) +
-                "\n  sVarName -> " + sVarNames +
-                "\n  sTag -> " + sTag +
-                "\n  nTime -> " + IntToString(nTime) +
-                "\n  bDelete -> " + (bDelete ? "TRUE" : "FALSE"));
+        Variable_Debug("Attempt to copy between databases failed: " +
+                "source and destination databases must be a PC object, the module object " +
+                "or a campaign database" +
+                "\n  Source Database (tag) -> " + (oSource == DB_CAMPAIGN ? "Campaign Database" : oSource == DB_MODULE ? "Module Database" : GetIsPC(oSource) ? GetName(oSource) : GetTag(oSource)) +
+                "\n  Destination Database (tag) -> " + (oTarget == DB_CAMPAIGN ? "Campaign Database" : oTarget == DB_MODULE ? "Module Database" : GetIsPC(oTarget) ? GetName(oTarget) : GetTag(oTarget)),
+                DEBUG_SEVERITY_ERROR);
         return;
     }
 
@@ -1519,8 +1551,8 @@ void _CopyLocalVariablesToObject(object oSource, object oTarget, int nTypes,
 {
     if (oSource == GetModule())
     {
-        Notice("Attempt to copy variables between objects failed; " +
-            "cannot copy from the module object");
+        Variable_Debug("Attempt to copy variables between objects failed; " +
+            "cannot copy from the module object", DEBUG_SEVERITY_ERROR);
         return;
     }
     else if (oSource == oTarget)
@@ -1573,7 +1605,7 @@ void CreateVariableTable(object oObject)
         "type INTEGER, " +
         "varname TEXT, " +
         "tag TEXT, " +
-        "value TEXT, " +
+        "value NONE, " +
         "timestamp INTEGER, " +
         "PRIMARY KEY (type, varname, tag));";
 
@@ -1720,14 +1752,14 @@ void SetModuleSerialized(string sVarName, object oValue, string sTag = "")
 void SetModuleLocation(string sVarName, location lValue, string sTag = "")
 {
     sqlquery q = _PrepareVariableInsert(DB_MODULE, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    SqlBindJson(q, "@value", LocationToJson(lValue));
+    SqlBindJson(q, "@value", _LocationToJson(lValue));
     SqlStep(q);
 }
 
 void SetModuleVector(string sVarName, vector vValue, string sTag = "")
 {
     sqlquery q = _PrepareVariableInsert(DB_MODULE, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    SqlBindJson(q, "@value", VectorToJson(vValue));
+    SqlBindJson(q, "@value", _VectorToJson(vValue));
     SqlStep(q);
 }
 
@@ -1778,7 +1810,7 @@ object GetModuleSerialized(string sVarName, string sTag, location l, object oTar
 location GetModuleLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(DB_MODULE, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
+    return SqlStep(q) ? _JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector GetModuleVector(string sVarName, string sTag = "")
@@ -1786,7 +1818,7 @@ vector GetModuleVector(string sVarName, string sTag = "")
     sqlquery q = _PrepareVariableSelect(DB_MODULE, VARIABLE_TYPE_VECTOR, sVarName, sTag);
 
     vector v;
-    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    if (SqlStep(q)) v = _JsonToVector(SqlGetJson(q, 0));
     else            v = Vector();
 
     return v;
@@ -1838,7 +1870,7 @@ void DeleteModuleSerialized(string sVarName, string sTag = "")
 location DeleteModuleLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(DB_MODULE, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
+    return SqlStep(q) ? _JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector DeleteModuleVector(string sVarName, string sTag = "")
@@ -1846,7 +1878,7 @@ vector DeleteModuleVector(string sVarName, string sTag = "")
     sqlquery q = _PrepareSimpleVariableDelete(DB_MODULE, VARIABLE_TYPE_VECTOR, sVarName, sTag);
 
     vector v;
-    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    if (SqlStep(q)) v = _JsonToVector(SqlGetJson(q, 0));
     else            v = Vector();
 
     return v;
@@ -1945,14 +1977,14 @@ void SetPlayerSerialized(object oPlayer, string sVarName, object oValue, string 
 void SetPlayerLocation(object oPlayer, string sVarName, location lValue, string sTag = "")
 {
     sqlquery q = _PrepareVariableInsert(oPlayer, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    SqlBindJson(q, "@value", LocationToJson(lValue));
+    SqlBindJson(q, "@value", _LocationToJson(lValue));
     SqlStep(q);
 }
 
 void SetPlayerVector(object oPlayer, string sVarName, vector vValue, string sTag = "")
 {
     sqlquery q = _PrepareVariableInsert(oPlayer, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    SqlBindJson(q, "@value", VectorToJson(vValue));
+    SqlBindJson(q, "@value", _VectorToJson(vValue));
     SqlStep(q);
 }
 
@@ -1998,7 +2030,7 @@ object GetPlayerSerialized(object oPlayer, string sVarName, string sTag, locatio
 location GetPlayerLocation(object oPlayer, string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(oPlayer, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
+    return SqlStep(q) ? _JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector GetPlayerVector(object oPlayer, string sVarName, string sTag = "")
@@ -2006,7 +2038,7 @@ vector GetPlayerVector(object oPlayer, string sVarName, string sTag = "")
     sqlquery q = _PrepareVariableSelect(oPlayer, VARIABLE_TYPE_VECTOR, sVarName, sTag);
 
     vector v;
-    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    if (SqlStep(q)) v = _JsonToVector(SqlGetJson(q, 0));
     else            v = Vector();
 
     return v;
@@ -2058,7 +2090,7 @@ void DeletePlayerSerialized(object oPlayer, string sVarName, string sTag = "")
 location DeletePlayerLocation(object oPlayer, string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(oPlayer, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
+    return SqlStep(q) ? _JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector DeletePlayerVector(object oPlayer, string sVarName, string sTag = "")
@@ -2066,7 +2098,7 @@ vector DeletePlayerVector(object oPlayer, string sVarName, string sTag = "")
     sqlquery q = _PrepareSimpleVariableDelete(oPlayer, VARIABLE_TYPE_VECTOR, sVarName, sTag);
 
     vector v;
-    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    if (SqlStep(q)) v = _JsonToVector(SqlGetJson(q, 0));
     else            v = Vector();
 
     return v;
@@ -2165,14 +2197,14 @@ void SetPersistentSerialized(string sVarName, object oValue, string sTag = "")
 void SetPersistentLocation(string sVarName, location lValue, string sTag = "")
 {
     sqlquery q = _PrepareVariableInsert(DB_CAMPAIGN, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    SqlBindJson(q, "@value", LocationToJson(lValue));
+    SqlBindJson(q, "@value", _LocationToJson(lValue));
     SqlStep(q);
 }
 
 void SetPersistentVector(string sVarName, vector vValue, string sTag = "")
 {
     sqlquery q = _PrepareVariableInsert(DB_CAMPAIGN, VARIABLE_TYPE_VECTOR, sVarName, sTag);
-    SqlBindJson(q, "@value", VectorToJson(vValue));
+    SqlBindJson(q, "@value", _VectorToJson(vValue));
     SqlStep(q);
 }
 
@@ -2223,7 +2255,7 @@ object GetPersistentSerialized(string sVarName, string sTag, location l, object 
 location GetPersistentLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareVariableSelect(DB_CAMPAIGN, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
+    return SqlStep(q) ? _JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector GetPersistentVector(string sVarName, string sTag = "")
@@ -2231,7 +2263,7 @@ vector GetPersistentVector(string sVarName, string sTag = "")
     sqlquery q = _PrepareVariableSelect(DB_CAMPAIGN, VARIABLE_TYPE_VECTOR, sVarName, sTag);
 
     vector v;
-    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    if (SqlStep(q)) v = _JsonToVector(SqlGetJson(q, 0));
     else            v = Vector();
 
     return v;
@@ -2283,7 +2315,7 @@ void DeletePersistentSerialized(string sVarName, string sTag = "")
 location DeletePersistentLocation(string sVarName, string sTag = "")
 {
     sqlquery q = _PrepareSimpleVariableDelete(DB_CAMPAIGN, VARIABLE_TYPE_LOCATION, sVarName, sTag);
-    return SqlStep(q) ? JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
+    return SqlStep(q) ? _JsonToLocation(SqlGetJson(q, 0)) : Location(OBJECT_INVALID, Vector(), 0.0);
 }
 
 vector DeletePersistentVector(string sVarName, string sTag = "")
@@ -2291,7 +2323,7 @@ vector DeletePersistentVector(string sVarName, string sTag = "")
     sqlquery q = _PrepareSimpleVariableDelete(DB_CAMPAIGN, VARIABLE_TYPE_VECTOR, sVarName, sTag);
 
     vector v;
-    if (SqlStep(q)) v = JsonToVector(SqlGetJson(q, 0));
+    if (SqlStep(q)) v = _JsonToVector(SqlGetJson(q, 0));
     else            v = Vector();
 
     return v;

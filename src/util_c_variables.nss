@@ -89,3 +89,32 @@ string ObjectToDatabaseTag(object oSource, object oDatabase, string sVarName,
 {
     return sTag;
 }
+
+// -----------------------------------------------------------------------------
+//                          Debugging Messages
+// -----------------------------------------------------------------------------
+// This function is called when a debug message needs to be sent due to errors
+//  int the system.  Any debug system may be used through this conduit.  The
+//  sample code uses sm-util's util_i_debug.nss.
+// -----------------------------------------------------------------------------
+
+// These are generic constants and can be modified or deleted at anytime to
+//  better suit your debugging preferences.
+
+const int DEBUG_SEVERITY_NONE     = 0;
+const int DEBUG_SEVERITY_CRITICAL = 1;
+const int DEBUG_SEVERITY_ERROR    = 2;
+const int DEBUG_SEVERITY_WARNING  = 3;
+const int DEBUG_SEVERITY_NOTICE   = 4;
+const int DEBUG_SEVERITY_DEBUG    = 5;
+
+/// @brief Sends a debug message to the desired destination.
+/// @param sMessage The debug message.
+/// @param nSeverity DEBUG_SEVERITY_*.
+
+// #include "util_i_debug"
+
+void Variable_Debug(string sMessage, int nSeverity = DEBUG_SEVERITY_NOTICE)
+{
+    //Debug(sMessage, nSeverity);
+}
