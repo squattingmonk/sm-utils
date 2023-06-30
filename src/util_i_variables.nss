@@ -1189,9 +1189,10 @@ sqlquery _PrepareVariableInsert(object oObject, int nType, string sVarName, stri
     string sTable = bPC ? VARIABLE_TABLE_PC : VARIABLE_TABLE_MODULE;
 
     string s =  "INSERT INTO " + sTable + " (type, varname, value, tag, timestamp) " +
-                "VALUES (@type, @varname, @value, @tag, strftime('%s','now')) " +
-                "ON CONFLICT (type, varname, tag) DO UPDATE SET value = @value, " +
-                "tag = @tag, timestamp = strftime('%s','now');";
+                "VALUES (@type, @varname, IIF(json_valid(@value), @value ->> '$', @value), " +
+                "@tag, strftime('%s', 'now')) ON CONFLICT (type, varname, tag) DO UPDATE " +
+                "SET value = IIF(json_valid(@value), @value ->> '$', @value), tag = @tag, " +
+                "timestamp = strftime('%s', 'now');";
 
     sqlquery q = bPC || !bCampaign ? _PrepareQueryObject(oObject, s) : _PrepareQueryCampaign(s);
     SqlBindInt   (q, "@type", nType);
