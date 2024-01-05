@@ -416,11 +416,6 @@ void _DeleteTargetingHookData(int nHookID)
 void _ExitTargetingMode(int nHookID)
 {
     struct TargetingHook th = GetTargetingHookDataByHookID(nHookID);
-
-    DeleteTargetingHook(nHookID);
-    DeleteLocalInt(th.oPC, TARGET_HOOK_ID);
-    DeleteLocalInt(th.oPC, TARGET_HOOK_BEHAVIOR);
-
     if (th.sScript != "")
     {
         Debug("Running post-targeting script " + th.sScript + " from Targeting Hook ID " +
@@ -430,6 +425,10 @@ void _ExitTargetingMode(int nHookID)
     else
         Debug("No post-targeting script specified for Targeting Hook ID " + IntToString(nHookID) + " " +
             "on " + GetName(th.oPC) + " with varname " + th.sVarName);
+
+    DeleteTargetingHook(nHookID);
+    DeleteLocalInt(th.oPC, TARGET_HOOK_ID);
+    DeleteLocalInt(th.oPC, TARGET_HOOK_BEHAVIOR);
 }
 
 // Reduces the number of targeting hooks remaining. When the remaining number is
@@ -664,7 +663,7 @@ int GetTargetingHookID(object oPC, string sVarName)
     string s =  "SELECT nHookID " +
                 "FROM targeting_hooks " +
                 "WHERE sUUID = @sUUID " +
-                    "AND sVarName =@sVarName;";
+                    "AND sVarName = @sVarName;";
 
     sqlquery q = _PrepareTargetingQuery(s);
     SqlBindString(q, "@sUUID", GetObjectUUID(oPC));

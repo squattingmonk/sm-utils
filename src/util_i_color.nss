@@ -344,21 +344,5 @@ string HSVColorString(string sString, struct HSV hsv)
 
 string UnColorString(string sString)
 {
-    sString = StringReplace(sString, "</c>", "");
-    int nOpen = FindSubString(sString, "<c");
-    int nClose = FindSubString(sString, ">", nOpen);
-    int nLength;
-    string sPrefix, sSuffix;
-
-    while (nOpen != -1 && nClose != -1)
-    {
-        nLength = GetStringLength(sString);
-        sPrefix = GetStringLeft(sString, nOpen);
-        sSuffix = GetStringRight(sString, nLength - nClose - 1);
-        sString = sPrefix + sSuffix;
-        nOpen = FindSubString(sString, "<c");
-        nClose = FindSubString(sString, ">", nOpen);
-    }
-
-    return sString;
+    return RegExpReplace("<c[\\S\\s]{3}>|<\\/c>", sString, "");
 }
