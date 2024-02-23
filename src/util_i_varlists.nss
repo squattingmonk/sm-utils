@@ -291,6 +291,41 @@ int RemoveListString(object oTarget, string sValue, string sListName = "", int b
 /// @returns The number of items remanining in the list.
 int RemoveListJson(object oTarget, json jValue, string sListName = "", int bMaintainOrder = FALSE);
 
+/// @brief Removes and returns the first value from an object's float list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+float PopListFloat(object oTarget, string sListName = "");
+
+/// @brief Removes and returns the first value from an object's int list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+int PopListInt(object oTarget, string sListName = "");
+
+/// @brief Removes and returns the first value from an object's location list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+location PopListLocation(object oTarget, string sListName = "");
+
+/// @brief Removes and returns the first value from an object's vector list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+vector PopListVector(object oTarget, string sListName = "");
+
+/// @brief Removes and returns the first value from an object's object list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+object PopListObject(object oTarget, string sListName = "");
+
+/// @brief Removes and returns the first value from an object's string list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+string PopListString(object oTarget, string sListName = "");
+
+/// @brief Removes and returns the first value from an object's json list.
+/// @param oTarget The object the list is stored on.
+/// @param sListName The name of the list.
+json PopListJson(object oTarget, string sListName = "");
+
 /// @brief Return the index of the first occurrence of a value in an object's
 ///     float list.
 /// @param oTarget The object the list is stored on.
@@ -1070,6 +1105,8 @@ void ReverseJsonList(object oTarget, string sListName = "");
 //                           Function Implementations
 // -----------------------------------------------------------------------------
 
+#include "util_i_debug"
+
 // -----------------------------------------------------------------------------
 //                              Private Functions
 // -----------------------------------------------------------------------------
@@ -1078,14 +1115,14 @@ void ReverseJsonList(object oTarget, string sListName = "");
 // If bNegative is TRUE, -1 will be returned as a valid nIndex value.
 int _GetIsIndexValid(json jList, int nIndex, int bNegative = FALSE)
 {
-    return nIndex >= (0 - bNegative) && nIndex < JsonGetLength(jList);
+    return nIndex == 0 || nIndex >= (0 - bNegative) && nIndex < JsonGetLength(jList);
 }
 
 // Retrieves json array sListName of sListType from oTarget.
 json _GetList(object oTarget, string sListType, string sListName = "")
 {
     json jList = GetLocalJson(oTarget, LIST_REF + sListType + sListName);
-    return jList == JsonNull() ? JsonArray() : jList;
+    return jList == JSON_NULL ? JSON_ARRAY : jList;
 }
 
 // Sets sListType json array jList as sListName on oTarget.
@@ -1110,8 +1147,7 @@ int _InsertListElement(object oTarget, string sListType, string sListName,
 
     if (_GetIsIndexValid(jList, nIndex, TRUE) == TRUE)
     {
-        jList = JsonArrayInsert(jList, jValue, nIndex);
-
+        JsonArrayInsertInplace(jList, jValue, nIndex);
         if (bUnique == TRUE)
             jList = JsonArrayTransform(jList, JSON_ARRAY_UNIQUE);
 
@@ -1122,13 +1158,11 @@ int _InsertListElement(object oTarget, string sListType, string sListName,
 }
 
 // Returns array element at nIndex from array sListName on oTarget. If not
-// found, returns JsonNull().
+// found, returns JSON_NULL.
 json _GetListElement(object oTarget, string sListType, string sListName, int nIndex)
 {
     json jList = _GetList(oTarget, sListType, sListName);
-    return _GetIsIndexValid(jList, nIndex) == TRUE ?
-                JsonArrayGet(jList, nIndex) :
-                JsonNull();
+    return _GetIsIndexValid(jList, nIndex) ? JsonArrayGet(jList, nIndex) : JSON_NULL;
 }
 
 // Deletes array element at nIndex from array sListName on oTarget. Element order
@@ -1139,7 +1173,7 @@ int _DeleteListElement(object oTarget, string sListType, string sListName, int n
 
     if (_GetIsIndexValid(jList, nIndex) == TRUE && JsonGetLength(jList) > 0)
     {
-        jList = JsonArrayDel(jList, nIndex);
+        JsonArrayDelInplace(jList, nIndex);
         _SetList(oTarget, sListType, sListName, jList);
     }
 
@@ -1152,7 +1186,7 @@ int _FindListElement(object oTarget, string sListType, string sListName, json jV
 {
     json jList = _GetList(oTarget, sListType, sListName);
     json jIndex = JsonFind(jList, jValue, 0, JSON_FIND_EQUAL);
-    return jIndex == JsonNull() ? -1 : JsonGetInt(jIndex);
+    return jIndex == JSON_NULL ? -1 : JsonGetInt(jIndex);
 }
 
 // Deletes array element jValue from array sListName on oTarget. Element order
@@ -1164,7 +1198,7 @@ int _RemoveListElement(object oTarget, string sListType, string sListName, json 
 
     if (nIndex > -1)
     {
-        jList = JsonArrayDel(jList, nIndex);
+        JsonArrayDelInplace(jList, nIndex);
         _SetList(oTarget, sListType, sListName, JsonArrayDel(jList, nIndex));
     }
 
@@ -1217,8 +1251,8 @@ int _CopyListElements(object oSource, object oTarget, string sListType, string s
     json jSource = _GetList(oSource, sListType, sSourceName);
     json jTarget = _GetList(oTarget, sListType, sTargetName);
 
-    if (jTarget == JsonNull())
-        jTarget = JsonArray();
+    if (jTarget == JSON_NULL)
+        jTarget = JSON_ARRAY;
 
     int nSource = JsonGetLength(jSource);
     int nTarget = JsonGetLength(jTarget);
@@ -1229,7 +1263,7 @@ int _CopyListElements(object oSource, object oTarget, string sListType, string s
 
     if (nIndex == 0 && (nRange == -1 || nRange >= nSource))
     {
-        if (jSource == JsonNull() || nSource == 0)
+        if (jSource == JSON_NULL || nSource == 0)
             return 0;
 
         jReturn = _JsonArrayAppend(jSource, jTarget);
@@ -1268,7 +1302,7 @@ int _IncrementListElement(object oTarget, string sListName, int nIndex, int nInc
     if (_GetIsIndexValid(jList, nIndex))
     {
         int nValue = JsonGetInt(JsonArrayGet(jList, nIndex)) + nIncrement;
-        jList = JsonArraySet(jList, nIndex, JsonInt(nValue));
+        JsonArraySetInplace(jList, nIndex, JsonInt(nValue));
         _SetList(oTarget, VARLIST_TYPE_INT, sListName, jList);
 
         return nValue;
@@ -1280,11 +1314,11 @@ int _IncrementListElement(object oTarget, string sListName, int nIndex, int nInc
 // Creates an array of length nLength jDefault elements as sListName on oTarget.
 json _DeclareList(object oTarget, string sListType, string sListName, int nLength, json jDefault)
 {
-    json jList = JsonArray();
+    json jList = JSON_ARRAY;
 
     int n;
     for (n = 0; n < nLength; n++)
-        jList = JsonArrayInsert(jList, jDefault);
+        JsonArrayInsertInplace(jList, jDefault);
 
     _SetList(oTarget, sListType, sListName, jList);
     return jList;
@@ -1294,7 +1328,7 @@ json _DeclareList(object oTarget, string sListType, string sListName, int nLengt
 json _NormalizeList(object oTarget, string sListType, string sListName, int nLength, json jDefault)
 {
     json jList = _GetList(oTarget, sListType, sListName);
-    if (jList == JsonArray())
+    if (jList == JSON_ARRAY)
         return _DeclareList(oTarget, sListType, sListName, nLength, jDefault);
     else if (nLength < 0)
         return jList;
@@ -1306,7 +1340,7 @@ json _NormalizeList(object oTarget, string sListType, string sListName, int nLen
         else
         {
             for (n = 0; n < nLength - nList; n++)
-                jList = JsonArrayInsert(jList, jDefault);
+                JsonArrayInsertInplace(jList, jDefault);
         }
 
         _SetList(oTarget, sListType, sListName, jList);
@@ -1336,10 +1370,12 @@ void _SortList(object oTarget, string sListType, string sListName, int nOrder)
 
 json VectorToJson(vector vPosition = [0.0, 0.0, 0.0])
 {
-    json jPosition = JsonObject();
-         jPosition = JsonObjectSet(jPosition, "x", JsonFloat(vPosition.x));
-         jPosition = JsonObjectSet(jPosition, "y", JsonFloat(vPosition.y));
-    return           JsonObjectSet(jPosition, "z", JsonFloat(vPosition.z));
+    json jPosition = JSON_OBJECT;
+    JsonObjectSetInplace(jPosition, "x", JsonFloat(vPosition.x));
+    JsonObjectSetInplace(jPosition, "y", JsonFloat(vPosition.y));
+    JsonObjectSetInplace(jPosition, "z", JsonFloat(vPosition.z));
+
+    return jPosition;
 }
 
 json JsonVector(vector vPosition = [0.0, 0.0, 0.0])
@@ -1363,10 +1399,12 @@ vector JsonGetVector(json jPosition)
 
 json LocationToJson(location lLocation)
 {
-    json jLocation = JsonObject();
-         jLocation = JsonObjectSet(jLocation, "area", JsonString(ObjectToString(GetAreaFromLocation(lLocation))));
-         jLocation = JsonObjectSet(jLocation, "position", VectorToJson(GetPositionFromLocation(lLocation)));
-    return           JsonObjectSet(jLocation, "facing", JsonFloat(GetFacingFromLocation(lLocation)));
+    json jLocation = JSON_OBJECT;
+    JsonObjectSetInplace(jLocation, "area", JsonString(GetTag(GetAreaFromLocation(lLocation))));
+    JsonObjectSetInplace(jLocation, "position", VectorToJson(GetPositionFromLocation(lLocation)));
+    JsonObjectSetInplace(jLocation, "facing", JsonFloat(GetFacingFromLocation(lLocation)));
+
+    return jLocation;
 }
 
 json JsonLocation(location lLocation)
@@ -1376,7 +1414,7 @@ json JsonLocation(location lLocation)
 
 location JsonToLocation(json jLocation)
 {
-    object oArea = StringToObject(JsonGetString(JsonObjectGet(jLocation, "area")));
+    object oArea = GetObjectByTag(JsonGetString(JsonObjectGet(jLocation, "area")));
     vector vPosition = JsonToVector(JsonObjectGet(jLocation, "position"));
     float fFacing = JsonGetFloat(JsonObjectGet(jLocation, "facing"));
 
@@ -1429,20 +1467,20 @@ int AddListJson(object oTarget, json jValue, string sListName = "", int bAddUniq
 float GetListFloat(object oTarget, int nIndex = 0, string sListName = "")
 {
     json jValue = _GetListElement(oTarget, VARLIST_TYPE_FLOAT, sListName, nIndex);
-    return jValue == JsonNull() ? 0.0 : JsonGetFloat(jValue);
+    return jValue == JSON_NULL ? 0.0 : JsonGetFloat(jValue);
 }
 
 int GetListInt(object oTarget, int nIndex = 0, string sListName = "")
 {
     json jValue = _GetListElement(oTarget, VARLIST_TYPE_INT, sListName, nIndex);
-    return jValue == JsonNull() ? -1 : JsonGetInt(jValue);
+    return jValue == JSON_NULL ? -1 : JsonGetInt(jValue);
 }
 
 location GetListLocation(object oTarget, int nIndex = 0, string sListName = "")
 {
     json jValue = _GetListElement(oTarget, VARLIST_TYPE_LOCATION, sListName, nIndex);
 
-    if (jValue == JsonNull())
+    if (jValue == JSON_NULL)
         return Location(OBJECT_INVALID, Vector(), 0.0);
     else
         return JsonToLocation(jValue);
@@ -1452,7 +1490,7 @@ vector GetListVector(object oTarget, int nIndex = 0, string sListName = "")
 {
     json jValue = _GetListElement(oTarget, VARLIST_TYPE_VECTOR, sListName, nIndex);
 
-    if (jValue == JsonNull())
+    if (jValue == JSON_NULL)
         return Vector();
     else
         return JsonToVector(jValue);
@@ -1461,13 +1499,13 @@ vector GetListVector(object oTarget, int nIndex = 0, string sListName = "")
 object GetListObject(object oTarget, int nIndex = 0, string sListName = "")
 {
     json jValue = _GetListElement(oTarget, VARLIST_TYPE_OBJECT, sListName, nIndex);
-    return jValue == JsonNull() ? OBJECT_INVALID : StringToObject(JsonGetString(jValue));
+    return jValue == JSON_NULL ? OBJECT_INVALID : StringToObject(JsonGetString(jValue));
 }
 
 string GetListString(object oTarget, int nIndex = 0, string sListName = "")
 {
     json jValue = _GetListElement(oTarget, VARLIST_TYPE_STRING, sListName, nIndex);
-    return jValue == JsonNull() ? "" : JsonGetString(jValue);
+    return jValue == JSON_NULL ? "" : JsonGetString(jValue);
 }
 
 json GetListJson(object oTarget, int nIndex = 0, string sListName = "")
@@ -1546,6 +1584,55 @@ int RemoveListString(object oTarget, string sValue, string sListName = "", int b
 int RemoveListJson(object oTarget, json jValue, string sListName = "", int bMaintainOrder = FALSE)
 {
     return _RemoveListElement(oTarget, VARLIST_TYPE_JSON, sListName, jValue);
+}
+
+float PopListFloat(object oTarget, string sListName = "")
+{
+    float f = GetListFloat(oTarget, 0, sListName);
+    DeleteListFloat(oTarget, 0, sListName);
+    return f;
+}
+
+int PopListInt(object oTarget, string sListName = "")
+{
+    int n = GetListInt(oTarget, 0, sListName);
+    DeleteListInt(oTarget, 0, sListName);
+    return n;
+}
+
+location PopListLocation(object oTarget, string sListName = "")
+{
+    location l = GetListLocation(oTarget, 0, sListName);
+    DeleteListLocation(oTarget, 0, sListName);
+    return l;
+}
+
+vector PopListVector(object oTarget, string sListName = "")
+{
+    vector v = GetListVector(oTarget, 0, sListName);
+    DeleteListVector(oTarget, 0, sListName);
+    return v;
+}
+
+object PopListObject(object oTarget, string sListName = "")
+{
+    object o = GetListObject(oTarget, 0, sListName);
+    DeleteListObject(oTarget, 0, sListName);
+    return o;
+}
+
+string PopListString(object oTarget, string sListName = "")
+{
+    string s = GetListString(oTarget, 0, sListName);
+    DeleteListString(oTarget, 0, sListName);
+    return s;
+}
+
+json PopListJson(object oTarget, string sListName = "")
+{
+    json j = GetListJson(oTarget, 0, sListName);
+    DeleteListString(oTarget, 0, sListName);
+    return j;
 }
 
 int FindListFloat(object oTarget, float fValue, string sListName = "")
@@ -1859,17 +1946,17 @@ json DeclareIntList(object oTarget, int nCount, string sListName = "", int nDefa
 
 json DeclareLocationList(object oTarget, int nCount, string sListName = "")
 {
-    return _DeclareList(oTarget, VARLIST_TYPE_LOCATION, sListName, nCount, JsonNull());
+    return _DeclareList(oTarget, VARLIST_TYPE_LOCATION, sListName, nCount, JSON_NULL);
 }
 
 json DeclareVectorList(object oTarget, int nCount, string sListName = "")
 {
-    return _DeclareList(oTarget, VARLIST_TYPE_VECTOR, sListName, nCount, JsonNull());
+    return _DeclareList(oTarget, VARLIST_TYPE_VECTOR, sListName, nCount, JSON_NULL);
 }
 
 json DeclareObjectList(object oTarget, int nCount, string sListName = "")
 {
-    return _DeclareList(oTarget, VARLIST_TYPE_OBJECT, sListName, nCount, JsonNull());
+    return _DeclareList(oTarget, VARLIST_TYPE_OBJECT, sListName, nCount, JSON_NULL);
 }
 
 json DeclareStringList(object oTarget, int nCount, string sListName = "", string sDefault = "")
@@ -1879,7 +1966,7 @@ json DeclareStringList(object oTarget, int nCount, string sListName = "", string
 
 json DeclareJsonList(object oTarget, int nCount, string sListName = "")
 {
-    return _DeclareList(oTarget, VARLIST_TYPE_JSON, sListName, nCount, JsonNull());
+    return _DeclareList(oTarget, VARLIST_TYPE_JSON, sListName, nCount, JSON_NULL);
 }
 
 json NormalizeFloatList(object oTarget, int nCount, string sListName = "", float fDefault = 0.0)
@@ -1894,17 +1981,17 @@ json NormalizeIntList(object oTarget, int nCount, string sListName = "", int nDe
 
 json NormalizeLocationList(object oTarget, int nCount, string sListName = "")
 {
-    return _NormalizeList(oTarget, VARLIST_TYPE_LOCATION, sListName, nCount, JsonNull());
+    return _NormalizeList(oTarget, VARLIST_TYPE_LOCATION, sListName, nCount, JSON_NULL);
 }
 
 json NormalizeVectorList(object oTarget, int nCount, string sListName = "")
 {
-    return _NormalizeList(oTarget, VARLIST_TYPE_VECTOR, sListName, nCount, JsonNull());
+    return _NormalizeList(oTarget, VARLIST_TYPE_VECTOR, sListName, nCount, JSON_NULL);
 }
 
 json NormalizeObjectList(object oTarget, int nCount, string sListName = "")
 {
-    return _NormalizeList(oTarget, VARLIST_TYPE_OBJECT, sListName, nCount, JsonNull());
+    return _NormalizeList(oTarget, VARLIST_TYPE_OBJECT, sListName, nCount, JSON_NULL);
 }
 
 json NormalizeStringList(object oTarget, int nCount, string sListName = "", string sDefault = "")
@@ -1914,7 +2001,7 @@ json NormalizeStringList(object oTarget, int nCount, string sListName = "", stri
 
 json NormalizeJsonList(object oTarget, int nCount, string sListName = "")
 {
-    return _NormalizeList(oTarget, VARLIST_TYPE_JSON, sListName, nCount, JsonNull());
+    return _NormalizeList(oTarget, VARLIST_TYPE_JSON, sListName, nCount, JSON_NULL);
 }
 
 void CopyFloatList(object oSource, object oTarget, string sSourceName, string sTargetName, int bAddUnique = FALSE)

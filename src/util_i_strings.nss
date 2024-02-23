@@ -2,7 +2,7 @@
 /// @file   util_i_strings.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Functions for formatting times
+/// @brief  Functions for manipulating strings
 /// ----------------------------------------------------------------------------
 /// @details This file holds utility functions for manipulating strings.
 /// ----------------------------------------------------------------------------
@@ -323,23 +323,17 @@ int GetIsAlphaNumeric(string sString)
 
 string TrimStringLeft(string sString, string sRemove = " ")
 {
-    while (FindSubString(sRemove, GetStringLeft(sString, 1)) != -1)
-        sString = GetStringRight(sString, GetStringLength(sString) - 1);
-
-    return sString;
+    return RegExpReplace("^(?:" + sRemove + ")*", sString, "");
 }
 
 string TrimStringRight(string sString, string sRemove = " ")
 {
-    while (FindSubString(sRemove, GetStringRight(sString, 1)) != -1)
-        sString = GetStringLeft(sString, GetStringLength(sString) - 1);
-
-    return sString;
+    return RegExpReplace("(:?" + sRemove + ")*$", sString, "");
 }
 
 string TrimString(string sString, string sRemove = " ")
 {
-    return TrimStringRight(TrimStringLeft(sString, sRemove), sRemove);
+    return RegExpReplace("^(:?" + sRemove + ")*|(?:" + sRemove + ")*$", sString, "");
 }
 
 string FormatValues(json jArray, string sFormat)
@@ -374,7 +368,7 @@ string FormatFloat(float f, string sFormat)
     json jArray = JsonArray();
     int i, nCount = GetSubStringCount(sFormat, "%");
     for (i = 0; i < nCount; i++)
-        jArray = JsonArrayInsert(jArray, JsonFloat(f));
+        JsonArrayInsertInplace(jArray, JsonFloat(f));
     return FormatValues(jArray, sFormat);
 }
 
@@ -383,7 +377,7 @@ string FormatInt(int n, string sFormat)
     json jArray = JsonArray();
     int i, nCount = GetSubStringCount(sFormat, "%");
     for (i = 0; i < nCount; i++)
-        jArray = JsonArrayInsert(jArray, JsonInt(n));
+        JsonArrayInsertInplace(jArray, JsonInt(n));
     return FormatValues(jArray, sFormat);
 }
 
@@ -392,7 +386,7 @@ string FormatString(string s, string sFormat)
     json jArray = JsonArray();
     int i, nCount = GetSubStringCount(sFormat, "%");
     for (i = 0; i < nCount; i++)
-        jArray = JsonArrayInsert(jArray, JsonString(s));
+        JsonArrayInsertInplace(jArray, JsonString(s));
     return FormatValues(jArray, sFormat);
 }
 

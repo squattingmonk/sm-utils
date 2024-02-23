@@ -52,17 +52,10 @@ string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, i
 
 json SplitList(object oTarget, string sList, string sListName = "", int bAddUnique = FALSE, int nListType = LIST_TYPE_STRING)
 {
-    json jList = JsonArray();
+    json jList = JSON_ARRAY;
 
     if (nListType == LIST_TYPE_STRING)
-    {
-        int n, nCount = CountList(sList);
-        for (n = 0; n < nCount; n++)
-        {
-            string sListItem = GetListItem(sList, n);
-            jList = JsonArrayInsert(jList, JsonString(TrimString(sListItem)));
-        }
-    }
+        jList = ListToJson(sList, TRUE);
     else
         jList = JsonParse("[" + sList + "]");
 
@@ -94,11 +87,7 @@ string JoinList(object oTarget, string sListName = "", int bAddUnique = FALSE, i
 
     string sList;
     if (nListType == LIST_TYPE_STRING)
-    {
-        int n, nCount = JsonGetLength(jList);
-        for (n = 0; n < nCount; n++)
-            sList = AddListItem(sList, JsonGetString(JsonArrayGet(jList, n)));
-    }
+        sList = JsonToList(jList);
     else
     {
         sList = JsonDump(jList);

@@ -52,6 +52,11 @@ const int UNITTEST_PARAMETER_RECEIVED = COLOR_PINK;
 //  test failure.
 const string UNITTEST_FAILURE_SCRIPT = "";
 
+// This value determines whether test results are expanded.  Set to TRUE to force
+//  all test results to show expanded data.  Set to FALSE to show expanded data
+//  only on test failures.
+const int UNITTEST_ALWAYS_EXPAND = FALSE;
+
 // -----------------------------------------------------------------------------
 //                        Helper Constants and Functions
 // -----------------------------------------------------------------------------
