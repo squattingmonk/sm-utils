@@ -164,13 +164,13 @@ string MergeLocalList(object oObject, string sListName, string sListToMerge, int
 /// @param sList Source CSV list.
 /// @param bNormalize TRUE to remove excess spaces and values.  See NormalizeList().
 /// @returns JSON array representation of CSV list.
-json ListToJson(string sList, int bNormalize = FALSE);
+json ListToJson(string sList, int bNormalize = TRUE);
 
 /// @brief Convert a JSON array to a comma-separate value list.
 /// @param jList JSON array list.
 /// @param bNormalize TRUE to remove excess spaces and values.  See NormalizeList().
 /// @returns CSV list of JSON array values.
-string JsonToList(json jList, int bNormalize = FALSE);
+string JsonToList(json jList, int bNormalize = TRUE);
 
 // -----------------------------------------------------------------------------
 //                           Function Implementations
@@ -193,6 +193,9 @@ int CountList(string sList)
 
 string AddListItem(string sList, string sListItem, int bAddUnique = FALSE)
 {
+    sList = NormalizeList(sList);
+    sListItem = TrimString(sListItem);
+
     if (bAddUnique && HasListItem(sList, sListItem))
         return sList;
 
@@ -239,7 +242,7 @@ string GetListItem(string sList, int nIndex = 0)
 
 int FindListItem(string sList, string sListItem, int nNth = 0)
 {
-    json jIndex = JsonFind(ListToJson(sList), JsonString(sListItem), nNth);
+    json jIndex = JsonFind(ListToJson(sList), JsonString(TrimString(sListItem)), nNth);
     return jIndex == JSON_NULL ? -1 : JsonGetInt(jIndex);
 }
 
@@ -290,7 +293,7 @@ string MergeLists(string sList1, string sList2, int bAddUnique = FALSE)
     if (bAddUnique)
         sList = JsonToList(JsonArrayTransform(ListToJson(sList), JSON_ARRAY_UNIQUE));
 
-    return sList;
+    return bAddUnique ? sList : NormalizeList(sList);
 }
 
 string AddLocalListItem(object oObject, string sListName, string sListItem, int bAddUnique = FALSE)
@@ -325,7 +328,7 @@ string MergeLocalList(object oObject, string sListName, string sListToMerge, int
     return sList;
 }
 
-json ListToJson(string sList, int bNormalize = FALSE)
+json ListToJson(string sList, int bNormalize = TRUE)
 {
     if (sList == "")
         return JSON_ARRAY;
@@ -337,7 +340,7 @@ json ListToJson(string sList, int bNormalize = FALSE)
     return JsonParse("[\"" + RegExpReplace(",", sList, "\",\"") + "\"]");
 }
 
-string JsonToList(json jList, int bNormalize = FALSE)
+string JsonToList(json jList, int bNormalize = TRUE)
 {
     if (JsonGetType(jList) != JSON_TYPE_ARRAY)
         return "";
