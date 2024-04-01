@@ -82,6 +82,7 @@ void HandleUnitTestOutput(string sOutput, object oTarget=OBJECT_INVALID)
 			 if(GetIsObjectValid(oTarget))
 			 {
 			 SendMessageToPC(oTarget, sOutput);
+			 return;
 			 }
 			 SendMessageToPC(GetFirstPC(), sOutput);
     */
