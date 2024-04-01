@@ -264,7 +264,14 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJ
             SendMessageToAllDMs(sMessage);
 
         if (nLogging & DEBUG_LOG_PC)
-            SendMessageToPC(GetFirstPC(), sMessage);
+				{
+						if(GetIsObjectValid(oTarget))
+						{
+								SendMessageToPC(oTarget, sMessage);
+								return;
+						}
+						SendMessageToPC(GetFirstPC(), sMessage);
+				}
     }
 }
 
