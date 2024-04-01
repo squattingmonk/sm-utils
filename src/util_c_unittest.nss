@@ -73,15 +73,18 @@ const int UNITTEST_ALWAYS_EXPAND = FALSE;
 
 /// @brief Custom handler to handle reporting unit test results.
 /// @param sOutput The formatted and colored output results of a unit test.
-void HandleUnitTestOutput(string sOutput)
+void HandleUnitTestOutput(string sOutput, object oTarget=OBJECT_INVALID)
 {
-    // This handler can be used to report the unit test output using any module
-    //  debugging or other reporting system.
+		// This handler can be used to report the unit test output using any module
+		//  debugging or other reporting system.
+		Notice(sOutput);
     /*
-        SendMessageToPC(GetFirstPC(), sOutput);
+			 if(GetIsObjectValid(oTarget))
+			 {
+			 SendMessageToPC(oTarget, sOutput);
+			 }
+			 SendMessageToPC(GetFirstPC(), sOutput);
     */
-
-    Notice(sOutput);
 }
 
 // -----------------------------------------------------------------------------

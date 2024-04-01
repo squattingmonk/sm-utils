@@ -103,6 +103,8 @@ const string TIMER_LAST      = "*TimerID";
 const string TIMER_ACTION    = "*TimerAction";
 const string TIMER_SOURCE    = "*TimerSource";
 
+const float MIN_INTERVAL_INFINITE_ITERATIONS = 6.0f;
+
 // -----------------------------------------------------------------------------
 //                               Global Variables
 // -----------------------------------------------------------------------------
@@ -343,7 +345,7 @@ int CreateTimer(object oTarget, string sAction, float fInterval, int nIterations
         sError = "fJitter is too low for fInterval";
     else if (nIterations < 0)
         sError = "nIterations is negative";
-    else if (fInterval < 6.0 && !nIterations)
+    else if (fInterval < MIN_INTERVAL_INFINITE_ITERATIONS && !nIterations)
         sError = "fInterval is too short for infinite executions";
 
     if (sError != "")
