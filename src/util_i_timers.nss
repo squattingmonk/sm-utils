@@ -327,8 +327,8 @@ int CreateTimer(object oTarget, string sAction, float fInterval, int nIterations
         "\n    sAction: " + sAction +
         "\n    sHandler: " + sHandler +
         "\n    nIterations: " + (nIterations ? IntToString(nIterations) : "Infinite") +
-        "\n    fInterval: " + FloatToString(fInterval, 0, 1) +
-        "\n    fJitter: " + FloatToString(fJitter, 0, 1);
+        "\n    fInterval: " + FloatToString(fInterval, 0, 2) +
+        "\n    fJitter: " + FloatToString(fJitter, 0, 2);
 
     // Sanity checks: don't create the timer if...
     // 1. the target is invalid
