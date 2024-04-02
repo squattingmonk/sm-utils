@@ -114,7 +114,7 @@ int IsDebugging(int nLevel, object oTarget = OBJECT_SELF);
 /// @param sMessage The message to display.
 /// @param nLevel A `DEBUG_LEVEL_*` constant representing the message verbosity.
 /// @param oTarget The object originating the message.
-void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF);
+void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF, object oMessageTo = OBJECT_INVALID);
 
 /// @brief Display a general notice message. Alias for Debug().
 /// @param sMessage The message to display.
@@ -235,7 +235,7 @@ int IsDebugging(int nLevel, object oTarget = OBJECT_SELF)
     return (nLevel <= GetDebugLevel(oTarget));
 }
 
-void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF)
+void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF, object oMessageTo = OBJECT_INVALID)
 {
     if (IsDebugging(nLevel, oTarget))
     {
@@ -264,7 +264,22 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJ
             SendMessageToAllDMs(sMessage);
 
         if (nLogging & DEBUG_LOG_PC)
-            SendMessageToPC(GetFirstPC(), sMessage);
+        {
+            if(GetIsObjectValid(oMessageTo))
+            {
+                if(GetIsPC(oMessageTo))
+                {
+                    SendMessageToPC(oMessageTo, sMessage);
+                    return;
+                }
+            }
+            object oPC = GetFirstPC();
+            while(GetIsObjectValid(oPC))
+            {
+                SendMessageToPC(GetFirstPC(), sMessage);
+                oPC = GetNextPC();
+            }
+        }
     }
 }
 
