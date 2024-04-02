@@ -114,6 +114,7 @@ int IsDebugging(int nLevel, object oTarget = OBJECT_SELF);
 /// @param sMessage The message to display.
 /// @param nLevel A `DEBUG_LEVEL_*` constant representing the message verbosity.
 /// @param oTarget The object originating the message.
+/// @param oMessageTo The object to receive the message.
 void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF, object oMessageTo = OBJECT_INVALID);
 
 /// @brief Display a general notice message. Alias for Debug().
