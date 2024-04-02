@@ -92,6 +92,7 @@
 #include "util_i_sqlite"
 #include "util_i_debug"
 #include "util_i_datapoint"
+#include "util_c_timers"
 
 // -----------------------------------------------------------------------------
 //                                   Constants
@@ -326,8 +327,8 @@ int CreateTimer(object oTarget, string sAction, float fInterval, int nIterations
         "\n    sAction: " + sAction +
         "\n    sHandler: " + sHandler +
         "\n    nIterations: " + (nIterations ? IntToString(nIterations) : "Infinite") +
-        "\n    fInterval: " + FloatToString(fInterval, 0, 1) +
-        "\n    fJitter: " + FloatToString(fJitter, 0, 1);
+        "\n    fInterval: " + FloatToString(fInterval, 0, 2) +
+        "\n    fJitter: " + FloatToString(fJitter, 0, 2);
 
     // Sanity checks: don't create the timer if...
     // 1. the target is invalid
@@ -343,7 +344,7 @@ int CreateTimer(object oTarget, string sAction, float fInterval, int nIterations
         sError = "fJitter is too low for fInterval";
     else if (nIterations < 0)
         sError = "nIterations is negative";
-    else if (fInterval < 6.0 && !nIterations)
+    else if (fInterval < MIN_INTERVAL_INFINITE_ITERATIONS && !nIterations)
         sError = "fInterval is too short for infinite executions";
 
     if (sError != "")
