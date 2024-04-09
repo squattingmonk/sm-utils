@@ -2,7 +2,7 @@
 /// @file   util_i_timers.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Functions for running scripts on an interval
+/// @brief  Functions for running scripts on an interval.
 /// ----------------------------------------------------------------------------
 /// @details
 /// ## Concept

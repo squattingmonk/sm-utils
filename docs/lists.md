@@ -7,7 +7,7 @@ done using the functions in `util_i_lists.nss`.
 `util_i_csvlists.nss` holds functions for CSV lists. These are comma-separated
 string lists that are altered in place. They are zero-indexed.
 
-``` c
+```c
 // Create a list of knights, then count and loop through the list
 string sKnight, sKnights = "Lancelot, Galahad, Robin";
 int i, nCount = CountList(sKnights);
@@ -34,10 +34,10 @@ SpeakString("Robin is knight " + IntToString(nRobin) + " in the party.");
 ## Var Lists
 `util_i_varlists.nss` contains functions for handling var lists. Var lists are
 saved to objects as local variables. They support float, int, location, object,
-and string datatypes. Each variable type is maintained in a separate list to
-avoid collision.
+vector, json and string datatypes. Each variable type is maintained in a separate
+list to avoid collision.
 
-``` c
+```c
 // Create a list of menu items on the module
 object oModule = GetModule();
 AddListString(oModule, "Spam", "Menu");

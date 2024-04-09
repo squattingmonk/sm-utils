@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
 /// @file   util_i_strftime.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
-/// @brief  Functions for formatting times
+/// @brief  Functions for formatting times.
 /// ----------------------------------------------------------------------------
 /// @details This file contains an implementation of C's strftime() in nwscript.
 ///

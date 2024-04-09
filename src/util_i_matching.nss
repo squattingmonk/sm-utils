@@ -2,7 +2,7 @@
 /// @file   util_i_matching.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Utilities for pattern matching
+/// @brief  Utilities for pattern matching.
 /// ----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------

@@ -44,7 +44,7 @@ void OnLibraryLoad()
 }
 ```
 
-This script contains custom functions (`MyFunction()` and `MyOtherFunction`) as
+This script contains custom functions (`MyFunction()` and `MyOtherFunction()`) as
 well as an `OnLibraryLoad()` function. `OnLibraryLoad()` is executed whenever
 the library is loaded by `LoadLibrary()`; it calls `RegisterLibraryScript()` to
 expose the names of the custom functions as library scripts. When a library
@@ -92,6 +92,12 @@ LoadLibrary("my_l_library");
 
 // Loads a CSV list of library scripts
 LoadLibraries("pw_l_plugin, dlg_l_example, prr_l_main");
+
+// Loads all libraries matching a glob pattern
+LoadLibrariesByPattern("*_l_*");
+
+// Loads all libraries matching a prefix
+LoadLibrariesByPrefix("pw_l_");
 ```
 
 If a library implements a script that has already been implemented in another
@@ -110,7 +116,7 @@ RunLibraryScript("MyFunction");
 
 // Executes a CSV list of library scripts, for which oPC will be OBJECT_SELF
 object oPC = GetFirstPC();
-RunLibraryScripts("MyFunction", "MyOtherFunction", oPC);
+RunLibraryScripts("MyFunction, MyOtherFunction", oPC);
 ```
 
 ## Pre-Compiled Libraries
