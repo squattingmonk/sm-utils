@@ -1105,8 +1105,6 @@ void ReverseJsonList(object oTarget, string sListName = "");
 //                           Function Implementations
 // -----------------------------------------------------------------------------
 
-#include "util_i_debug"
-
 // -----------------------------------------------------------------------------
 //                              Private Functions
 // -----------------------------------------------------------------------------
@@ -1380,7 +1378,6 @@ json VectorToJson(vector vPosition = [0.0, 0.0, 0.0])
 
 json JsonVector(vector vPosition = [0.0, 0.0, 0.0])
 {
-    Debug("JsonVector() is deprecated; use VectorToJson()");
     return VectorToJson(vPosition);
 }
 
@@ -1395,7 +1392,6 @@ vector JsonToVector(json jPosition)
 
 vector JsonGetVector(json jPosition)
 {
-    Debug("JsonGetVector() is deprecated; use JsonToVector()");
     return JsonToVector(jPosition);
 }
 
@@ -1411,7 +1407,6 @@ json LocationToJson(location lLocation)
 
 json JsonLocation(location lLocation)
 {
-    Debug("JsonLocation() is deprecated; use LocationToJson()");
     return LocationToJson(lLocation);
 }
 
@@ -1426,7 +1421,6 @@ location JsonToLocation(json jLocation)
 
 location JsonGetLocation(json jLocation)
 {
-    Debug("JsonGetLocation() is deprecated; use JsonToLocation()");
     return JsonToLocation(jLocation);
 }
 
