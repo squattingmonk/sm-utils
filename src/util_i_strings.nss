@@ -2,7 +2,7 @@
 /// @file   util_i_strings.nss
 /// @author Michael A. Sinclair (Squatting Monk) <squattingmonk@gmail.com>
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Functions for manipulating strings
+/// @brief  Functions for manipulating strings.
 /// ----------------------------------------------------------------------------
 /// @details This file holds utility functions for manipulating strings.
 /// ----------------------------------------------------------------------------

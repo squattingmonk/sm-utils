@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
 /// @file   util_i_unittest.nss
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Functions for managing unit test reporting
+/// @brief  Functions for managing unit test reporting.
 /// ----------------------------------------------------------------------------
 /// @details
 ///
@@ -25,8 +25,8 @@
 ///         _b : Returns `True` or `False` (literals)
 ///
 ///         _q  : Returns string wrapped in single quotes
-///         _qq : Return string wrapped in souble quotes
-///         _p  : Retursn string wrapped in parenthesis
+///         _qq : Returns string wrapped in double quotes
+///         _p  : Returns string wrapped in parenthesis
 ///
 ///     Timers:
 ///         To start a timer:
@@ -41,8 +41,10 @@
 ///     outcome, set UNITTEST_ALWAYS_EXPAND to TRUE in `util_c_unittest`.
 ///
 /// For example purposes only, this unit test sample code will run a unittest
-///     against following function, which will return -1, if n <= 0; 20 *n, if 0 < n <= 3;
-///     and 100, if n > 3;
+///     against the following function, which will return:
+///         -1, if n <= 0
+///         20 * n, if 0 < n <= 3
+///         100, if n > 3
 ///
 /// ```nwscript
 /// int unittest_demo_ConvertValue(int n)
@@ -53,7 +55,7 @@
 ///
 /// The following unit test will run against the function above for three test cases:
 ///     - Out of bounds (low) -> n <= 0;
-///     - In bound -> 0 < n <= 3;
+///     - In bounds -> 0 < n <= 3;
 ///     - Out of bounds (high) -> n > 3;
 ///
 /// ```nwscript

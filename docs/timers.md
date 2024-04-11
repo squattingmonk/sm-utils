@@ -89,7 +89,7 @@ called using `ExecuteScript()` and the action will be available to it as a
 script parameter.
 
 For example, the Core Framework allows timers to run event hooks by calling the
-handler script `core_e_timerhook`, which is as follows:
+handler script `hook_timerhook`, which is as follows:
 ```nwscript
 #include "core_i_framework"
 

@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
 /// @file   util_i_targeting.nss
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Functions for managing forced targeting
+/// @brief  Functions for managing forced targeting.
 /// ----------------------------------------------------------------------------
 /// @details
 /*

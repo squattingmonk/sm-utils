@@ -1,7 +1,7 @@
 /// ----------------------------------------------------------------------------
 /// @file   util_i_variables.nss
 /// @author Ed Burke (tinygiant98) <af.hog.pilot@gmail.com>
-/// @brief  Functions for managing database variables
+/// @brief  Functions for managing database variables.
 /// ----------------------------------------------------------------------------
 
 /// @details The functions in this include are meant to complement and extend

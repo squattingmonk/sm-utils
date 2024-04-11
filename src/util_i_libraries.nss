@@ -40,7 +40,7 @@
 /// }
 /// ```
 ///
-/// This script contains custom functions (`MyFunction()` and `MyOtherFunction`)
+/// This script contains custom functions (`MyFunction()` and `MyOtherFunction()`)
 /// as well as an `OnLibraryLoad()` function. `OnLibraryLoad()` is executed
 /// whenever the library is loaded by `LoadLibrary()`; it calls
 /// `RegisterLibraryScript()` to expose the names of the custom functions as
@@ -89,6 +89,12 @@
 ///
 /// // Loads a CSV list of library scripts
 /// LoadLibraries("pw_l_plugin, dlg_l_example, prr_l_main");
+///
+/// // Loads all libraries matching a glob pattern
+/// LoadLibrariesByPattern("*_l_*");
+///
+/// // Loads all libraries matching a prefix
+/// LoadLibrariesByPrefix("pw_l_");
 /// ```
 ///
 /// If a library implements a script that has already been implemented in
@@ -108,7 +114,7 @@
 ///
 /// // Executes a CSV list of library scripts, for which oPC will be OBJECT_SELF
 /// object oPC = GetFirstPC();
-/// RunLibraryScripts("MyFunction", "MyOtherFunction", oPC);
+/// RunLibraryScripts("MyFunction, MyOtherFunction", oPC);
 /// ```
 ///
 /// ## Pre-Compiled Libraries
@@ -197,7 +203,7 @@ void LoadLibraries(string sLibraries, int bForce = FALSE);
 /// @note The search includes both nss and ncs files, with duplicates removed.
 json GetScriptsByPrefix(string sPrefix);
 
-/// @brief Load all scripts matching the given pattern.
+/// @brief Load all scripts matching the given glob pattern(s).
 /// @param sPattern A CSV list of glob patterns to match with. Supported syntax:
 ///     - `*`: match zero or more characters
 ///     - `?`: match a single character
@@ -216,7 +222,7 @@ void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE);
 /// @brief Execute a registered library script.
 /// @param sScript The unique name of the library script.
 /// @param oSelf The object that should execute the script as OBJECT_SELF.
-/// @returns The value set by SetLibraryReturnValue() in the script.
+/// @returns The integer value set with LibraryReturn() by sScript.
 /// @note If sScript is not registered as a library script, it will be executed
 ///     as a regular script instead.
 int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF);
@@ -232,7 +238,7 @@ void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF);
 ///     RunLibraryScript().
 /// @param sScript A name for the script. Must be unique in the module. If a
 ///     second script with the same name is registered, it will overwrite the
-///     first one.
+///     first one.  This value does not have to match the function or script name.
 /// @param nEntry A number unique to this library to identify this script. If
 ///     this is 0 and the library has not been pre-compiled, RunLibraryScript()
 ///     will call sScript directly. Otherwise, RunLibraryScript() will run a
@@ -392,9 +398,9 @@ void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE)
     LoadLibraries(JsonToList(jLibraries), bForce);
 }
 
-// Alias kept for backwards compatibility.
 void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
 {
+    Debug("LoadPrefixLibraries() is deprecated; use LoadLibrariesByPrefix()");
     LoadLibrariesByPrefix(sPrefix, bForce);
 }
 
