@@ -105,9 +105,75 @@ int GetIsAlpha(string sString);
 /// @param sString The string to check.
 int GetIsNumeric(string sString);
 
+/// @brief Return whether sString is a valid hexadecimal number.
+/// @param sString The string to check.
+/// @note Hexadecimal numbers must be prefixed with "0x" or "0X".
+int GetIsHex(string sString);
+
+/// @brief Return whether sString is a valid binary number.
+/// @param sString The string to check.
+/// @note Binary numbers must be prefixed with "0b" or "0B".
+int GetIsBinary(string sString);
+
+/// @brief Return whether sString is an valid octal number.
+/// @param sString The string to check.
+/// @note Octal numbers must be prefixed with "0o" or "0O".
+int GetIsOctal(string sString);
+
+/// @brief Return whether sString is a valid floating-point number.
+/// @param sString The string to check.
+/// @note This function checks for valid nwscript floats, which include
+///     values such as .5, 0.5, 5., 5.0 and 5f.
+int GetIsFloat(string sString);
+
+/// @brief Return whether sString is a number.
+/// @param sString The string to check.
+/// @note This function checks for valid nwscript numbers, which include
+///     integers, floats, hexadecimals, binaries, and octals.
+int GetIsNumber(string sString);
+
 /// @brief Return whether all characters in sString are letters or digits.
 /// @param sString The string to check.
 int GetIsAlphaNumeric(string sString);
+
+/// @brief Convert a hexadecimal string to an integer.
+/// @param sString The string to convert.
+/// @note Hexadecimal numbers must be prefixed with "0x" or "0X".
+int HexStringToInt(string sString);
+
+/// @brief Convert a binary string to an integer.
+/// @param sString The string to convert.
+/// @note Binary numbers must be prefixed with "0b" or "0B".
+int BinaryStringToInt(string sString);
+
+/// @brief Convert an octal string to an integer.
+/// @param sString The string to convert.
+/// @note Octal numbers must be prefixed with "0o" or "0O".
+int OctalStringToInt(string sString);
+
+/// @brief Convert a bitwise flags string to an integer.
+/// @param sString The string to convert.
+/// @note The 0b/0B prefix is ignored for bitwise flags.
+/// @note The string may contain underscores or spaces for
+///     readability, which will be removed before conversion.
+int BitwiseFlagsToInt(string sString);
+
+/// @brief Convert an integer to a binary string.
+/// @param n The integer to convert.
+/// @note The result will be prefixed with "0b".
+string IntToBinaryString(int n);
+
+/// @brief Convert an integer to an octal string.
+/// @param n The integer to convert.
+/// @note The result will be prefixed with "0o".
+string IntToOctalString(int n);
+
+/// @brief Convert an integer to a bitwise flags string.
+/// @param n The integer to convert.
+/// @param nBlock The number of bits to group together for readability.
+/// @note The result will not be prefixed and will be padded
+///     to 32 characters with leading zeros.
+string IntToBitwiseFlags(int n, int nBlock = 0);
 
 /// @brief Trim characters from the left side of a string.
 /// @param sString The string to trim.
@@ -316,9 +382,134 @@ int GetIsNumeric(string sString)
     return GetAllCharsInSet(sString, CHARSET_NUMERIC);
 }
 
+int GetIsHex(string sString)
+{
+    return RegExpMatch("^-?0[xX][0-9a-fA-F]+$", sString) != JSON_ARRAY;
+}
+
+int GetIsBinary(string sString)
+{
+    return RegExpMatch("^-?0[bB][01]+$", sString) != JSON_ARRAY;
+}
+
+int GetIsOctal(string sString)
+{
+    return RegExpMatch("^-?0[oO][0-7]+$", sString) != JSON_ARRAY;
+}
+
+int GetIsFloat(string sString)
+{
+    return RegExpMatch("^(-?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+|[0-9]+f|\\.[0-9]+)(f)?)$", sString) != JSON_ARRAY;
+}
+
+int GetIsNumber(string sString)
+{
+    return GetIsNumeric(sString) || GetIsFloat(sString) || 
+        GetIsHex(sString) || GetIsBinary(sString) || GetIsOctal(sString);
+}
+
 int GetIsAlphaNumeric(string sString)
 {
     return GetAllCharsInSet(sString, CHARSET_ALPHA + CHARSET_NUMERIC);
+}
+
+int HexStringToInt(string s)
+{
+    if (!GetIsHex(s))
+        return 0;
+
+    sqlquery q = SqlPrepareQueryObject(GetModule(), "SELECT " + s);
+    return SqlStep(q) ? SqlGetInt(q, 0) : 0;
+}
+
+int _BinaryStringToInt(string s)
+{
+    int r, n;
+    while (n < GetStringLength(s))
+    {
+        r <<= 1;
+        if (GetChar(s, n++) == "1")
+            r |= 1;
+    }
+
+    return r;
+}
+
+int BinaryStringToInt(string s)
+{
+    if (!GetIsBinary(s))
+        return 0;
+
+    return _BinaryStringToInt(s);
+}
+
+int OctalStringToInt(string s)
+{
+    if (!GetIsOctal(s))
+        return 0;
+
+    int r, n;
+    while (n < GetStringLength(s))
+    {
+        r <<= 3;
+        r |= StringToInt(GetChar(s, n++));
+    }
+
+    return r;
+}
+
+int BitwiseFlagsToInt(string s)
+{
+    if (GetStringLeft(s, 2) == "0b" || GetStringLeft(s, 2) == "0B")
+        s = GetStringRight(s, GetStringLength(s) - 2);
+
+    s = RegExpReplace("[_ ]", s, "");
+
+    if (!GetIsBinary("0b" + s))
+        return 0;
+
+    return _BinaryStringToInt(s);
+}
+
+string _IntToBinaryString(int n)
+{
+    string s;
+    if (n >> 1)
+        s+= _IntToBinaryString(n >> 1);
+
+    return s+= n & 1 ? "1" : "0";
+}
+
+string IntToBinaryString(int n)
+{
+    return "0b" + _IntToBinaryString(n);
+}
+
+string IntToOctalString(int n)
+{
+    return FormatInt(n, "0o%o");
+}
+
+string IntToBitwiseFlags(int n, int nBlock = 0)
+{
+    string t = _IntToBinaryString(n);
+    t = RepeatString("0", 32 - GetStringLength(t)) + t;
+
+    if (nBlock >= 1 && nBlock <= 32)
+    {
+        string s;
+        int n; for (; n < GetStringLength(t); n++)
+        {
+            if (n % 4 == 0 && n != 0)
+                s+= " ";
+
+            s+= GetChar(t, n);
+        }
+
+        return s;
+    }
+
+    return t;
 }
 
 string TrimStringLeft(string sString, string sRemove = " ")
