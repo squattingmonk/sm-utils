@@ -18,6 +18,7 @@ and `util_i_nss.nss`.
 ## Contents
 - [Anatomy of a Library](#anatomy-of-a-library)
 - [Using a Library](#using-a-library)
+- [Pre-compiled Functions](#pre-compiled-functions)
 - [Pre-Compiled Libraries](#pre-compiled-libraries)
 - [Advanced Usage](#advanced-usage)
 
@@ -118,6 +119,26 @@ RunLibraryScript("MyFunction");
 object oPC = GetFirstPC();
 RunLibraryScripts("MyFunction, MyOtherFunction", oPC);
 ```
+## Pre-compiled Functions
+Library functions may be pre-compiled into individual ncs files for faster
+execution at runtime.  If the library would normally be JIT-compiled (i.e. a
+`void main()` function does not exist in the library file or `util_i_library`
+is not included), functions such as `CompileLibrary()`, `CompileLibraries()`,
+`CompileLibrariesByPattern()` and `CompileLibrariesByPrefix()` may be used to
+generate individual ncs files from each function in the library file.
+
+Filename extensions are stripped from library names, therefore a function call
+of `CompileLibrary(__FILE__)` from within the library's `OnLibraryLoad()`
+function is valid.
+
+Libraries compiled via `Compile*` functions do not require `OnLibraryLoad()`
+or `OnLibraryScript()` functions as `RunLibraryScript()` will execute the
+compiled file directly, if it exists.  If a library was compiled using a
+`Compile*` function and the compiled ncs file does not exist at the time of
+execution, the system will attempt to run the `RunLibraryScript()` function.
+As a backup, pre-compiled functions are added with unique `nEntry` identifiers
+and all function names are required to be module-unique.  If a duplicate
+function name is added, the original function's script will be overwritten.
 
 ## Pre-Compiled Libraries
 By default, libraries are run using `ExecuteScriptChunk()`, which JIT compiles
