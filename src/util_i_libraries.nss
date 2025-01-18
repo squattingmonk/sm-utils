@@ -166,8 +166,7 @@ void CreateLibraryTable(int bReset = FALSE);
 ///     function that can use this number to execute the correct code. Thus,
 ///     nEntry must be set if sScript does not exactly match the desired
 ///     function name or the function requires parameters.
-/// @param bCompiled Whether the library function has a compiled script associated
-///     with the entry.
+/// @param sFilename Unique filename for the compiled ncs file.
 void AddLibraryScript(string sLibrary, string sScript, int nEntry = 0, string sFilename = "");
 
 /// @brief Remove database records associated with a library.
@@ -310,6 +309,14 @@ void CompileLibraryScript(string sScript, int nEntry = 0);
 /// @brief Set the return value of the currently executing library script.
 /// @param nValue The value to return to the calling script.
 void LibraryReturn(int nValue);
+
+/// @brief Broadcast a library execution error.  This function is meant to be
+///     called from a library's `OnLibraryScript()` function when a called
+///     function is not found.
+/// @param sFile The library script's filename, usually passed with __FILE__.
+/// @param sScript Name of the script called for execution.
+/// @param nEntry Entry number of the script called for execution.
+void LibraryError(string sFile, string sScript, int nEntry);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
@@ -502,17 +509,16 @@ void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
 /// @private Compile an individual function into an ncs file in the `currentgame`
 ///     folder.  `OnLibraryLoad` and `OnLibraryScript` will be excluded, therefore
 ///     legacy libraries can be updated with a call to `CompileLibrary(__FILE__);`
-///     or `CompileLibraryScript(<script>, <entry>);`. `main` and
-///     `StartingConditional` are also excluded, however, any library that includes
-///     a `void main()` or `int StartingConditional()` will cause a compilation error.
-void _CompileFunction(string sLibrary, string sFunction, int nEntry)
+///     or `CompileLibraryScript(<script>, <entry>);`.
+/// @return FALSE if script compilation failed.
+int _CompileFunction(string sLibrary, string sFunction, int nEntry)
 {
-    string sExclusions = "OnLibraryLoad,OnLibraryScript,main,StartingConditional";
+    string sExclusions = "OnLibraryLoad,OnLibraryScript";
     if (HasListItem(sExclusions, sFunction))
     {
-        Error("Unable to compile function " + sFunction + " for library " +
+        Error("Skippnig function " + sFunction + " compilation for library " +
             sLibrary + "; function name is excluded");
-        return;
+        return TRUE;
     }
 
     string sChunk = r"
@@ -528,12 +534,14 @@ void _CompileFunction(string sLibrary, string sFunction, int nEntry)
 
     string sError = CompileScript(sFilename, sChunk);
     if (sError == "" && ResManGetAliasFor(sFilename, RESTYPE_NCS) != "")
-        AddLibraryScript(sLibrary, sFunction, n, sFilename);
+        AddLibraryScript(sLibrary, sFunction, nEntry, sFilename);
     else
         Error("Unable to compile library script:" +
             "\n  Library: " + sLibrary +
             "\n  Script: " + sFunction +
             "\n  Error: " + sError);
+
+    return sError == "";
 }
 
 void CompileLibrary(string sLibrary, int bForce = FALSE)
@@ -549,7 +557,7 @@ void CompileLibrary(string sLibrary, int bForce = FALSE)
         else
         {
             string sScript = ResManGetFileContents(sLibrary, RESTYPE_NSS);
-            sScript = RegExpReplace("\\/\\/.*?$|\\/\\*.*?\\*\\/", sScript, "");
+            sScript = RegExpReplace("\\/\\/.*?$|\\/\\*[\\s\\S]*?\\*\\/", sScript, "");
 
             string r = "void|int|float|string|object|vector|effect|event|location|talent|itemproperty|sqlquery|cassowary|json";
             r = "\\b(?:" + r + ")\\s+(\\w+)\\s*\\([^)]*\\)\\s*[^;]";
@@ -558,7 +566,8 @@ void CompileLibrary(string sLibrary, int bForce = FALSE)
             int n; for (; n < JsonGetLength(j); n++)
             {
                 string sFunction = JsonGetString(JsonArrayGet(JsonArrayGet(j, n), 1));
-                _CompileFunction(sLibrary, sFunction, n);
+                if (!_CompileFunction(sLibrary, sFunction, n))
+                    return;
             }
         }
     }
@@ -568,7 +577,7 @@ void CompileLibrary(string sLibrary, int bForce = FALSE)
 
 void CompileLibraries(string sLibraries, int bForce = FALSE)
 {
-    Debug("Attempting to " + (bForce ? "force " : "") + "load and compile libraries " + sLibrary);
+    Debug("Attempting to " + (bForce ? "force " : "") + "load and compile libraries " + sLibraries);
 
     int i, nCount = CountList(sLibraries);
     for (i = 0; i < nCount; i++)
@@ -692,4 +701,14 @@ void CompileLibraryScript(string sScript, int nEntry = 0)
 void LibraryReturn(int nValue)
 {
     SetLocalInt(OBJECT_SELF, LIB_RETURN, nValue);
+}
+
+void LibraryError(string sFile, string sScript, int nEntry)
+{
+    string sLibrary = GetScriptLibrary(sScript);
+
+    Error("Library script execution error in " + sFile + "; " +
+        "script request not handled or found by `OnLibraryScript`: " + 
+        (sLibrary == "" ? "(Unknown Library)" : sLibrary) + "::" +
+        sScript + "(" + IntToString(nEntry) + ")");
 }
