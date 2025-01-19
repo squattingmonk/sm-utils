@@ -16,6 +16,7 @@ const string DEBUG_LOG      = "DEBUG_LOG";
 const string DEBUG_OVERRIDE = "DEBUG_OVERRIDE";
 const string DEBUG_PREFIX   = "DEBUG_PREFIX";
 const string DEBUG_DISPATCH = "DEBUG_DISPATCH";
+const string DEBUG_LOGFILE  = "DEBUG_LOGFILE";
 
 // Debug levels
 const int DEBUG_LEVEL_NONE     = 0; ///< No debug level set
@@ -60,6 +61,19 @@ int GetDebugLevel(object oTarget = OBJECT_SELF);
 /// @param oTarget The object to set the debug level of. If no debug level has
 ///     been set on oTarget, will use the module instead.
 void SetDebugLevel(int nLevel, object oTarget = OBJECT_SELF);
+
+/// @brief Get the verbosity of debug messages that will be sent to the game's
+///     logfile.  Logfile verbosity level will always be greater than or equal
+///     to the verbosity of the current debug target object.
+int GetLogfileDebugLevel(object oTarget = OBJECT_SELF);
+
+/// @brief Set the verbosity of debug messages that will be sent to the game's
+///     logfile, regardless of the debug settings for the module or target
+///     object.  This setting will be ignored if debug logging does not
+///     include DEBUG_LOG_FILE.
+/// @param nLevel A `DEBUG_LEVEL_*` constant representing the maximum verbosity
+///     of messages that will be sent to the game's logfile.
+void SetLogfileDebugLevel(int nLevel);
 
 /// @brief Return the color of debug messages of a given level.
 /// @param nLevel A `DEBUG_LEVEL_*` constant representing the verbosity of debug
@@ -179,6 +193,16 @@ void SetDebugLevel(int nLevel, object oTarget = OBJECT_SELF)
     SetLocalInt(oTarget, DEBUG_LEVEL, nLevel);
 }
 
+int GetLogfileDebugLevel(object oTarget = OBJECT_SELF)
+{
+    return max(GetLocalInt(GetModule(), DEBUG_LOGFILE), GetDebugLevel(oTarget));
+}
+
+void SetLogfileDebugLevel(int nLevel)
+{
+    SetLocalInt(GetModule(), DEBUG_LOGFILE, nLevel);
+}
+
 string GetDebugColor(int nLevel)
 {
     string sColor = GetLocalString(GetModule(), DEBUG_COLOR + IntToString(nLevel));
@@ -256,7 +280,7 @@ void RemoveDebugLoggingPC(object oPC)
 
 int IsDebugging(int nLevel, object oTarget = OBJECT_SELF)
 {
-    return (nLevel <= GetDebugLevel(oTarget));
+    return (nLevel <= GetDebugLevel(oTarget) || nLevel <= GetLogfileDebugLevel());
 }
 
 void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJECT_SELF)
@@ -277,12 +301,20 @@ void Debug(string sMessage, int nLevel = DEBUG_LEVEL_DEBUG, object oTarget = OBJ
             return;
 
         sMessage = sPrefix + sMessage;
-        int nLogging = GetLocalInt(GetModule(), DEBUG_LOG);
-
+        int nLogging = GetDebugLogging();
+        
         if (nLogging & DEBUG_LOG_FILE)
             WriteTimestampedLogEntry(UnColorString(sMessage));
 
-        sMessage = ColorString(sMessage, sColor);
+        if (nLevel > GetDebugLevel(oTarget))
+        {
+            if (between(nLevel, DEBUG_LEVEL_CRITICAL, DEBUG_LEVEL_WARNING))
+                sMessage = ColorString(sPrefix, sColor) + "logged; see logfile";
+            else
+                return;
+        }
+        else
+            sMessage = ColorString(sMessage, sColor);
 
         if (nLogging & DEBUG_LOG_DM)
             SendMessageToAllDMs(sMessage);
