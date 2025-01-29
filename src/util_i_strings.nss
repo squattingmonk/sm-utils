@@ -237,7 +237,7 @@ string FormatInt(int n, string sFormat);
 string FormatString(string s, string sFormat);
 
 /// @brief Substitute tokens in a string with values from a json array.
-/// @param s The string to interpolate the values into. Should have tokens wich
+/// @param s The string to interpolate the values into. Should have tokens which
 ///     contain sDesignator followed by a number denoting the position of the
 ///     value in jArray (1-based index).
 /// @param jArray An array of values to interpolate. May be any combination of
@@ -250,7 +250,22 @@ string FormatString(string s, string sFormat);
 ///   SubstituteString("The applicant answered: $4", jArray); // "The applicant answered: true"
 string SubstituteString(string s, json jArray, string sDesignator = "$");
 
-/// @brief Repeats a string multiple times.
+/// @brief Substitute tokens ina  string with values from a json array.  Like
+///     SubstituteString() above, but accepts a json object with tokens as keys
+///     and the desired substitute strings as values.
+/// @param s The string to interpolate the values into.  Should have tokens which
+///     contain sDesignator followed by a the key of the value to substitute.
+/// @param jObject An object of values to interpolate.  Substituted values may be
+///     any combination of strings, floats, decimals, or booleans.  Key value pairs
+///     within jObject can be reused.
+/// @param sDesignator The character denoting the beginning of a token.
+/// @example
+///   // Assumes jObject = {"$bueller": "Kennedy", "$distance": 34, "$day", "Today"};
+///   SubstituteStrings("$bueller $bueller $bueller", jObject);       // "Kennedy Kennedy Kennedy"
+///   SubstituteStrings("$day's goal is $distance miles.", jObject);  // "Today's goal is 34 miles."
+string SubstituteStrings(string s, json jObject, string sDesignator = "$");
+
+/// @brief Repeats a stroan said it was trueing multiple times.
 /// @param s The string to repeat.
 /// @param n The number of times to repeat s.
 /// @returns The repeated string.
@@ -598,6 +613,33 @@ string SubstituteString(string s, json jArray, string sDesignator = "$")
         else continue;
 
         s = SubstituteSubStrings(s, sDesignator + IntToString(n + 1), sValue);
+    }
+
+    return s;
+}
+
+string SubstituteStrings(string s, json jObject, string sDesignator = "$")
+{
+    if (JsonGetType(jObject) != JSON_TYPE_OBJECT)
+        return s;
+
+    json jKeys = JsonObjectKeys(jObject);
+    if (JsonGetLength(jKeys) == 0)
+        return s;
+
+    int n; for (; n < JsonGetLength(jKeys); n++)
+    {
+        string sValue, sKey = JsonGetString(JsonArrayGet(jKeys, n));
+        json jValue = JsonObjectGet(jObject, sKey);
+        int nType = JsonGetType(jValue);
+
+        if      (nType == JSON_TYPE_STRING)  sValue = JsonGetString(jValue);
+        else if (nType == JSON_TYPE_INTEGER) sValue = IntToString(JsonGetInt(jValue));
+        else if (nType == JSON_TYPE_FLOAT)   sValue = FormatFloat(JsonGetFloat(jValue), "%!f");
+        else if (nType == JSON_TYPE_BOOL)    sValue = JsonGetInt(jValue) == 1 ? "true" : "false";
+        else continue;
+
+        s = SubstituteSubStrings(s, sDesignator + sKey, sValue);
     }
 
     return s;
