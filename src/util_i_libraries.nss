@@ -166,7 +166,16 @@ void CreateLibraryTable(int bReset = FALSE);
 ///     function that can use this number to execute the correct code. Thus,
 ///     nEntry must be set if sScript does not exactly match the desired
 ///     function name or the function requires parameters.
-void AddLibraryScript(string sLibrary, string sScript, int nEntry = 0);
+/// @param sFilename Unique filename for the compiled ncs file.
+void AddLibraryScript(string sLibrary, string sScript, int nEntry = 0, string sFilename = "");
+
+/// @brief Remove database records associated with a library.
+/// @param sLibrary The library to remove.
+/// @note If sLibrary is associated with pre-compiled ncs files, the ncs
+///     files will not be deleted from the `currentgame` folder; however
+///     these files will no longer be referenced and will be deleted with the
+///     module is shutdown.
+void RemoveLibraryScripts(string sLibrary);
 
 /// @brief Return the name of the library containing a script from the database.
 /// @param sScript The name of the library script.
@@ -175,6 +184,10 @@ string GetScriptLibrary(string sScript);
 /// @brief Return the entry number associated with a library script.
 /// @param sScript The name of the library script.
 int GetScriptEntry(string sScript);
+
+/// @brief Return the filename of the pre-compiled script from the database.
+/// @param sScript The name of the library script.
+string GetScriptFilename(string sScript);
 
 /// @brief Return a prepared query with the with the library and entry data
 ///     associated with a library script.
@@ -219,6 +232,37 @@ void LoadLibrariesByPattern(string sPattern, int bForce = FALSE);
 /// @see GetMatchesPattern() for the rules on glob syntax.
 void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE);
 
+/// @brief Compile a script library by compiling individual functions into
+///     ncs files.
+/// @param sLibrary The name of the script library file.
+/// @param bForce If TRUE, will re-load the library if it was already loaded.
+/// @warning sLibrary cannot have a `void main()` function.
+void CompileLibrary(string sLibrary, int bForce = FALSE);
+
+/// @brief Compile a list of script libraries in sequence.
+/// @param sLibraries A CSV list of libraries to compile.
+/// @param bForce If TRUE, will re-load the library if it was already loaded.
+/// @warning File in sLibraries cannot have a `void main()` function.
+void CompileLibraries(string sLibraries, int bForce = FALSE);
+
+/// @brief Compile all scripts matching the given glob pattern(s).
+/// @param sPattern A CSV list of glob patterns to match with. Supported syntax:
+///     - `*`: match zero or more characters
+///     - `?`: match a single character
+///     - `[abc]`: match any of a, b, or c
+///     - `[a-z]`: match any character from a-z
+///     - other text is matched literally
+/// @param bForce If TRUE, will-reload the library if it was already loaded.
+/// @warning Files matching sPattern cannot have a `void main()` function.
+void CompileLibrariesByPattern(string sPattern, int bForce = FALSE);
+
+/// @brief Compile all scripts with a given prefix as script libraries.
+/// @param sPrefix A prefix for the desired script libraries.
+/// @param bForce If TRUE, will re-load the library if it was already loaded.
+/// @see GetMatchesPattern() for the rules on glob syntax.
+/// @warning Files matching sPrefix cannot have a `void main()` function.
+void CompileLibrariesByPrefix(string sPrefix, int bForce = FALSE);
+
 /// @brief Execute a registered library script.
 /// @param sScript The unique name of the library script.
 /// @param oSelf The object that should execute the script as OBJECT_SELF.
@@ -249,9 +293,30 @@ void RunLibraryScripts(string sScripts, object oSelf = OBJECT_SELF);
 ///     uses in other places, use AddLibraryScript().
 void RegisterLibraryScript(string sScript, int nEntry = 0);
 
+/// @brief Compile a single library script function into an ncs file for the 
+///     current module session.
+/// @param sScript A name for the script. Must be unique in the module. If a
+///     second script with the same name is registered, it will overwrite the
+///     first one.  Unlike `RegisterLibraryScript()`, this value must match
+///     the function's name.
+/// @param nEntry A number unique to this library to identify this script. This
+///     number should be unique to the library, however this number is not used
+///     unless the resultant ncs file is not found when `RunLibraryScript()` is
+///     executed against it.  If the matching ncs file is found,
+///     `OnLibraryScript()` is not called and the ncs file is executed directly.
+void CompileLibraryScript(string sScript, int nEntry = 0);
+
 /// @brief Set the return value of the currently executing library script.
 /// @param nValue The value to return to the calling script.
 void LibraryReturn(int nValue);
+
+/// @brief Broadcast a library execution error.  This function is meant to be
+///     called from a library's `OnLibraryScript()` function when a called
+///     function is not found.
+/// @param sFile The library script's filename, usually passed with __FILE__.
+/// @param sScript Name of the script called for execution.
+/// @param nEntry Entry number of the script called for execution.
+void LibraryError(string sFile, string sScript, int nEntry);
 
 // -----------------------------------------------------------------------------
 //                             Function Definitions
@@ -259,25 +324,47 @@ void LibraryReturn(int nValue);
 
 void CreateLibraryTable(int bReset = FALSE)
 {
-    SqlCreateTableModule("library_scripts",
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        "sLibrary TEXT NOT NULL, " +
-        "sScript TEXT NOT NULL UNIQUE ON CONFLICT REPLACE, " +
-        "nEntry INTEGER NOT NULL);",
-        bReset);
+    SqlCreateTableModule("library_scripts", r"
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sLibrary TEXT NOT NULL,
+        sScript TEXT NOT NULL UNIQUE ON CONFLICT REPLACE,
+        nEntry INTEGER NOT NULL,
+        sFilename TEXT NOT NULL
+    ", bReset);
 }
 
-void AddLibraryScript(string sLibrary, string sScript, int nEntry = 0)
+void AddLibraryScript(string sLibrary, string sScript, int nEntry = 0, string sFilename = "")
 {
     CreateLibraryTable();
 
-    string sQuery = "INSERT INTO library_scripts (sLibrary, sScript, nEntry) " +
-                    "VALUES (@sLibrary, @sScript, @nEntry);";
+    Debug("Adding" + (sFilename != "" ? " pre-compiled " : " ") + "library function " +
+        sScript + " to library " + sLibrary + " at entry " + IntToString(nEntry));
+
+    string sQuery = r"
+        INSERT INTO library_scripts (sLibrary, sScript, nEntry, sFilename) 
+        VALUES (@sLibrary, @sScript, @nEntry, @sFilename);
+    ";
     sqlquery sql = SqlPrepareQueryModule(sQuery);
     SqlBindString(sql, "@sLibrary", sLibrary);
     SqlBindString(sql, "@sScript", sScript);
     SqlBindInt(sql, "@nEntry", nEntry);
+    SqlBindString(sql, "@sFilename", sFilename);
 
+    SqlStep(sql);
+}
+
+void RemoveLibraryScripts(string sLibrary)
+{
+    CreateLibraryTable();
+
+    Debug("Removing library functions from library " + sLibrary);
+
+    string sQuery = r"
+        DELETE FROM script_libraries
+        WHERE sLibrary = @sLibrary;
+    ";
+    sqlquery sql = SqlPrepareQueryModule(sQuery);
+    SqlBindString(sql, "@sLibrary", sLibrary);
     SqlStep(sql);
 }
 
@@ -285,8 +372,11 @@ string GetScriptFieldData(string sField, string sScript)
 {
     CreateLibraryTable();
 
-    string sQuery = "SELECT " + sField + " FROM library_scripts " +
-                    "WHERE sScript = @sScript;";
+    string sQuery = r"
+        SELECT $1 FROM library_scripts
+        WHERE sScript = @sScript;
+    ";
+    sQuery = SubstituteSubString(sQuery, "$1", sField);
     sqlquery sql = SqlPrepareQueryModule(sQuery);
     SqlBindString(sql, "@sScript", sScript);
 
@@ -303,12 +393,20 @@ int GetScriptEntry(string sScript)
     return StringToInt(GetScriptFieldData("nEntry", sScript));
 }
 
+string GetScriptFilename(string sScript)
+{
+    return GetScriptFieldData("sFilename", sScript);
+}
+
 sqlquery GetScriptData(string sScript)
 {
     CreateLibraryTable();
 
-    string sQuery = "SELECT sLibrary, nEntry FROM library_scripts " +
-                    "WHERE sScript = @sScript;";
+    string sQuery = r"
+        SELECT sLibrary, nEntry, sFilename
+        FROM library_scripts
+        WHERE sScript = @sScript;
+    ";
     sqlquery sql = SqlPrepareQueryModule(sQuery);
     SqlBindString(sql, "@sScript", sScript);
 
@@ -319,8 +417,12 @@ int GetIsLibraryLoaded(string sLibrary)
 {
     CreateLibraryTable();
 
-    string sQuery = "SELECT COUNT(sLibrary) FROM library_scripts " +
-                    "WHERE sLibrary = @sLibrary LIMIT 1;";
+    string sQuery = r"
+        SELECT COUNT(sLibrary)
+        FROM library_scripts
+        WHERE sLibrary = @sLibrary
+            LIMIT 1;
+    ";
     sqlquery sql = SqlPrepareQueryModule(sQuery);
     SqlBindString(sql, "@sLibrary", sLibrary);
 
@@ -359,7 +461,7 @@ void LoadLibraries(string sLibraries, int bForce = FALSE)
         LoadLibrary(GetListItem(sLibraries, i), bForce);
 }
 
-// Private function for GetScriptsByPrefix*(). Adds all scripts of nResType
+/// @private Supports GetScriptsByPrefix*(). Adds all scripts of nResType
 // matching a prefix to a json array and returns it.
 json _GetScriptsByPrefix(json jArray, string sPrefix, int nResType)
 {
@@ -385,7 +487,7 @@ void LoadLibrariesByPattern(string sPatterns, int bForce = FALSE)
     if (sPatterns == "")
         return;
 
-    Debug("Finding libraries matching \"" + sPatterns + "\"");
+    Debug("Loading libraries matching \"" + sPatterns + "\"");
     json jPatterns  = ListToJson(sPatterns);
     json jLibraries = FilterByPatterns(GetScriptsByPrefix(""), jPatterns, TRUE);
     LoadLibraries(JsonToList(jLibraries), bForce);
@@ -393,7 +495,7 @@ void LoadLibrariesByPattern(string sPatterns, int bForce = FALSE)
 
 void LoadLibrariesByPrefix(string sPrefix, int bForce = FALSE)
 {
-    Debug("Finding libraries with prefix \"" + sPrefix + "\"");
+    Debug("Loading libraries with prefix \"" + sPrefix + "\"");
     json jLibraries = GetScriptsByPrefix(sPrefix);
     LoadLibraries(JsonToList(jLibraries), bForce);
 }
@@ -404,11 +506,107 @@ void LoadPrefixLibraries(string sPrefix, int bForce = FALSE)
     LoadLibrariesByPrefix(sPrefix, bForce);
 }
 
+/// @private Compile an individual function into an ncs file in the `currentgame`
+///     folder.  `OnLibraryLoad` and `OnLibraryScript` will be excluded, therefore
+///     legacy libraries can be updated with a call to `CompileLibrary(__FILE__);`
+///     or `CompileLibraryScript(<script>, <entry>);`.
+/// @return FALSE if script compilation failed.
+int _CompileFunction(string sLibrary, string sFunction, int nEntry)
+{
+    string sExclusions = "OnLibraryLoad,OnLibraryScript";
+    if (HasListItem(sExclusions, sFunction))
+    {
+        Error("Skippnig function " + sFunction + " compilation for library " +
+            sLibrary + "; function name is excluded");
+        return TRUE;
+    }
+
+    string sChunk = r"
+        #include ""$1"" void main() {$2();}
+    ";
+    sChunk = SubstituteSubString(sChunk, "$1", sLibrary);
+    sChunk = SubstituteSubString(sChunk, "$2", sFunction);
+
+    string sFilename;
+    do {
+        sFilename = GetSubString(RegExpReplace("-", GetRandomUUID(), ""), 0, 16);
+    } while (ResManGetAliasFor(sFilename, RESTYPE_NCS) != "");
+
+    string sError = CompileScript(sFilename, sChunk);
+    if (sError == "" && ResManGetAliasFor(sFilename, RESTYPE_NCS) != "")
+        AddLibraryScript(sLibrary, sFunction, nEntry, sFilename);
+    else
+        Error("Unable to compile library script:" +
+            "\n  Library: " + sLibrary +
+            "\n  Script: " + sFunction +
+            "\n  Error: " + sError);
+
+    return sError == "";
+}
+
+void CompileLibrary(string sLibrary, int bForce = FALSE)
+{
+    sLibrary = RegExpReplace("\\.nss$", sLibrary, "");
+    
+    Debug("Attempting to " + (bForce ? "force " : "") + "load and compile library " + sLibrary);
+
+    if (bForce || !GetIsLibraryLoaded(sLibrary))
+    {
+        if (ResManGetAliasFor(sLibrary, RESTYPE_NSS) == "")
+            Debug(sLibrary + ".nss not present; unable to load and compile library");
+        else
+        {
+            string sScript = ResManGetFileContents(sLibrary, RESTYPE_NSS);
+            sScript = RegExpReplace("\\/\\/.*?$|\\/\\*[\\s\\S]*?\\*\\/", sScript, "");
+
+            string r = "void|int|float|string|object|vector|effect|event|location|talent|itemproperty|sqlquery|cassowary|json";
+            r = "\\b(?:" + r + ")\\s+(\\w+)\\s*\\([^)]*\\)\\s*[^;]";
+
+            json j = RegExpIterate(r, sScript);
+            int n; for (; n < JsonGetLength(j); n++)
+            {
+                string sFunction = JsonGetString(JsonArrayGet(JsonArrayGet(j, n), 1));
+                if (!_CompileFunction(sLibrary, sFunction, n))
+                    return;
+            }
+        }
+    }
+    else
+        Error("Library " + sLibrary + " already loaded!");
+}
+
+void CompileLibraries(string sLibraries, int bForce = FALSE)
+{
+    Debug("Attempting to " + (bForce ? "force " : "") + "load and compile libraries " + sLibraries);
+
+    int i, nCount = CountList(sLibraries);
+    for (i = 0; i < nCount; i++)
+        CompileLibrary(GetListItem(sLibraries, i), bForce);
+}
+
+void CompileLibrariesByPattern(string sPatterns, int bForce = FALSE)
+{
+    if (sPatterns == "")
+        return;
+
+    Debug("Compiling libraries matching \"" + sPatterns + "\"");
+    json jPatterns  = ListToJson(sPatterns);
+    json jLibraries = FilterByPatterns(GetScriptsByPrefix(""), jPatterns, TRUE);
+    CompileLibraries(JsonToList(jLibraries), bForce);
+}
+
+void CompileLibrariesByPrefix(string sPrefix, int bForce = FALSE)
+{
+    Debug("Compiling libraries with prefix \"" + sPrefix + "\"");
+    json jLibraries = GetScriptsByPrefix(sPrefix);
+    CompileLibraries(JsonToList(jLibraries), bForce);
+}
+
 int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
 {
     if (sScript == "") return -1;
 
-    string sLibrary;
+    string sLibrary, sFilename;
     int nEntry;
 
     sqlquery sqlScriptData = GetScriptData(sScript);
@@ -416,20 +614,23 @@ int RunLibraryScript(string sScript, object oSelf = OBJECT_SELF)
     {
         sLibrary = SqlGetString(sqlScriptData, 0);
         nEntry = SqlGetInt(sqlScriptData, 1);
+        sFilename = SqlGetString(sqlScriptData, 2);
     }
 
     DeleteLocalInt(oSelf, LIB_RETURN);
 
     if (sLibrary != "")
     {
-        Debug("Library script " + sScript + " found in " + sLibrary +
-            (nEntry != 0 ? " at entry " + IntToString(nEntry) : ""));
+        Debug((sFilename != "" ? "Pre-compiled " : "") + "Library script " + sScript +
+            " found in " + sLibrary + (nEntry != 0 ? " at entry " + IntToString(nEntry) : ""));
 
         SetScriptParam(LIB_LIBRARY, sLibrary);
         SetScriptParam(LIB_SCRIPT, sScript);
         SetScriptParam(LIB_ENTRY, IntToString(nEntry));
 
-        if (ResManGetAliasFor(sLibrary, RESTYPE_NCS) == "")
+        if (sFilename != "")
+            ExecuteScript(sFilename, oSelf);
+        else if (ResManGetAliasFor(sLibrary, RESTYPE_NCS) == "")
         {
             Debug(sLibrary + ".ncs not present; running library script as chunk");
             string sChunk = NssInclude(sLibrary) + NssVoidMain(nEntry ?
@@ -475,7 +676,39 @@ void RegisterLibraryScript(string sScript, int nEntry = 0)
     AddLibraryScript(sLibrary, sScript, nEntry);
 }
 
+void CompileLibraryScript(string sScript, int nEntry = 0)
+{
+    string sLibrary = GetScriptParam(LIB_LIBRARY);
+    string sExist = GetScriptLibrary(sScript);
+
+    if (sLibrary != sExist && sExist != "")
+        Warning(sLibrary + " is overriding " + sExist + "'s implementation of " + sScript);
+
+    int nOldEntry = GetScriptEntry(sScript);
+    if (nOldEntry)
+        Warning(sLibrary + " already declared " + sScript +
+            " Old Entry: " + IntToString(nOldEntry) +
+            " New Entry: " + IntToString(nEntry));
+    
+    string sFilename = GetScriptFilename(sScript);
+    if (sFilename != "" && ResManGetAliasFor(sFilename, RESTYPE_NCS) != "")
+        Warning(sScript + " previously compiled as " + sFilename + ".ncs; " +
+            "file will be abandoned");
+
+    _CompileFunction(sLibrary, sScript, nEntry);
+}
+
 void LibraryReturn(int nValue)
 {
     SetLocalInt(OBJECT_SELF, LIB_RETURN, nValue);
+}
+
+void LibraryError(string sFile, string sScript, int nEntry)
+{
+    string sLibrary = GetScriptLibrary(sScript);
+
+    Error("Library script execution error in " + sFile + "; " +
+        "script request not handled or found by `OnLibraryScript`: " + 
+        (sLibrary == "" ? "(Unknown Library)" : sLibrary) + "::" +
+        sScript + "(" + IntToString(nEntry) + ")");
 }
