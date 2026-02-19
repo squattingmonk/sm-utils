@@ -14,6 +14,7 @@
 /// ----------------------------------------------------------------------------
 
 #include "util_i_math"
+#include "util_i_json"
 
 // -----------------------------------------------------------------------------
 //                                   Constants
@@ -37,42 +38,6 @@ const string VARLIST_TYPE_JSON     = "JL:";
 // -----------------------------------------------------------------------------
 //                              Function Prototypes
 // -----------------------------------------------------------------------------
-
-/// @brief Convert a vector to a json object.
-/// @param vPosition The vector to convert.
-/// @note Alias for JsonVector().
-json VectorToJson(vector vPosition = [0.0, 0.0, 0.0]);
-
-/// @brief Convert a vector to a json object.
-/// @param vPosition The vector to convert.
-json JsonVector(vector vPosition = [0.0, 0.0, 0.0]);
-
-/// @brief Convert a json object to a vector.
-/// @param jPosition The json object to convert.
-/// @note Alias for JsonGetVector().
-vector JsonToVector(json jPosition);
-
-/// @brief Convert a json object to a vector.
-/// @param jPosition The json object to convert.
-vector JsonGetVector(json jPosition);
-
-/// @brief Convert a location to a json object.
-/// @param lLocation The location to convert.
-/// @note Alias for JsonLocation().
-json LocationToJson(location lLocation);
-
-/// @brief Convert a location to a json object.
-/// @param lLocation The location to convert.
-json JsonLocation(location lLocation);
-
-/// @brief Convert a json object to a location.
-/// @param jLocation The json object to convert.
-/// @note Alias for JsonGetLocation().
-location JsonToLocation(json jLocation);
-
-/// @brief Convert a json object to a location.
-/// @param jLocation The json object to convert.
-location JsonGetLocation(json jLocation);
 
 /// @brief Add a value to a float list on a target.
 /// @param oTarget The object the list is stored on.
@@ -1119,8 +1084,7 @@ int _GetIsIndexValid(json jList, int nIndex, int bNegative = FALSE)
 // Retrieves json array sListName of sListType from oTarget.
 json _GetList(object oTarget, string sListType, string sListName = "")
 {
-    json jList = GetLocalJson(oTarget, LIST_REF + sListType + sListName);
-    return jList == JSON_NULL ? JSON_ARRAY : jList;
+    return GetLocalJsonOrDefault(oTarget, LIST_REF + sListType + sListName, JSON_ARRAY);
 }
 
 // Sets sListType json array jList as sListName on oTarget.
@@ -1135,21 +1099,20 @@ void _DeleteList(object oTarget, string sListType, string sListName)
     DeleteLocalJson(oTarget, LIST_REF + sListType + sListName);
 }
 
-// Inserts array element jValue into json array sListName at nIndex on oTarget.
-// Returns the number of elements in the array after insertion. If bUnique is
-// TRUE, duplicate values with be removed after the insert operation.
-int _InsertListElement(object oTarget, string sListType, string sListName,
-                       json jValue, int nIndex, int bUnique)
+// Inserts array element jValue into a json array slistName at nIndex on
+// oTarget. Returns the number of elements in the array after insertion. If
+// bUnique is TRUE, the value will only be added if it was not already in the
+// list.
+int _InsertListElement(object oTarget, string sListType, string sListName, json
+        jValue, int nIndex, int bUnique)
 {
     json jList = _GetList(oTarget, sListType, sListName);
-
-    if (_GetIsIndexValid(jList, nIndex, TRUE) == TRUE)
+    if (_GetIsIndexValid(jList, nIndex, TRUE))
     {
-        JsonArrayInsertInplace(jList, jValue, nIndex);
-        if (bUnique == TRUE)
-            jList = JsonArrayTransform(jList, JSON_ARRAY_UNIQUE);
-
-        _SetList(oTarget, sListType, sListName, jList);
+        if (bUnique)
+            JsonArrayInsertUniqueInplace(jList, jValue, nIndex);
+        else
+            JsonArrayInsertInplace(jList, jValue, nIndex);
     }
 
     return JsonGetLength(jList);
@@ -1159,8 +1122,7 @@ int _InsertListElement(object oTarget, string sListType, string sListName,
 // found, returns JSON_NULL.
 json _GetListElement(object oTarget, string sListType, string sListName, int nIndex)
 {
-    json jList = _GetList(oTarget, sListType, sListName);
-    return _GetIsIndexValid(jList, nIndex) ? JsonArrayGet(jList, nIndex) : JSON_NULL;
+    return JsonArrayGet(_GetList(oTarget, sListType, sListName), nIndex);
 }
 
 // Deletes array element at nIndex from array sListName on oTarget. Element order
@@ -1365,64 +1327,6 @@ void _SortList(object oTarget, string sListType, string sListName, int nOrder)
 // -----------------------------------------------------------------------------
 //                              Public Functions
 // -----------------------------------------------------------------------------
-
-json VectorToJson(vector vPosition = [0.0, 0.0, 0.0])
-{
-    json jPosition = JSON_OBJECT;
-    JsonObjectSetInplace(jPosition, "x", JsonFloat(vPosition.x));
-    JsonObjectSetInplace(jPosition, "y", JsonFloat(vPosition.y));
-    JsonObjectSetInplace(jPosition, "z", JsonFloat(vPosition.z));
-
-    return jPosition;
-}
-
-json JsonVector(vector vPosition = [0.0, 0.0, 0.0])
-{
-    return VectorToJson(vPosition);
-}
-
-vector JsonToVector(json jPosition)
-{
-    float x = JsonGetFloat(JsonObjectGet(jPosition, "x"));
-    float y = JsonGetFloat(JsonObjectGet(jPosition, "y"));
-    float z = JsonGetFloat(JsonObjectGet(jPosition, "z"));
-
-    return Vector(x, y, z);
-}
-
-vector JsonGetVector(json jPosition)
-{
-    return JsonToVector(jPosition);
-}
-
-json LocationToJson(location lLocation)
-{
-    json jLocation = JSON_OBJECT;
-    JsonObjectSetInplace(jLocation, "area", JsonString(GetTag(GetAreaFromLocation(lLocation))));
-    JsonObjectSetInplace(jLocation, "position", VectorToJson(GetPositionFromLocation(lLocation)));
-    JsonObjectSetInplace(jLocation, "facing", JsonFloat(GetFacingFromLocation(lLocation)));
-
-    return jLocation;
-}
-
-json JsonLocation(location lLocation)
-{
-    return LocationToJson(lLocation);
-}
-
-location JsonToLocation(json jLocation)
-{
-    object oArea = GetObjectByTag(JsonGetString(JsonObjectGet(jLocation, "area")));
-    vector vPosition = JsonToVector(JsonObjectGet(jLocation, "position"));
-    float fFacing = JsonGetFloat(JsonObjectGet(jLocation, "facing"));
-
-    return Location(oArea, vPosition, fFacing);
-}
-
-location JsonGetLocation(json jLocation)
-{
-    return JsonToLocation(jLocation);
-}
 
 int AddListFloat(object oTarget, float fValue, string sListName = "", int bAddUnique = FALSE)
 {
