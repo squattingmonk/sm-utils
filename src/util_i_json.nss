@@ -1265,7 +1265,7 @@ json GetLocalJsonOrDefault(object oObject, string sVarName, json jDefault)
 
 json JsonVector(vector vPosition = [0.0, 0.0, 0.0])
 {
-    json jPosition = JSON_OBJECT;
+    json jPosition = JsonObject();
     JsonObjectSetInplace(jPosition, "x", JsonFloat(vPosition.x));
     JsonObjectSetInplace(jPosition, "y", JsonFloat(vPosition.y));
     JsonObjectSetInplace(jPosition, "z", JsonFloat(vPosition.z));
@@ -1294,7 +1294,7 @@ vector JsonToVector(json jPosition)
 
 json JsonLocation(location lLocation)
 {
-    json jLocation = JSON_OBJECT;
+    json jLocation = JsonObject();
     JsonObjectSetStringInplace(jLocation, "area",     GetTag(GetAreaFromLocation(lLocation)));
     JsonObjectSetVectorInplace(jLocation, "position", GetPositionFromLocation(lLocation));
     JsonObjectSetFloatInplace (jLocation, "facing",   GetFacingFromLocation(lLocation));
@@ -1493,7 +1493,7 @@ json JsonArrayPop(json jArray)
 {
     int nIndex = JsonGetLength(jArray);
     if (nIndex < 0)
-        return JSON_NULL;
+        return JsonNull();
 
     json jRet = JsonArrayGet(jArray, nIndex);
     JsonArrayDelInplace(jArray, nIndex);
@@ -1503,7 +1503,7 @@ json JsonArrayPop(json jArray)
 json JsonArrayPopLeft(json jArray)
 {
     if (!JsonGetLength(jArray))
-        return JSON_NULL;
+        return JsonNull();
 
     json jRet = JsonArrayGet(jArray, 0);
     JsonArrayDelInplace(jArray, 0);
