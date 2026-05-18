@@ -1251,6 +1251,43 @@ void JsonArrayRemoveAllStringInplace(json jArray, string sValue, int nConditiona
 ///     perform.
 void JsonArrayRemoveAllVectorInplace(json jArray, vector vValue, int nConditional = JSON_FIND_EQUAL);
 
+// ----- Patch Builders --------------------------------------------------------
+
+/// @brief Creates an `add` op for a `JsonPatch` call. The resulting value must
+///     still be added to an array before it can be used as a patch.
+/// @param sPath A json pointer to the path to add the value.
+/// @param jValue The value to add.
+json JsonPatchAdd(string sPath, json jValue);
+
+/// @brief Creates a `remove` op for a `JsonPatch` call. The resulting value must
+///     still be added to an array before it can be used as a patch.
+/// @param sPath A json pointer to the path to remove.
+json JsonPatchRemove(string sPath);
+
+/// @brief Creates a `replace` op for a `JsonPatch` call. The resulting value
+///     must still be added to an array before it can be used as a patch.
+/// @param sPath A json pointer to the path of the value to replace.
+/// @param jValue The value to add.
+json JsonPatchReplace(string sPath, json jValue);
+
+/// @brief Creates a `copy` op for a `JsonPatch` call. The resulting value must
+///     still be added to an array before it can be used as a patch.
+/// @param sFrom A json pointer to the value to be copied.
+/// @param sPath A json pointer to the path the value should be copied to.
+json JsonPatchCopy(string sFrom, string sPath);
+
+/// @brief Creates a `move` op for a `JsonPatch` call. The resulting value must
+///     still be added to an array before it can be used as a patch.
+/// @param sFrom A json pointer to the value to be moved.
+/// @param sPath A json pointer to the path the value should be moved to.
+json JsonPatchMove(string sFrom, string sPath);
+
+/// @brief Creates a `test` op for a `JsonPatch` call. The resulting value must
+///     still be added to an array before it can be used as as a patch.
+/// @param sPath A json pointer to the value to be tested.
+/// @param jValue The value to compare to the stored value.
+json JsonPatchTest(string sPath, json jValue);
+
 // -----------------------------------------------------------------------------
 //                           Function Implementations
 // -----------------------------------------------------------------------------
@@ -2018,4 +2055,59 @@ void JsonArrayRemoveAllStringInplace(json jArray, string sValue, int nConditiona
 void JsonArrayRemoveAllVectorInplace(json jArray, vector vValue, int nConditional = JSON_FIND_EQUAL)
 {
     JsonArrayRemoveAllInplace(jArray, JsonVector(vValue), nConditional);
+}
+
+// ----- Patch Builders --------------------------------------------------------
+
+json JsonPatchAdd(string sPath, json jValue)
+{
+    json jRet = JsonObject();
+    JsonObjectSetStringInplace(jRet, "op", "add");
+    JsonObjectSetStringInplace(jRet, "path", sPath);
+    JsonObjectSetInplace(jRet, "value", jValue);
+    return jRet;
+}
+
+json JsonPatchRemove(string sPath)
+{
+    json jRet = JsonObject();
+    JsonObjectSetStringInplace(jRet, "op", "remove");
+    JsonObjectSetStringInplace(jRet, "path", sPath);
+    return jRet;
+}
+
+json JsonPatchReplace(string sPath, json jValue)
+{
+    json jRet = JsonObject();
+    JsonObjectSetStringInplace(jRet, "op", "replace");
+    JsonObjectSetStringInplace(jRet, "path", sPath);
+    JsonObjectSetInplace(jRet, "value", jValue);
+    return jRet;
+}
+
+json JsonPatchCopy(string sFrom, string sPath)
+{
+    json jRet = JsonObject();
+    JsonObjectSetStringInplace(jRet, "op", "copy");
+    JsonObjectSetStringInplace(jRet, "from", sFrom);
+    JsonObjectSetStringInplace(jRet, "path", sPath);
+    return jRet;
+}
+
+json JsonPatchMove(string sFrom, string sPath)
+{
+    json jRet = JsonObject();
+    JsonObjectSetStringInplace(jRet, "op", "move");
+    JsonObjectSetStringInplace(jRet, "from", sFrom);
+    JsonObjectSetStringInplace(jRet, "path", sPath);
+    return jRet;
+}
+
+json JsonPatchTest(string sPath, json jValue)
+{
+    json jRet = JsonObject();
+    JsonObjectSetStringInplace(jRet, "op", "test");
+    JsonObjectSetStringInplace(jRet, "path", sPath);
+    JsonObjectSetInplace(jRet, "value", jValue);
+    return jRet;
 }
