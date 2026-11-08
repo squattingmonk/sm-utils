@@ -75,6 +75,7 @@ meant to be included in other scripts that implement its functions.
   - [Libraries](docs/libraries.md)
   - [Times](docs/times.md)
   - [Timers](docs/timers.md)
+  - [Unit Tests](docs/unittest.md)
 
 ## Acknowledgements
 - Thanks to tinygiant98 for his continued contributions and testing.

@@ -57,6 +57,25 @@ const string UNITTEST_FAILURE_SCRIPT = "";
 //  only on test failures.
 const int UNITTEST_ALWAYS_EXPAND = FALSE;
 
+// This is a comma-separated list of glob patterns. The test runner
+//  (util_e_unittest) will run every compiled script in the module whose name
+//  matches one of these patterns. This list can be overridden for a single run
+//  by passing a script parameter with the same name to the runner, or for all
+//  runs by setting a local string with the same name on the module object. See
+//  GetMatchesPattern() in util_i_matching for supported glob syntax.
+const string UNITTEST_SCRIPT_PATTERNS = "*_t_*";
+
+// This is a bitmask of DEBUG_LOG_* destinations (see util_i_debug) that the test
+//  runner (util_e_unittest) will display test results to in addition to the
+//  log file, which is always used. For example, set this to DEBUG_LOG_PC to
+//  show results to the first PC, or DEBUG_LOG_DM | DEBUG_LOG_PC to also show
+//  them to all DMs. While the tests run, the module's debug level is raised to
+//  DEBUG_LEVEL_NOTICE so the results can reach these destinations.
+// This value can be overridden for a single run by passing a script parameter
+//  with the same name to the runner, or for all runs by setting a local int
+//  with the same name on the module object.
+const int UNITTEST_DISPLAY = DEBUG_LOG_NONE;
+
 // -----------------------------------------------------------------------------
 //                        Helper Constants and Functions
 // -----------------------------------------------------------------------------

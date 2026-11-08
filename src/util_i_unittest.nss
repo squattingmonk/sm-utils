@@ -117,6 +117,13 @@
 
 string TEST_INDENT = "TEST_INDENT";
 
+// Module-level counters tracking assertion results. These are read by the test
+// runner (util_e_unittest) to produce a summary.
+const string TEST_GROUPS_PASSED = "TEST_GROUPS_PASSED";
+const string TEST_GROUPS_FAILED = "TEST_GROUPS_FAILED";
+const string TEST_TESTS_PASSED  = "TEST_TESTS_PASSED";
+const string TEST_TESTS_FAILED  = "TEST_TESTS_FAILED";
+
 string TEST_PASS      = HexColorString("PASS", COLOR_GREEN_LIGHT);
 string TEST_FAIL      = HexColorString("FAIL", COLOR_RED_LIGHT);
 string TEST_DELIMITER = HexColorString(" | ", COLOR_WHITE);
@@ -192,6 +199,18 @@ int Assert(string sTest, int bAssertion);
 /// @returns The results of the group test.
 int AssertGroup(string sGroup, int bAssertion);
 
+/// @brief Get the number of assertions recorded since the last reset.
+/// @param bGroup If TRUE, count group assertions (AssertGroup()); otherwise,
+///     count individual assertions (Assert()).
+/// @param bPassed If TRUE, count passed assertions; otherwise, count failed
+///     assertions.
+/// @note Individual assertions inside a passing group are not counted unless
+///     UNITTEST_ALWAYS_EXPAND is TRUE, since they are not evaluated.
+int GetTestCount(int bGroup, int bPassed);
+
+/// @brief Reset all assertion counters to 0.
+void ResetTestCounts();
+
 // -----------------------------------------------------------------------------
 //                        Private Function Implementations
 // -----------------------------------------------------------------------------
@@ -210,6 +229,13 @@ string _GetIndent(int bReset = FALSE)
         sIndent += "  ";
 
     return sIndent;
+}
+
+void _IncrementTestCount(int bGroup, int bPassed)
+{
+    string sCounter = bGroup ? (bPassed ? TEST_GROUPS_PASSED : TEST_GROUPS_FAILED)
+                             : (bPassed ? TEST_TESTS_PASSED  : TEST_TESTS_FAILED);
+    SetLocalInt(GetModule(), sCounter, GetLocalInt(GetModule(), sCounter) + 1);
 }
 
 // -----------------------------------------------------------------------------
@@ -353,6 +379,7 @@ int Assert(string sTest, int bAssertion)
         HexColorString(sTest, UNITTEST_NAME_COLOR);
 
     HandleUnitTestOutput(_GetIndent() + sTest + TEST_DELIMITER + (bAssertion ? TEST_PASS : TEST_FAIL));
+    _IncrementTestCount(FALSE, bAssertion);
 
     if (!bAssertion)
         HandleUnitTestFailure(sTest);
@@ -366,10 +393,26 @@ int AssertGroup(string sGroup, int bAssertion)
         HexColorString(sGroup, UNITTEST_NAME_COLOR);
 
     HandleUnitTestOutput(_GetIndent() + sGroup + TEST_DELIMITER + (bAssertion ? TEST_PASS : TEST_FAIL));
+    _IncrementTestCount(TRUE, bAssertion);
     Indent();
 
     if (!bAssertion)
         HandleUnitTestFailure(sGroup);
 
     return UNITTEST_ALWAYS_EXPAND ? FALSE : bAssertion;
+}
+
+int GetTestCount(int bGroup, int bPassed)
+{
+    string sCounter = bGroup ? (bPassed ? TEST_GROUPS_PASSED : TEST_GROUPS_FAILED)
+                             : (bPassed ? TEST_TESTS_PASSED  : TEST_TESTS_FAILED);
+    return GetLocalInt(GetModule(), sCounter);
+}
+
+void ResetTestCounts()
+{
+    DeleteLocalInt(GetModule(), TEST_GROUPS_PASSED);
+    DeleteLocalInt(GetModule(), TEST_GROUPS_FAILED);
+    DeleteLocalInt(GetModule(), TEST_TESTS_PASSED);
+    DeleteLocalInt(GetModule(), TEST_TESTS_FAILED);
 }
